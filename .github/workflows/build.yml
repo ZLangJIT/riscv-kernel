@@ -81,6 +81,10 @@ jobs:
       if: ${{ env.REBUILD_FLAG }}
       run: |
         cd linux && ../build.sh
+
+    - name: Copy ${{ matrix.image-name }}
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
         ls -l
         ls -l arch/riscv/boot
         mv vmlinux ../${{ matrix.image-name }}
