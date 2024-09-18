@@ -85,8 +85,13 @@ jobs:
     - name: Copy ${{ matrix.image-name }}
       if: ${{ env.REBUILD_FLAG }}
       run: |
+        cd linux
+        pwd
         ls -l
-        ls -l arch/riscv/boot
+        cd arch/riscv/boot
+        pwd
+        ls -l
+        cd ../../..
         mv vmlinux ../${{ matrix.image-name }}
         cd .. && sha256sum ${{ matrix.image-name }} > ${{ matrix.image-name }}.sha256
 
