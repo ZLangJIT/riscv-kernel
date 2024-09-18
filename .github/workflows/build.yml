@@ -57,7 +57,7 @@ jobs:
         scripts/config -e ${{ matrix.arch }}
 
         # Load version info into env
-        echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local/clang.*[^0-9]\(.*\) (\(.*\))#\1#")" | tee -a $GITHUB_ENV
+        echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local/clang.*[^0-9]\(.*\) (\(.*\))#\1#')" | tee -a $GITHUB_ENV
 
         export CURRENT_VERSION=$(grep 'LOCALVERSION=' ../riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
         # must query with a token, or will fail with api rate limit on public runners
