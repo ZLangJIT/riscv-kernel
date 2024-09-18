@@ -80,7 +80,7 @@ jobs:
     - name: Build kernel
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        cd linux && ../build.sh
+        unzip initrd.zip && cd linux && ../build.sh
 
     - name: Copy ${{ matrix.image-name }}
       if: ${{ env.REBUILD_FLAG }}
