@@ -11,4 +11,4 @@
 #
 TAG=6.11.0
 
-git tag -a -m "riscv-kernel" riscv-kernel-$TAG && git add -Av && git commit -m "update" &&  git log -n 1 && git push --follow-tags
+git add -Av && git commit -m "update" && git tag -a -m "riscv-kernel" riscv-kernel-$TAG && git log -n 1 && git push --follow-tags
