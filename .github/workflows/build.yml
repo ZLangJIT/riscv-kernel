@@ -64,9 +64,10 @@ jobs:
         export RELEASED_TAG=$(curl -sL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'\
          https://api.github.com/repos/ZLangJIT/riscv-kernel/tags\?per_page\=60 | jq -r '.[].name' | grep -v 'lts' | head -n 1)
         export RELEASED_VERSION=$(echo $RELEASED_TAG | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/' )
-        export RELEASED_MINOR=$(echo $RELEASED_TAG | sed 's/^.*[^0-9][0-9]*\.\([0-9]*)\.[0-9]*\.*$/\1/' )
+        export RELEASED_MINOR=$(echo $RELEASED_TAG | sed 's/^.*[^0-9][0-9]*\.\([0-9]*\)\.[0-9]*\.*$/\1/' )
 
         echo "CURRENT_VERSION=$CURRENT_VERSION" | tee -a $GITHUB_ENV
+        echo "RELEASE_TAG=$RELEASE_TAG"
         echo "RELEASED_VERSION=$RELEASED_VERSION" | tee -a $GITHUB_ENV
 
         if [[ $CURRENT_VERSION != $RELEASED_VERSION || \
