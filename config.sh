@@ -16,6 +16,6 @@
 # generate .config
 #
 cp ../riscv_defconfig ./arch/riscv/configs/riscv_defconfig
-make ARCH=riscv LLVM=1 LLVM_IAS=1 riscv_defconfig
-make ARCH=riscv LLVM=1 LLVM_IAS=1 oldconfig
+make ARCH=riscv LLVM=1 LLVM_IAS=1 riscv_defconfig V=2
+make ARCH=riscv LLVM=1 LLVM_IAS=1 oldconfig V=2
 
