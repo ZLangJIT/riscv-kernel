@@ -57,7 +57,7 @@ jobs:
         scripts/config -e ${{ matrix.arch }}
 
         # Load version info into env
-        echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang-git | sed "s#.*local/clang \(.*\) (\(.*\))#\1#")" | tee -a $GITHUB_ENV
+        echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed "s#.*local/clang \(.*\) (\(.*\))#\1#")" | tee -a $GITHUB_ENV
         
         export CURRENT_VERSION=$(make kernelrelease)
         # must query with a token, or will fail with api rate limit on public runners
