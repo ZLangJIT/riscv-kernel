@@ -14,7 +14,7 @@ env:
   IS_LTS: NO
 
 jobs:
-  build:        
+  build:
     runs-on: ubuntu-latest
     container: locietta/loia-dev-base:latest
     outputs:
@@ -22,17 +22,17 @@ jobs:
       release_version: ${{ steps.out.outputs.release_version }}
       clang_version:   ${{ steps.out.outputs.clang_version }}
       rebuild_flag:    ${{ steps.out.outputs.rebuild_flag }}
-    
-    strategy: 
+
+    strategy:
       matrix:
         include:
           - arch: riscv
-            image-name: bzImage-riscv-64
+            image-name: vmlinux-riscv64
 
     steps:
 
     - uses: actions/checkout@main
-    
+
     - name: Install dependencies
       id: dep
       run: |
@@ -40,13 +40,13 @@ jobs:
 
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
- 
+
     - name: Initialize ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         max-size: 2048M
         key: ${{ github.job }}-${{ matrix.arch }}
-       
+
     - name: Prepare source code
       shell: bash
       run: |
@@ -58,7 +58,7 @@ jobs:
 
         # Load version info into env
         echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed "s#.*local/clang \(.*\) (\(.*\))#\1#")" | tee -a $GITHUB_ENV
-        
+
         export CURRENT_VERSION=$(make kernelrelease)
         # must query with a token, or will fail with api rate limit on public runners
         export RELEASED_TAG=$(curl -sL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'\
@@ -73,7 +73,7 @@ jobs:
               ($CURRENT_VERSION = $RELEASED_VERSION && 1 -gt "$RELEASED_MINOR") || \
               "${{ github.event_name }}" = 'pull_request' ]]; then
           echo "REBUILD_FLAG=1" | tee -a $GITHUB_ENV
-        else 
+        else
           echo "REBUILD_FLAG=" | tee -a $GITHUB_ENV
         fi
 
@@ -81,10 +81,12 @@ jobs:
       if: ${{ env.REBUILD_FLAG }}
       run: |
         cd linux && ../build.sh
-        mv arch/riscv/boot/bzImage ../${{ matrix.image-name }}
+        ls -l
+        ls -l arch/riscv/boot
+        mv vmlinux ../${{ matrix.image-name }}
         cd .. && sha256sum ${{ matrix.image-name }} > ${{ matrix.image-name }}.sha256
 
-    - name: Upload bzImage
+    - name: Upload ${{ matrix.image-name }}
       uses: actions/upload-artifact@main
       if: ${{ env.REBUILD_FLAG }}
       with:
@@ -115,7 +117,7 @@ jobs:
         if [ ${{ github.event_name }} = 'pull_request' ]; then
           echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
           echo "RELEASE_TAG=${{ needs.build.outputs.current_version }}.1-PR" | tee -a $GITHUB_ENV
-        else 
+        else
           echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
           echo "RELEASE_TAG=${{ needs.build.outputs.current_version }}.1" | tee -a $GITHUB_ENV
         fi
@@ -127,11 +129,11 @@ jobs:
         name:  ${{ env.RELEASE_TAG }}
         tag_name:  ${{ env.RELEASE_TAG }}
         draft: ${{ github.event_name == 'pull_request' }}
-        target_commitish: ${{ steps.fetch_commit_sha.outputs.sha }} 
+        target_commitish: ${{ steps.fetch_commit_sha.outputs.sha }}
         body: |
           RISC-V linux kernel, built with Clang ${{ needs.build.outputs.clang_version }}
 
-          * `bzImage-x64` for riscv
+          * `${{ matrix.image-name }}` for riscv
 
         files: |
           release_images/*/*
