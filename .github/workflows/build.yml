@@ -133,7 +133,7 @@ jobs:
         body: |
           RISC-V linux kernel, built with Clang ${{ needs.build.outputs.clang_version }}
 
-          * `${{ matrix.image-name }}` for riscv
+          * `vmlinux` for riscv
 
         files: |
           release_images/*/*
