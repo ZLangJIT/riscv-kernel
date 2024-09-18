@@ -1,2 +1,3 @@
 /linux-*
 /vmlinux*
+/initrd.dir*
