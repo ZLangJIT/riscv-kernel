@@ -1,1 +1,1 @@
-git add -Av ; git commit -m "update" ; git tag -f riscv-kernel-6.11 ; git log -n 1 ; git push --tags ; git push
+git add -Av ; git commit -m "update" ; git tag -f -a -m "riscv-kernel" riscv-kernel-6.11 ; git log -n 1 ; git push --follow-tags
