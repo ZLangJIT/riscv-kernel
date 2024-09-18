@@ -86,19 +86,11 @@ jobs:
       if: ${{ env.REBUILD_FLAG }}
       run: |
         cd linux
-        pwd
-        ls -l
-        cd arch/riscv/boot
-        pwd
-        ls -l
-        cd ../../..
         mv vmlinux ../${{ matrix.image-name }}
-        mv arch/riscv/boot/Image.gz ../${{ matrix.image-name }}.ramdisk.gz
         cd ..
         sha256sum ${{ matrix.image-name }} > ${{ matrix.image-name }}.sha256
-        sha256sum ${{ matrix.image-name }}.ramdisk.gz > ${{ matrix.image-name }}.ramdisk.gz.sha256
 
-    - name: Upload ${{ matrix.image-name }} ${{ matrix.image-name }}.ramdisk.gz
+    - name: Upload ${{ matrix.image-name }}
       uses: actions/upload-artifact@main
       if: ${{ env.REBUILD_FLAG }}
       with:
@@ -106,8 +98,6 @@ jobs:
         path: |
           ${{ matrix.image-name }}
           ${{ matrix.image-name }}.sha256
-          ${{ matrix.image-name }}.ramdisk.gz
-          ${{ matrix.image-name }}.ramdisk.gz.sha256
 
     - id: out
       run: |
@@ -147,8 +137,7 @@ jobs:
         body: |
           RISC-V linux kernel, built with Clang ${{ needs.build.outputs.clang_version }}
 
-          * `vmlinux` for riscv
-          * `vmlinux.ramdisk.gz` for riscv
+          * `vmlinux` for riscv ( built-in busybox ramdisk - initrd.zip )
 
         files: |
           release_images/*/*
