@@ -1,0 +1,2 @@
+/bin/busybox --install -s
+/bin/sh
