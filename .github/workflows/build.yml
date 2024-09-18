@@ -130,7 +130,6 @@ jobs:
         target_commitish: ${{ steps.fetch_commit_sha.outputs.sha }} 
         body: |
           RISC-V linux kernel, built with Clang ${{ needs.build.outputs.clang_version }}
-          Provide builds on different archs with matrix build utility of GitHub Action.
 
           * `bzImage-x64` for riscv
 
