@@ -6,4 +6,4 @@
 
 ../RVVM/debug_BUILD/rvvm --help
 ../RVVM/debug_BUILD/rvvm ../RVVM/uboot -v -k vmlinux-riscv64 -m 100m \
-  -cmdline="console=ttyS rootflags=discard rw $1"
+  -cmdline="console=ttyS0 rootflags=discard rw $1"
