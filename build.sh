@@ -1,4 +1,4 @@
-#
+
 if [ "$(cat /sys/devices/system/cpu/smt/active)" = "1" ]; then
 	export LOGICAL_CORES=$(($(nproc --all) * 2))
 else
@@ -7,9 +7,6 @@ fi
 # Compile
 #
 
-OLD=$(pwd)
-
-cd ..
 mkdir initrd.dir
 cd initrd.dir
 mkdir usr ; chmod 755 usr
@@ -25,8 +22,7 @@ mkdir dev ; chmod 755 dev
 mknod dev/console c 5 1 ; chmod 666 dev/console
 mknod dev/null c 1 3 ; chmod 666 dev/null
 mknod dev/zero c 1 5 ; chmod 666 dev/zero
-
-cd $OLD
+cd ..
 
 if [ "$IS_LTS" = "NO" ]; then
 	echo -e "Using $LOGICAL_CORES jobs for this non-LTS build..."
@@ -36,13 +32,11 @@ else
 	#make ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2
 fi
 
-cd ..
-git clone --recursive https://github.com/ATS-INTC/linux-image
 pacman -S --noconfirm rsync wget
-cd linux-image
-rm -rf linux-xlnx
-mv ../linux linux-xlnx
-make clean
-make rootfs
-make linux
-mv linux-xlnx ../linux
+useradd -m build
+echo "build ALL=(ALL:ALL) ALL" >> /etc/sudoers
+su --command="git clone --recursive https://github.com/ATS-INTC/linux-image --depth 1 linux-image" build
+su --command="cd linux-image ; rm -rf linux-xlnx ; git clone https://github.com/torvalds/linux -b v6.11 --depth 1 linux-xlnx" build
+su --command="cd linux-image ; make clean ; make rootfs ; make linux" build
+mv linux-image/linux-xlnx linux
+rm -rf linux-image

@@ -50,11 +50,11 @@ jobs:
     - name: Prepare source code
       shell: bash
       run: |
-        export VERSION_BRANCH=v6.11
-        git clone https://github.com/torvalds/linux -b $VERSION_BRANCH --depth 1 linux
-        cd linux && ../config.sh
-        scripts/config -d riscv # avoid override warning for duplicate arch flags 
-        scripts/config -e ${{ matrix.arch }}
+        #export VERSION_BRANCH=v6.11
+        #git clone https://github.com/torvalds/linux -b $VERSION_BRANCH --depth 1 linux
+        #cd linux && ../config.sh
+        #scripts/config -d riscv # avoid override warning for duplicate arch flags 
+        #scripts/config -e ${{ matrix.arch }}
 
         # Load version info into env
         echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local\/clang.*[^0-9]\(.*\) (\(.*\))#\1#')" | tee -a $GITHUB_ENV
@@ -80,14 +80,12 @@ jobs:
     - name: Build kernel
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        cd linux && ../build.sh
+        .build.sh
 
     - name: Copy ${{ matrix.image-name }}
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        cd linux
-        mv vmlinux ../${{ matrix.image-name }}
-        cd ..
+        mv ./linux/vmlinux ./${{ matrix.image-name }}
         sha256sum ${{ matrix.image-name }} > ${{ matrix.image-name }}.sha256
 
     - name: Upload ${{ matrix.image-name }}
