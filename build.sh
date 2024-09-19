@@ -38,9 +38,10 @@ fi
 
 cd ..
 git clone --recursive https://github.com/ATS-INTC/linux-image
+pacman -S --noconfirm rsync wget
 cd linux-image
 rm -rf linux-xlnx
-mv ../linux-6 linux-xlnx
+mv ../linux linux-xlnx
 make clean
 make rootfs
 make linux
