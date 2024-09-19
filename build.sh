@@ -14,6 +14,8 @@ mkdir initrd.dir
 cd initrd.dir
 mkdir usr ; chmod 755 usr
 mkdir bin ; chmod 755 bin
+mkdir proc ; chmod 755 proc
+mkdir sys ; chmod 755 sys
 mkdir sbin ; chmod 755 sbin
 ln -s /bin usr/bin
 ln -s /sbin usr/sbin
@@ -24,7 +26,6 @@ mknod dev/console c 5 1 ; chmod 666 dev/console
 mknod dev/null c 1 3 ; chmod 666 dev/null
 mknod dev/zero c 1 5 ; chmod 666 dev/zero
 mknod dev/tty c 5 0 ; chmod 600 dev/tty
-#mknod dev/tty1 c 5 0 ; chmod 600 dev/tty1
 
 cd $OLD
 
