@@ -24,10 +24,10 @@ Boot took $(cut -d' ' -f1 /proc/uptime) seconds
 
 !
 
-setsid sh -c 'exec sh </dev/tty >/dev/tty 2>&1'
+setsid sh -c 'exec sh </dev/ttyS0 >/dev/ttyS0 2>&1'
 
 echo "fell off end of init"
 echo "launching shell"
-sh
+setsid sh -c 'exec sh </dev/ttyS0 >/dev/ttyS0 2>&1'
 echo "shutting down..."
 busybox poweroff -f

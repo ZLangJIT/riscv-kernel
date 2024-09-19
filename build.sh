@@ -25,7 +25,6 @@ mkdir dev ; chmod 755 dev
 mknod dev/console c 5 1 ; chmod 666 dev/console
 mknod dev/null c 1 3 ; chmod 666 dev/null
 mknod dev/zero c 1 5 ; chmod 666 dev/zero
-mknod dev/tty c 5 0 ; chmod 600 dev/tty
 
 cd $OLD
 
