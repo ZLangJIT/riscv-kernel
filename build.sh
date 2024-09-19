@@ -12,7 +12,11 @@ OLD=$(pwd)
 cd ..
 mkdir initrd.dir
 cd initrd.dir
+mkdir usr ; chmod 755 usr
 mkdir bin ; chmod 755 bin
+mkdir sbin ; chmod 755 sbin
+ln -s /bin usr/bin
+ln -s /sbin usr/sbin
 cp ../initrd.dir.riscv64/bin/busybox bin/busybox ; chmod 755 bin/busybox
 cp ../initrd.dir.riscv64/init init ; chmod 755 init
 mkdir dev ; chmod 755 dev
