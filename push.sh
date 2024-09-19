@@ -15,5 +15,5 @@
 
 TAG=$(grep 'LOCALVERSION=' riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
 
-zip -r initrd.zip initrd.dir.riscv64
+#zip -r initrd.zip initrd.dir.riscv64
 git add -Av && git commit -m "update to riscv-kernel-$TAG" && git log -n 1 && git push
