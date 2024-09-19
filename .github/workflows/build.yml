@@ -59,8 +59,8 @@ jobs:
         # Load version info into env
         echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local\/clang.*[^0-9]\(.*\) (\(.*\))#\1#')" | tee -a $GITHUB_ENV
 
-        export CURRENT_VERSION=$(grep 'LOCALVERSION=' ../riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
-        # must query with a token, or will fail with api rate limit on public runners
+        export CURRENT_VERSION=$(grep 'LOCALVERSION=' ./riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
+        # must query with a token, or will fail with ai rate limit on public runners
         export RELEASED_TAG=$(curl -sL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'\
          https://api.github.com/repos/ZLangJIT/riscv-kernel/tags\?per_page\=60 | jq -r '.[].name' | grep -v 'lts' | head -n 1)
         export RELEASED_VERSION=$(echo $RELEASED_TAG | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/' )
@@ -80,7 +80,7 @@ jobs:
     - name: Build kernel
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        .build.sh
+        ./build.sh
 
     - name: Copy ${{ matrix.image-name }}
       if: ${{ env.REBUILD_FLAG }}
