@@ -7,6 +7,20 @@ fi
 # Compile
 #
 
+mkdir initrd.dir
+cd initrd.dir
+mkdir bin ; chmod 755 bin
+cp ../initrd.dir.riscv64/bin/busybox bin/busybox ; chmod 755 bin/busybox
+cp ../initrd.dir.riscv64/init init ; chmod 755 init
+mkdir dev ; chmod 755 dev
+mknod dev/console c 5 1 ; chmod 666 dev/console
+mknod dev/null c 1 3 ; chmod 666 dev/null
+mknod dev/zero c 1 5 ; chmod 666 dev/zero
+mknod dev/tty c 5 0 ; chmod 600 /dev/tty
+mknod dev/tty1 c 5 0 ; chmod 600 /dev/tty1
+
+cd ..
+
 if [ "$IS_LTS" = "NO" ]; then
 	echo -e "Using $LOGICAL_CORES jobs for this non-LTS build..."
 	make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2
