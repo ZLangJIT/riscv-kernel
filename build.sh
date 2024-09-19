@@ -40,6 +40,5 @@ chown build:build build_dir
 chmod 777 build_dir
 su --command="cd build_dir ; git clone --recursive https://github.com/ATS-INTC/linux-image --depth 1 linux-image" build
 su --command="cd build_dir/linux-image ; rm -rf linux-xlnx ; git clone https://github.com/torvalds/linux -b v6.11 --depth 1 linux-xlnx" build
-su --command="cd build_dir/linux-image ; make clean ; make rootfs ; make linux" build
-mv build_dir/linux-image/linux-xlnx linux
-rm -rf build_dir
+su --command="cd build_dir/linux-image/buildroot ; cp ../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2 ; cp output/images/rootfs.cpio ../rootfs.cpio" build
+su --command="cd build_dir/linux-image/buildroot ; cp ../.linuxconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2 " build
