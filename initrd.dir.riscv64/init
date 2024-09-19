@@ -6,12 +6,14 @@
 
 echo "installed symlinks"
 
+ls -l /
 mount -t devtmpfs devtmpfs /dev
-mount -t debugfs debugfs /debugfs
 mount -t proc procfs /proc
 mount -t sysfs sysfs /sys
+ls -l /dev
 
 mkdir debugfs ; chmod 755 debugfs
+mount -t debugfs debugfs /debugfs
 
 
 cat <<!
@@ -25,5 +27,7 @@ Boot took $(cut -d' ' -f1 /proc/uptime) seconds
 setsid sh -c 'exec sh </dev/tty >/dev/tty 2>&1'
 
 echo "fell off end of init"
+echo "launching shell"
+sh
 echo "shutting down..."
 busybox poweroff -f
