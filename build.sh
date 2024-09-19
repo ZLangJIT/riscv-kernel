@@ -29,9 +29,19 @@ mknod dev/zero c 1 5 ; chmod 666 dev/zero
 cd $OLD
 
 if [ "$IS_LTS" = "NO" ]; then
-	echo -e "Using $LOGICAL_CORES jobs for this non-LTS build..."
-	make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2
+	#echo -e "Using $LOGICAL_CORES jobs for this non-LTS build..."
+	#make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2
 else
-	echo -e "Using $LOGICAL_CORES jobs for this LTS build..."
-	make ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2
+	#echo -e "Using $LOGICAL_CORES jobs for this LTS build..."
+	#make ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2
 fi
+
+cd ..
+git clone --recursive https://github.com/ATS-INTC/linux-image
+cd linux-image
+rm -rf linux-xlnx
+mv ../linux-6 linux-xlnx
+make clean
+make rootfs
+make linux
+mv linux-xlnx ../linux
