@@ -48,6 +48,9 @@ jobs:
         which riscv64-unknown-elf-gcc || true
         set -v
         ls -lahp /usr/riscv64-linux-gnu
+        ls -lahp /usr/riscv64-linux-gnu/usr/include/linux/version.h || true
+        ls -lahp /usr/riscv64-linux-gnu/usr/include/linux || true
+        ls -lahp /usr/riscv64-linux-gnu/usr/include || true
         ls -lahp /usr/riscv64-linux-gnu/include/linux/version.h || true
         ls -lahp /usr/riscv64-linux-gnu/include/linux || true
         ls -lahp /usr/riscv64-linux-gnu/include || true
