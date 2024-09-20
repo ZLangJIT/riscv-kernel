@@ -156,6 +156,8 @@ jobs:
           build_dir/rootfs.cpio.sha256
           build_dir/Image
           build_dir/Image.sha256
+          build_dir/Image.gz
+          build_dir/Image.gz.sha256
           build_dir/vmlinux
           build_dir/vmlinux.sha256
 
