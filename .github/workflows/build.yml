@@ -46,7 +46,10 @@ jobs:
         pacman -S --noconfirm riscv64-unknown-elf-gcc
         which riscv64-linux-gnu-gcc || true
         which riscv64-unknown-elf-gcc || true
-        mkdir /usr/riscv64-linux-gnu/usr ; ln -s /usr/riscv64-linux-gnu/include /usr/riscv64-linux-gnu/usr/include
+        set -v
+        ls -lahp /usr/riscv64-linux-gnu
+        ls -lahp /usr/riscv64-linux-gnu/usr
+        ln -s /usr/riscv64-linux-gnu/include /usr/riscv64-linux-gnu/usr/include
 
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
