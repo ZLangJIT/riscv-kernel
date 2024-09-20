@@ -47,7 +47,7 @@ jobs:
         which riscv64-linux-gnu-gcc || true
         which riscv64-unknown-elf-gcc || true
         set -v
-        ln -s /usr/riscv64-linux-gnu/include/linux/version.h /usr/riscv64-linux-gnu/usr/include/linux/version.h
+        ln -s /usr/riscv64-linux-gnu/include/linux /usr/riscv64-linux-gnu/usr/include/linux || true
         ls -lahp /usr/riscv64-linux-gnu/usr/include/linux/version.h || true
         ls -lahp /usr/riscv64-linux-gnu/include/linux/version.h || true
 
@@ -104,7 +104,7 @@ jobs:
     - name: Build rootfs
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command=". cores.sh ; cd build_dir/buildroot ; cp ../../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES ; cp output/images/rootfs.cpio ../rootfs.cpio" build
+        su --command=". cores.sh ; cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; cp ../../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES ; cp output/images/rootfs.cpio ../rootfs.cpio" build
         sha256sum build_dir/rootfs.cpio > build_dir/rootfs.cpio.sha256
 
     - name: Build kernel
