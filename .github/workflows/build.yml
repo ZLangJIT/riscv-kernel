@@ -41,9 +41,12 @@ jobs:
       id: dep
       run: |
         pacman -Ss riscv
-        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers riscv64-unknown-elf-gcc
+        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip
+        pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
+        pacman -S --noconfirm riscv64-unknown-elf-gcc
         which riscv64-linux-gnu-gcc || true
         which riscv64-unknown-elf-gcc || true
+        mkdir /usr/riscv64-linux-gnu/usr ; ln -s /usr/riscv64-linux-gnu/include /usr/riscv64-linux-gnu/usr/include
 
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
