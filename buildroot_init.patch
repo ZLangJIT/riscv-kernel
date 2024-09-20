@@ -1,0 +1,11 @@
+diff --git a/fs/cpio/init b/fs/cpio/init
+index f74ef7e15f..3a858b0d23 100755
+--- a/fs/cpio/init
++++ b/fs/cpio/init
+@@ -13,3 +13,6 @@ if (exec 0</dev/console) 2>/dev/null; then
+ fi
+ 
+ exec /sbin/init "$@"
++/bin/busybox echo "fell off end of /init"
++/bin/busybox echo "powering off..."
++/bin/busybox poweroff -f
