@@ -42,6 +42,10 @@ jobs:
       run: |
         pacman -Ss riscv
         pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-unknown-elf-gcc
+        which riscv-linux-gcc || true
+        which riscv-linux-gnu-gcc || true
+        which riscv-linux-elf-gcc || true
+        which riscv-unknown-elf-gcc || true
 
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
