@@ -104,13 +104,25 @@ jobs:
     - name: Build rootfs
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command=". cores.sh ; cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; cp ../../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES ; cp output/images/rootfs.cpio ../rootfs.cpio" build
+        su --command=". cores.sh ; cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; cp ../../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
+
+    - name: Copy rootfs
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
+        su --command="cd build_dir/buildroot ; pwd ; ls -l output/images ; cp output/images/rootfs.cpio ../rootfs.cpio" build
         sha256sum build_dir/rootfs.cpio > build_dir/rootfs.cpio.sha256
 
     - name: Build kernel
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command=". cores.sh ; cd build_dir/linux-xlnx ; cp ../../.linuxconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2 ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
+        su --command=". cores.sh ; cd build_dir/linux-xlnx ; cp ../../.linuxconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2" build
+        sha256sum build_dir/Image > build_dir/Image.sha256
+        sha256sum build_dir/vmlinux > build_dir/vmlinux.sha256
+
+    - name: Copy kernel
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
+        su --command="cd build_dir/linux-xlnx ; pwd ' ls -l arch/riscv/boot ; pwd ; ls -l ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
         sha256sum build_dir/Image > build_dir/Image.sha256
         sha256sum build_dir/vmlinux > build_dir/vmlinux.sha256
 
