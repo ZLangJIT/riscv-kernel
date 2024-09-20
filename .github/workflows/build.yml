@@ -33,12 +33,16 @@ jobs:
 
     - uses: actions/checkout@main
 
-    - name: Install dependencies
+    - name: System upgrade
       id: dep
       run: |
         pacman -Syu --noconfirm
+
+    - name: Install dependencies
+      id: dep
+      run: |
         pacman -Ss riscv
-        pacman -Syu --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip
+        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-unknown-elf-gcc
 
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
@@ -93,13 +97,13 @@ jobs:
     - name: Build rootfs
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="cd build_dir/linux-image/buildroot ; cp ../../../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES ; cp output/images/rootfs.cpio ../rootfs.cpio" build
+        su --command=". cores.sh ; cd build_dir/linux-image/buildroot ; cp ../../../.buildrootconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES ; cp output/images/rootfs.cpio ../rootfs.cpio" build
         sha256sum build_dir/linux-image/rootfs.cpio > build_dir/linux_image/rootfs.cpio.sha256
 
     - name: Build kernel
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="cd build_dir/linux-image/buildroot ; cp ../../../.linuxconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2 ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
+        su --command=". cores.sh ; cd build_dir/linux-image/buildroot ; cp ../../../.linuxconfig .config ; make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2 ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
         sha256sum build_dir/linux-image/Image > build_dir/linux_image/Image.sha256
         sha256sum build_dir/linux-image/vmlinux > build_dir/linux_image/vmlinux.sha256
 
