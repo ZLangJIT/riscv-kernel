@@ -105,7 +105,7 @@ jobs:
         else
             export LOGICAL_CORES=$(nproc --all)
         fi
-        su --command="cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; cp ../../.buildrootconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
+        su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; cp ../../.buildrootconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
 
     - name: Copy rootfs
       if: ${{ env.REBUILD_FLAG }}
@@ -127,7 +127,7 @@ jobs:
         else
             export LOGICAL_CORES=$(nproc --all)
         fi
-        su --command="cd build_dir/linux-xlnx ; ls -lhap .. ; cp ../../.linuxconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2" build
+        su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/linux-xlnx ; ls -lhap .. ; cp ../../.linuxconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2" build
 
     - name: Copy kernel
       if: ${{ env.REBUILD_FLAG }}
