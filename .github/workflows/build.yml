@@ -97,7 +97,7 @@ jobs:
       run: |
         su --command="cd build_dir ; git clone https://github.com/ATS-INTC/buildroot.git --depth=1 buildroot" build
 
-    - name: Build rootfs
+    - name: Build rootfs [buildroot]
       if: ${{ env.REBUILD_FLAG }}
       run: |
         if [ "$(cat /sys/devices/system/cpu/smt/active)" = "1" ]; then
@@ -107,19 +107,23 @@ jobs:
         fi
         su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; cp ../../.buildrootconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
 
-    - name: Copy rootfs
+    - name: Copy rootfs [buildroot]
       if: ${{ env.REBUILD_FLAG }}
       run: |
         su --command="cd build_dir/buildroot ; pwd ; ls -lahp output/images ; cp output/images/rootfs.cpio ../rootfs.cpio" build
         sha256sum build_dir/rootfs.cpio > build_dir/rootfs.cpio.sha256
-        rm -rf build_dir/build_root
+
+    - name: Remove buildroot
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
+        rm -rf build_dir/buildroot
 
     - name: Clone linux 6.11
       if: ${{ env.REBUILD_FLAG }}
       run: |
         su --command="cd build_dir ; git clone https://github.com/torvalds/linux -b v6.11 --depth 1 linux-xlnx" build
 
-    - name: Build kernel
+    - name: Build kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
       run: |
         if [ "$(cat /sys/devices/system/cpu/smt/active)" = "1" ]; then
@@ -129,12 +133,16 @@ jobs:
         fi
         su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/linux-xlnx ; ls -lhap .. ; cp ../../.linuxconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2" build
 
-    - name: Copy kernel
+    - name: Copy kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
       run: |
         su --command="cd build_dir/linux-xlnx ; pwd ' ls -lahp arch/riscv/boot ; pwd ; ls -l ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
         sha256sum build_dir/Image > build_dir/Image.sha256
         sha256sum build_dir/vmlinux > build_dir/vmlinux.sha256
+
+    - name: Remove linux 6.11
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
         rm -rf build_dir/linux-xlnx
 
     - name: Upload files
