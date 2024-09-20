@@ -48,8 +48,9 @@ jobs:
         which riscv64-unknown-elf-gcc || true
         set -v
         ls -lahp /usr/riscv64-linux-gnu
-        ls -lahp /usr/riscv64-linux-gnu/usr
-        ln -s /usr/riscv64-linux-gnu/include /usr/riscv64-linux-gnu/usr/include
+        ls -lahp /usr/riscv64-linux-gnu/include/linux/version.h || true
+        ls -lahp /usr/riscv64-linux-gnu/include/linux || true
+        ls -lahp /usr/riscv64-linux-gnu/include || true
 
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
