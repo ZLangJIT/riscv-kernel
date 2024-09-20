@@ -36,6 +36,8 @@ jobs:
     - name: Install dependencies
       id: dep
       run: |
+        pacman -Syu --noconfirm
+        pacman -Ss riscv
         pacman -Syu --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip
 
     - name: Trust this directory
