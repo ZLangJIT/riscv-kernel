@@ -41,10 +41,8 @@ jobs:
       id: dep
       run: |
         pacman -Ss riscv
-        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-unknown-elf-gcc
-        which riscv64-linux-gcc || true
+        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers riscv64-unknown-elf-gcc
         which riscv64-linux-gnu-gcc || true
-        which riscv64-linux-elf-gcc || true
         which riscv64-unknown-elf-gcc || true
 
     - name: Trust this directory
