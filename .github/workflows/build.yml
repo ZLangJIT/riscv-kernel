@@ -136,7 +136,7 @@ jobs:
     - name: Copy kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="cd build_dir/linux-xlnx ; pwd ' ls -lahp arch/riscv/boot ; pwd ; ls -l ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
+        su --command="cd build_dir/linux-xlnx ; pwd ; ls -lahp arch/riscv/boot ; pwd ; ls -l ; cp arch/riscv/boot/Image ../Image ; cp vmlinux ../vmlinux" build
         sha256sum build_dir/Image > build_dir/Image.sha256
         sha256sum build_dir/vmlinux > build_dir/vmlinux.sha256
 
