@@ -5,5 +5,4 @@
 #
 
 ../RVVM/debug_BUILD/rvvm --help
-../RVVM/debug_BUILD/rvvm ../RVVM/uboot -v -k Image.gz -m 102m \
-  -cmdline="console=ttyS rootflags=discard rw $1"
+../RVVM/debug_BUILD/rvvm ../RVVM/uboot -v -k Image -m 102m -cmdline="console=ttyS rootflags=discard rw $1"
