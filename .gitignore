@@ -1,5 +1,5 @@
 /linux-*
 /vmlinux*
-/Image
+/Image*
 /buildroot
 
