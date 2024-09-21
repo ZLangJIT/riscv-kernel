@@ -178,7 +178,7 @@ jobs:
         . ~/.bashrc
         echo $PATH
         which sdkmanager
-        sdkmanager --help
+        sdkmanager --help || true # sdkmanager exits with code 1
 
     - name: Grant execute permission for gradlew
       run: |
