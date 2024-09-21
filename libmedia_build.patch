@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..83ed94a4 100755
+index fca317f1..d449223e 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -5,7 +5,7 @@ apply plugin: 'kotlin-android-extensions'
@@ -11,21 +11,28 @@ index fca317f1..83ed94a4 100755
  
      defaultConfig {
          applicationId "media.player.pro"
-@@ -54,7 +54,8 @@ dependencies {
+@@ -52,9 +52,8 @@ dependencies {
+     implementation fileTree(include: ['*.jar'], dir: 'libs')
+     implementation 'com.android.support:appcompat-v7:28.0.0'
      implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-     implementation 'androidx.core:core-ktx:1.2.0-alpha02'
-     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+-    implementation 'androidx.core:core-ktx:1.2.0-alpha02'
+-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 -    implementation 'com.jraska:console:1.0.0'
-+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.1.15"
++    implementation 'androidx.core:core-ktx:1.6.0'
 +    implementation 'com.jraska:console:1.2.0'
      implementation "commons-io:commons-io:2.6"
      implementation "androidx.annotation:annotation:1.1.0"
      implementation "androidx.drawerlayout:drawerlayout:1.0.0"
 diff --git a/build.gradle b/build.gradle
-index df8fe1b9..6903c67b 100644
+index df8fe1b9..a2f5bdb1 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -5,7 +5,7 @@ buildscript {
+@@ -1,14 +1,14 @@
+ // Top-level build file where you can add configuration options common to all sub-projects/modules.
+ 
+ buildscript {
+-    ext.kotlin_version = '1.3.41'
++    ext.kotlin_version = '1.4.31'
      repositories {
          google()
          jcenter()
@@ -33,7 +40,11 @@ index df8fe1b9..6903c67b 100644
 +        mavenCentral()
      }
      dependencies {
-         classpath 'com.android.tools.build:gradle:3.5.1'
+-        classpath 'com.android.tools.build:gradle:3.5.1'
++        classpath 'com.android.tools.build:gradle:3.5.2'
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
 @@ -19,7 +19,7 @@ allprojects {
      repositories {
          google()
