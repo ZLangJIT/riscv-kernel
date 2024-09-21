@@ -146,12 +146,32 @@ jobs:
       run: |
         rm -rf build_dir/linux-xlnx
 
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x android/gradlew
+
+    - name: Build with Gradle
+      run: cd android ; ./gradlew build
+
+    - name: Build debug APK
+      run: cd android ; bash ./gradlew assembleDebug --stacktrace
+
+    - name: Check files
+      run: ls -al android/app/build/outputs/apk/debug
+
     - name: Upload files
       uses: actions/upload-artifact@main
       if: ${{ env.REBUILD_FLAG }}
       with:
         name: upload
         path: |
+          android/app/build/outputs/apk/debug/app-debug.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
           build_dir/Image
