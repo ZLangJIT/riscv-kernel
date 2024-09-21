@@ -282,7 +282,8 @@ jobs:
         name: upload
         path: |
 
-    - id: fetch_commit_sha
+    - name: fetch_commit_sha
+      id: fetch_commit_sha
       run: |
         if [ ${{ github.event_name }} = 'pull_request' ]; then
           echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
