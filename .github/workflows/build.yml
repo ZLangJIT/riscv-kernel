@@ -33,14 +33,18 @@ jobs:
 
     - uses: actions/checkout@main
 
+    - name: Trust this directory
+      run: git config --global --add safe.directory '*' # v2.35.3 or later
+
     - name: System upgrade
       run: |
         pacman -Syu --noconfirm
 
-    - name: Trust this directory
-      run: git config --global --add safe.directory '*' # v2.35.3 or later
+    - name: install important packages
+      run: |
+        pacman -S --noconfirm ccache zip unzip
 
-    - name: Initialize ccache - key is ${{ github.job }}-${{ matrix.arch }}
+    - name: Initialize ccache -
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         max-size: 2048M
@@ -86,7 +90,7 @@ jobs:
       id: dep
       run: |
         pacman -Ss riscv
-        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip
+        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld zip unzip
         pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
         pacman -S --noconfirm riscv64-unknown-elf-gcc
         which riscv64-linux-gnu-gcc || true
