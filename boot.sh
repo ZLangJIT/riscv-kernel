@@ -5,4 +5,5 @@
 #
 
 ../RVVM/debug_BUILD/rvvm --help
-../RVVM/debug_BUILD/rvvm ../RVVM/uboot -v -k Image -m 102m -cmdline="console=ttyS rootflags=discard rw $1"
+../RVVM/debug_BUILD/rvvm ../RVVM/uboot -v -k Image -m 100m -cmdline="console=ttyS0 rootflags=discard rw $1" $2
+#qemu-system-riscv64 -nographic -machine virt -kernel Image --append "console=ttyS0 rootflags=discard rw $1" $2
