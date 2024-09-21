@@ -176,6 +176,7 @@ jobs:
       shell: bash
       run: |
         . ~/.bashrc
+        export PATH=$PATH:/cmdline-tools/bin
         echo $PATH
         which sdkmanager
         sdkmanager --help || true # sdkmanager exits with code 1
