@@ -85,10 +85,10 @@ jobs:
         if [[ $CURRENT_VERSION != $RELEASED_VERSION || \
               ($CURRENT_VERSION = $RELEASED_VERSION && 1 -gt "$RELEASED_MINOR") || \
               "${{ github.event_name }}" = 'pull_request' ]]; then
-          echo "REBUILD_FLAG=1" | tee -a $GITHUB_ENV
+          echo "REBUILD_FLAG=0" | tee -a $GITHUB_ENV # set to 1 to enable building, set to 0 to skip building
           ./build.sh
         else
-          echo "REBUILD_FLAG=" | tee -a $GITHUB_ENV
+          echo "REBUILD_FLAG=0" | tee -a $GITHUB_ENV
         fi
         cp monitor_memory.sh /tmp/monitor_memory.sh ; chmod +x /tmp/monitor_memory.sh
 
@@ -163,11 +163,21 @@ jobs:
       run: cd android ; bash ./gradlew assembleDebug --stacktrace
 
     - name: Check files
-      run: ls -al android/app/build/outputs/apk/debug
+      run: |
+        ls -al android/app/build/outputs/apk/debug
+        TAG=6.11.26 # use kernel from 6.11.26
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio.sha256
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.sha256
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz.sha256
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux
+        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux.sha256
 
     - name: Upload files
       uses: actions/upload-artifact@main
-      if: ${{ env.REBUILD_FLAG }}
+      if: ${{ env.REBUILD_FLAG }} || 1 # always upload for now
       with:
         name: upload
         path: |
