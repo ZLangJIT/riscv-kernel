@@ -166,7 +166,7 @@ jobs:
       run: |
         TOOLS_URL=$(wget -qO- http://developer.android.com/sdk/index.html | grep latest.zip | grep linux | grep href | grep -o https.*zip)
         TOOLS_FILE=$(echo $TOOLS_URL | grep -o command.*zip)
-        bash -c "cd / ; wget $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE"
+        bash -c "cd / ; echo \"downloading $TOOLS_FILE ...\" ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE"
 
     - name: init env
       run: |
@@ -174,7 +174,7 @@ jobs:
         echo "export ANDROID_SDK_ROOT=/android-sdk" >> /etc/bash.bashrc
         echo "export ANDROID_SDKROOT=/android-sdk" >> /etc/bash.bashrc
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> /etc/bash.bashrc
-        echo "export PATH=$PATH:/cmdline-tools" >> /etc/bash.bashrc
+        echo "export PATH=$PATH:/cmdline-tools/bin" >> /etc/bash.bashrc
 
     - name: test sdkmanager
       run: |
