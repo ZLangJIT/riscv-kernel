@@ -274,9 +274,9 @@ jobs:
       run: |
         . ~/.bashrc
         #cp android/gradle/wrapper/gradle-wrapper.properties libmedia/gradle/wrapper/gradle-wrapper.properties
-        #cd libmedia ; git apply ../libmedia_build.patch ; ./gradlew build --stacktrace
         archlinux-java set java-8-openjdk
-        cd libmedia ; ./gradlew build
+        cd libmedia ; git apply ../libmedia_build.patch ; ./gradlew build
+        #cd libmedia ; ./gradlew build
 
     - name: Build debug APK
       shell: bash
