@@ -199,7 +199,9 @@ jobs:
         body: |
           RISC-V linux kernel, built with Clang ${{ needs.build.outputs.clang_version }}
 
-          * `vmlinux` for riscv ( built-in busybox ramdisk - initrd.zip )
+          * `vmlinux` for riscv ( built-in busybox ramdisk )
+          * `Image` for riscv ( built-in busybox ramdisk )
+          * `Image.gz` for riscv ( built-in busybox ramdisk )
 
         files: |
           release_images/*/*
