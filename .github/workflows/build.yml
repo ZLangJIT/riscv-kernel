@@ -275,13 +275,6 @@ jobs:
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux.sha256
 
-    - name: Upload files
-      uses: actions/upload-artifact@main
-      if: ${{ env.REBUILD_FLAG }} || 1 # always upload for now
-      with:
-        name: upload
-        path: |
-
     - name: fetch_commit_sha
       id: fetch_commit_sha
       run: |
