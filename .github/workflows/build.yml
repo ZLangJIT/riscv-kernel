@@ -252,7 +252,7 @@ jobs:
       shell: bash
       run: |
         . ~/.bashrc
-        cd android ; ./gradlew build
+        cd android ; ./gradlew build --stacktrace
 
     - name: Build debug APK
       shell: bash
@@ -273,7 +273,7 @@ jobs:
       run: |
         . ~/.bashrc
         cp android/gradle/wrapper/gradle-wrapper.properties libmedia/gradle/wrapper/gradle-wrapper.properties
-        cd libmedia ; git apply ../libmedia_build.patch ; ./gradlew build
+        cd libmedia ; git apply ../libmedia_build.patch ; ./gradlew build --stacktrace
 
     - name: Build debug APK
       shell: bash
