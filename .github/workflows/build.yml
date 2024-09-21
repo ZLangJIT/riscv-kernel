@@ -159,7 +159,7 @@ jobs:
       run: |
         TOOLS_URL=$(wget -qO- http://developer.android.com/sdk/index.html | grep latest.zip | grep linux | grep href | grep -o https.*zip)
         TOOLS_FILE=$(echo $TOOLS_URL | grep -o command.*zip)
-        cd / ; echo \"downloading $TOOLS_FILE ...\" ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE
+        cd / ; echo "downloading $TOOLS_FILE ..." ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE ; bash -c "rm $TOOLS_FILE || true"
         pacman -S --noconfirm jdk17-openjdk
         archlinux-java status
 
@@ -193,6 +193,7 @@ jobs:
         ls -l /android-sdk/cmdline-tools/latest
         ls -l /android-sdk/cmdline-tools/latest/bin
         echo "export PATH=$PATH:/android-sdk/cmdline-tools/latest/bin" >> ~/.bashrc
+        rm -rf /cmdline-tools*
 
     - name: Grant execute permission for gradlew
       run: |
