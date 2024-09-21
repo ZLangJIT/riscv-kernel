@@ -171,7 +171,6 @@ jobs:
         echo "export ANDROID_SDK_ROOT=/android-sdk" >> $FILE
         echo "export ANDROID_SDK_PATH=/android-sdk" >> $FILE
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> $FILE
-        echo "export PATH=$PATH:/cmdline-tools/bin" >> $FILE
 
     - name: Test sdkmanager
       shell: bash
@@ -185,8 +184,15 @@ jobs:
       shell: bash
       run: |
         . ~/.bashrc
-        sdkmanager --list || true
-        yes | sdkmanager --licenses
+        export PATH=$PATH:/cmdline-tools/bin
+        yes | sdkmanager --licenses --sdk_root=/android-sdk
+        sdkmanager --list --sdk_root=/android-sdk || true
+        sdkmanager --install commandline-tools:latest  --sdk_root=/android-sdk || true
+        ls -l /android-sdk
+        ls -l /android-sdk/cmdline-tools
+        ls -l /android-sdk/cmdline-tools/latest
+        ls -l /android-sdk/cmdline-tools/latest/bin
+        echo "export PATH=$PATH:/android-sdk/cmdline-tools/latest/bin" >> ~/.bashrc
 
     - name: Grant execute permission for gradlew
       run: |
