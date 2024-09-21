@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..1d991823 100755
+index fca317f1..98b8eb5c 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -1,18 +1,20 @@
@@ -54,23 +54,20 @@ index fca317f1..1d991823 100755
      }
  }
  
-@@ -52,9 +63,9 @@ dependencies {
+@@ -52,7 +63,7 @@ dependencies {
      implementation fileTree(include: ['*.jar'], dir: 'libs')
      implementation 'com.android.support:appcompat-v7:28.0.0'
      implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 -    implementation 'androidx.core:core-ktx:1.2.0-alpha02'
 +    implementation 'androidx.core:core-ktx:1.7.0'
      implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
--    implementation 'com.jraska:console:1.0.0'
-+    //implementation 'com.jraska:console:1.0.0'
+     implementation 'com.jraska:console:1.0.0'
      implementation "commons-io:commons-io:2.6"
-     implementation "androidx.annotation:annotation:1.1.0"
-     implementation "androidx.drawerlayout:drawerlayout:1.0.0"
 diff --git a/build.gradle b/build.gradle
-index df8fe1b9..4fda6146 100644
+index df8fe1b9..eaf7c0c5 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -1,18 +1,8 @@
+@@ -1,26 +1,8 @@
  // Top-level build file where you can add configuration options common to all sub-projects/modules.
 -
 -buildscript {
@@ -86,10 +83,39 @@ index df8fe1b9..4fda6146 100644
 -        // NOTE: Do not place your application dependencies here; they belong
 -        // in the individual module build.gradle files
 -    }
+-}
+-
+-allprojects {
+-    repositories {
+-        google()
+-        jcenter()
+-        
+-    }
 +plugins {
 +    id 'com.android.application' version '7.2.2' apply false
 +    id 'com.android.library' version '7.2.2' apply false
 +    id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
  }
  
- allprojects {
+ task clean(type: Delete) {
+diff --git a/settings.gradle b/settings.gradle
+index f9e92492..f0a551f2 100644
+--- a/settings.gradle
++++ b/settings.gradle
+@@ -1,2 +1,16 @@
++pluginManagement {
++    repositories {
++        gradlePluginPortal()
++        google()
++        mavenCentral()
++    }
++}
++dependencyResolutionManagement {
++    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
++    repositories {
++        google()
++        mavenCentral()
++    }
++}
+ include ':app'
+ rootProject.name='Media Player Pro'
