@@ -280,10 +280,10 @@ jobs:
       run: |
         if [ ${{ github.event_name }} = 'pull_request' ]; then
           echo "sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-          echo "RELEASE_TAG=${{ needs.build.outputs.current_version }}-PR" | tee -a $GITHUB_ENV
+          echo "RELEASE_TAG=$CURRENT_VERSION-PR" | tee -a $GITHUB_ENV
         else
           echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "RELEASE_TAG=${{ needs.build.outputs.current_version }}" | tee -a $GITHUB_ENV
+          echo "RELEASE_TAG=$CURRENT_VERSION" | tee -a $GITHUB_ENV
         fi
 
     - name: Release
