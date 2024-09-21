@@ -155,20 +155,15 @@ jobs:
       run: |
         rm -rf build_dir/linux-xlnx
 
-    - name: set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: gradle
-
-    - name: install android command line tools
+    - name: Install android commandline-tools + JDK17
       run: |
         TOOLS_URL=$(wget -qO- http://developer.android.com/sdk/index.html | grep latest.zip | grep linux | grep href | grep -o https.*zip)
         TOOLS_FILE=$(echo $TOOLS_URL | grep -o command.*zip)
-        bash -c "cd / ; echo \"downloading $TOOLS_FILE ...\" ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE"
+        cd / ; echo \"downloading $TOOLS_FILE ...\" ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE
+        pacman -S --noconfirm jdk17-openjdk
+        archlinux-java status
 
-    - name: init env
+    - name: Init env
       run: |
         FILE=~/.bashrc
         echo "export ANDROID_HOME=/android-sdk" >> $FILE
@@ -177,13 +172,12 @@ jobs:
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> $FILE
         echo "export PATH=$PATH:/cmdline-tools/bin" >> $FILE
 
-    - name: test sdkmanager
+    - name: Test sdkmanager
       shell: bash
       run: |
         . ~/.bashrc
         echo $PATH
         which sdkmanager
-        ls -l /cmdline-tools/bin
         sdkmanager --help
 
     - name: Grant execute permission for gradlew
