@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..cb16fce4 100755
+index fca317f1..83ed94a4 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -5,7 +5,7 @@ apply plugin: 'kotlin-android-extensions'
@@ -11,11 +11,12 @@ index fca317f1..cb16fce4 100755
  
      defaultConfig {
          applicationId "media.player.pro"
-@@ -54,7 +54,7 @@ dependencies {
+@@ -54,7 +54,8 @@ dependencies {
      implementation 'com.android.support.constraint:constraint-layout:1.1.3'
      implementation 'androidx.core:core-ktx:1.2.0-alpha02'
      implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 -    implementation 'com.jraska:console:1.0.0'
++    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.1.15"
 +    implementation 'com.jraska:console:1.2.0'
      implementation "commons-io:commons-io:2.6"
      implementation "androidx.annotation:annotation:1.1.0"
