@@ -158,21 +158,19 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: install android sdk
+    - name: install android command line tools
       run: |
-        for a in $( wget -qO- http://developer.android.com/sdk/index.html | egrep -o "http://dl.google.com[^\"']*linux_x86.tgz" ); do 
-            wget $a && tar --wildcards --no-anchored -xvzf android-sdk_*-linux_x86.tgz
-            mv android-sdk-linux_x86 /android-sdk
-            chmod 777 -R /android-sdk
-            rm android-sdk_*-linux_x86.tgz
-        done
+        TOOLS_URL=$(wget -qO- http://developer.android.com/sdk/index.html | grep latest.zip | grep linux | grep href | grep -o https.*zip)
+        TOOLS_FILE=$(echo $TOOLS_URL | grep -o command.*zip)
+        bash -c "cd / ; wget $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE"
 
     - name: init env
       run: |
         echo "export ANDROID_HOME=/android-sdk" >> /etc/bash.bashrc
+        echo "export ANDROID_SDK_ROOT=/android-sdk" >> /etc/bash.bashrc
+        echo "export ANDROID_SDKROOT=/android-sdk" >> /etc/bash.bashrc
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> /etc/bash.bashrc
-        rm /bin/ddms || true
-        ln -s /android-sdk/tools/ddms /bin/ddms
+        echo "export PATH=$PATH:/cmdline-tools" >> /etc/bash.bashrc
 
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
