@@ -264,6 +264,7 @@ jobs:
       run: |
         ls -al android/app/build/outputs/apk/debug
         TAG=6.11.26 # use kernel from 6.11.26
+        mkdir build_dir || true
         cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio
         cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio.sha256
         cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image
