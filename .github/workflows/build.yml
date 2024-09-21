@@ -37,20 +37,6 @@ jobs:
       run: |
         pacman -Syu --noconfirm
 
-    - name: Install dependencies
-      id: dep
-      run: |
-        pacman -Ss riscv
-        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip
-        pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
-        pacman -S --noconfirm riscv64-unknown-elf-gcc
-        which riscv64-linux-gnu-gcc || true
-        which riscv64-unknown-elf-gcc || true
-        set -v
-        ln -s /usr/riscv64-linux-gnu/include/linux /usr/riscv64-linux-gnu/usr/include/linux || true
-        ls -lahp /usr/riscv64-linux-gnu/usr/include/linux/version.h || true
-        ls -lahp /usr/riscv64-linux-gnu/include/linux/version.h || true
-
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
@@ -70,8 +56,6 @@ jobs:
         #scripts/config -e ${{ matrix.arch }}
 
         # Load version info into env
-        echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local\/clang.*[^0-9]\(.*\) (\(.*\))#\1#')" | tee -a $GITHUB_ENV
-
         export CURRENT_VERSION=$(grep 'LOCALVERSION=' ./riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
         # must query with a token, or will fail with ai rate limit on public runners
         export RELEASED_TAG=$(curl -sL -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'\
@@ -96,6 +80,22 @@ jobs:
         mkdir build_dir
         chown build:build build_dir
         chmod 777 build_dir
+
+    - name: Install dependencies
+      if: ${{ env.REBUILD_FLAG }}
+      id: dep
+      run: |
+        pacman -Ss riscv
+        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld ccache zip unzip
+        pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
+        pacman -S --noconfirm riscv64-unknown-elf-gcc
+        which riscv64-linux-gnu-gcc || true
+        which riscv64-unknown-elf-gcc || true
+        set -v
+        ln -s /usr/riscv64-linux-gnu/include/linux /usr/riscv64-linux-gnu/usr/include/linux || true
+        ls -lahp /usr/riscv64-linux-gnu/usr/include/linux/version.h || true
+        ls -lahp /usr/riscv64-linux-gnu/include/linux/version.h || true
+        echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local\/clang.*[^0-9]\(.*\) (\(.*\))#\1#')" | tee -a $GITHUB_ENV
 
     - name: Clone buildroot
       if: ${{ env.REBUILD_FLAG }}
@@ -171,6 +171,10 @@ jobs:
         echo "export ANDROID_SDKROOT=/android-sdk" >> /etc/bash.bashrc
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> /etc/bash.bashrc
         echo "export PATH=$PATH:/cmdline-tools" >> /etc/bash.bashrc
+
+    - name: test sdkmanager
+      run: |
+        sdkmanager --help
 
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
