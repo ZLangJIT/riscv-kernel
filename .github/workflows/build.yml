@@ -170,14 +170,15 @@ jobs:
 
     - name: init env
       run: |
-        ls -lahp /etc ~/
-        echo "export ANDROID_HOME=/android-sdk" >> /etc/profile
-        echo "export ANDROID_SDK_ROOT=/android-sdk" >> /etc/profile
-        echo "export ANDROID_SDKROOT=/android-sdk" >> /etc/profile
-        echo "export PATH=$PATH:/android-sdk/platform-tools" >> /etc/profile
-        echo "export PATH=$PATH:/cmdline-tools/bin" >> /etc/profile
+        FILE=/etc/bash.bashrc
+        echo "export ANDROID_HOME=/android-sdk" >> $FILE
+        echo "export ANDROID_SDK_ROOT=/android-sdk" >> $FILE
+        echo "export ANDROID_SDKROOT=/android-sdk" >> $FILE
+        echo "export PATH=$PATH:/android-sdk/platform-tools" >> $FILE
+        echo "export PATH=$PATH:/cmdline-tools/bin" >> $FILE
 
     - name: test sdkmanager
+      shell: bash
       run: |
         sdkmanager --help
 
@@ -185,10 +186,12 @@ jobs:
       run: chmod +x android/gradlew
 
     - name: Build with Gradle
+      shell: bash
       run: cd android ; ./gradlew build
 
     - name: Build debug APK
-      run: cd android ; bash ./gradlew assembleDebug --stacktrace
+      shell: bash
+      run: cd android ; ./gradlew assembleDebug --stacktrace
 
     - name: Check files
       run: |
