@@ -272,6 +272,7 @@ jobs:
       shell: bash
       run: |
         . ~/.bashrc
+        cp android/gradle/wrapper/gradle-wrapper.properties libmedia/gradle/wrapper/gradle-wrapper.properties
         cd libmedia ; ./gradlew build
 
     - name: Build debug APK
