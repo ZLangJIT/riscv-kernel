@@ -1,8 +1,19 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..4b0da418 100755
+index fca317f1..03f790aa 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
-@@ -52,9 +52,8 @@ dependencies {
+@@ -7,6 +7,10 @@ android { // main settings for your application
+     buildToolsVersion = '29.0.3'
+     ndkVersion '21.4.7075529'
+ 
++    packagingOptions {
++        exclude "**/module-info.class"
++    }
++
+     defaultConfig {
+         applicationId "media.player.pro"
+         minSdkVersion 26
+@@ -52,9 +56,8 @@ dependencies {
      implementation fileTree(include: ['*.jar'], dir: 'libs')
      implementation 'com.android.support:appcompat-v7:28.0.0'
      implementation 'com.android.support.constraint:constraint-layout:1.1.3'
