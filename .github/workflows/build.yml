@@ -320,7 +320,6 @@ jobs:
 
     - name: Release
       uses: softprops/action-gh-release@master
-      if: ${{ needs.build.outputs.rebuild_flag }}
       with:
         name:  ${{ env.RELEASE_TAG }}
         tag_name:  ${{ env.RELEASE_TAG }}
