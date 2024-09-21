@@ -170,7 +170,7 @@ jobs:
 
     - name: init env
       run: |
-        FILE=/etc/bash.bashrc
+        FILE=~/.bashrc
         echo "export ANDROID_HOME=/android-sdk" >> $FILE
         echo "export ANDROID_SDK_ROOT=/android-sdk" >> $FILE
         echo "export ANDROID_SDKROOT=/android-sdk" >> $FILE
@@ -180,18 +180,27 @@ jobs:
     - name: test sdkmanager
       shell: bash
       run: |
+        . ~/.bashrc
+        echo $PATH
+        which sdkmanager
+        ls -l /cmdline-tools/bin
         sdkmanager --help
 
     - name: Grant execute permission for gradlew
-      run: chmod +x android/gradlew
+      run: |
+        chmod +x android/gradlew
 
     - name: Build with Gradle
       shell: bash
-      run: cd android ; ./gradlew build
+      run: |
+        . ~/.bashrc
+        cd android ; ./gradlew build
 
     - name: Build debug APK
       shell: bash
-      run: cd android ; ./gradlew assembleDebug --stacktrace
+      run: |
+        . ~/.bashrc
+        cd android ; ./gradlew assembleDebug --stacktrace
 
     - name: Check files
       run: |
