@@ -54,7 +54,7 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
-    - name: Initialize ccache - key: ${{ github.job }}-${{ matrix.arch }}
+    - name: Initialize ccache - key is ${{ github.job }}-${{ matrix.arch }}
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         max-size: 2048M
