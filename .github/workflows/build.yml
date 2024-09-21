@@ -162,7 +162,7 @@ jobs:
         cd / ; echo "downloading $TOOLS_FILE ..." ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE ; bash -c "rm $TOOLS_FILE || true"
         pacman -S --noconfirm jdk17-openjdk jdk8-openjdk
         archlinux-java status
-        archlinux-java switch java-17-openjdk
+        archlinux-java set java-17-openjdk
 
     - name: Init env
       run: |
@@ -275,7 +275,7 @@ jobs:
         . ~/.bashrc
         #cp android/gradle/wrapper/gradle-wrapper.properties libmedia/gradle/wrapper/gradle-wrapper.properties
         #cd libmedia ; git apply ../libmedia_build.patch ; ./gradlew build --stacktrace
-        archlinux-java switch java-8-openjdk
+        archlinux-java set java-8-openjdk
         cd libmedia ; ./gradlew build
 
     - name: Build debug APK
