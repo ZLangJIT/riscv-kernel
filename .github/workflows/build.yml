@@ -181,18 +181,41 @@ jobs:
         which sdkmanager
         sdkmanager --help || true # sdkmanager exits with code 1
 
-    - name: Install sdkmanager packages
+    - name: List sdkmanager packages
       shell: bash
       run: |
         . ~/.bashrc
         export PATH=$PATH:/cmdline-tools/bin
-        yes | sdkmanager --licenses --sdk_root=/android-sdk
         sdkmanager --list --sdk_root=/android-sdk || true
-        sdkmanager --install commandline-tools:latest  --sdk_root=/android-sdk || true
+
+    - name: Accept sdkmanager Licenses
+      shell: bash
+      run: |
+        . ~/.bashrc
+        export PATH=$PATH:/cmdline-tools/bin
+        yes | sdkmanager --licenses --sdk_root=/android-sdk || true
+
+    - name: Verify sdkmanager Licenses
+      shell: bash
+      run: |
+        . ~/.bashrc
+        export PATH=$PATH:/cmdline-tools/bin
+        yes | sdkmanager --licenses --sdk_root=/android-sdk || true
+
+    - name: Install sdkmanager cmdline-tools
+      shell: bash
+      run: |
+        . ~/.bashrc
+        export PATH=$PATH:/cmdline-tools/bin
+        sdkmanager --install commandline-tools:latest --sdk_root=/android-sdk || true
         ls -l /android-sdk
         ls -l /android-sdk/cmdline-tools
         ls -l /android-sdk/cmdline-tools/latest
         ls -l /android-sdk/cmdline-tools/latest/bin
+
+    - name: Switch to sdkmanager cmdline-tools
+      shell: bash
+      run: |
         echo "export PATH=$PATH:/android-sdk/cmdline-tools/latest/bin" >> ~/.bashrc
         rm -rf /cmdline-tools*
 
