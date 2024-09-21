@@ -167,6 +167,7 @@ jobs:
       run: |
         FILE=~/.bashrc
         echo "export ANDROID_HOME=/android-sdk" >> $FILE
+        echo "export ANDROID_SDK=/android-sdk" >> $FILE
         echo "export ANDROID_SDK_ROOT=/android-sdk" >> $FILE
         echo "export ANDROID_SDK_PATH=/android-sdk" >> $FILE
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> $FILE
