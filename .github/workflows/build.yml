@@ -265,14 +265,15 @@ jobs:
         ls -al android/app/build/outputs/apk/debug
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio.sha256
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.sha256
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz.sha256
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux
-        cd build_dir ; wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux.sha256
+        cd build_dir
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio.sha256
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.sha256
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz.sha256
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/vmlinux.sha256
 
     - name: Upload files
       uses: actions/upload-artifact@main
