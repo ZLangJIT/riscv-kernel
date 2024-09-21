@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..6c531945 100755
+index fca317f1..953279a8 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -1,18 +1,19 @@
@@ -32,7 +32,7 @@ index fca317f1..6c531945 100755
  
          externalNativeBuild {
              cmake {
-@@ -42,9 +43,18 @@ android { // main settings for your application
+@@ -42,9 +43,15 @@ android { // main settings for your application
              path "src/main/CMakeLists.txt"
          }
      }
@@ -47,13 +47,10 @@ index fca317f1..6c531945 100755
 -        targetCompatibility = '1.8'
 +        sourceCompatibility JavaVersion.VERSION_1_8
 +        targetCompatibility JavaVersion.VERSION_1_8
-+    }
-+    kotlinOptions {
-+        jvmTarget = '1.8'
      }
  }
  
-@@ -52,8 +62,7 @@ dependencies {
+@@ -52,8 +59,7 @@ dependencies {
      implementation fileTree(include: ['*.jar'], dir: 'libs')
      implementation 'com.android.support:appcompat-v7:28.0.0'
      implementation 'com.android.support.constraint:constraint-layout:1.1.3'
