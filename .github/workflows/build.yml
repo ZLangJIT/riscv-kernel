@@ -159,7 +159,7 @@ jobs:
         cache: gradle
 
     - name: install android sdk
-    - run: |
+      run: |
         for a in $( wget -qO- http://developer.android.com/sdk/index.html | egrep -o "http://dl.google.com[^\"']*linux_x86.tgz" ); do 
             wget $a && tar --wildcards --no-anchored -xvzf android-sdk_*-linux_x86.tgz
             mv android-sdk-linux_x86 /android-sdk
@@ -168,7 +168,7 @@ jobs:
         done
 
     - name: init env
-    - run: |
+      run: |
         echo "export ANDROID_HOME=/android-sdk" >> /etc/bash.bashrc
         echo "export PATH=$PATH:/android-sdk/platform-tools" >> /etc/bash.bashrc
         rm /bin/ddms || true
