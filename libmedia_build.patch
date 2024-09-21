@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..953279a8 100755
+index fca317f1..bc3f9ce8 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -1,18 +1,19 @@
@@ -32,16 +32,39 @@ index fca317f1..953279a8 100755
  
          externalNativeBuild {
              cmake {
-@@ -42,9 +43,15 @@ android { // main settings for your application
+@@ -24,15 +25,11 @@ android { // main settings for your application
+             abiFilters 'arm64-v8a' // only support 64 bit for now
+         }
+ 
+-        compileOptions {
+-            incremental false
+-        }
+-    }
+-
+-    sourceSets {
+-        main {
+-            jniLibs {
+-                srcDirs = ["./libs"] // it seems that this must be explicitly specified
++        sourceSets {
++            main {
++                jni {
++                    srcDirs = ["libs"] // it seems that this must be explicitly specified
++                }
+             }
+         }
+     }
+@@ -42,9 +39,17 @@ android { // main settings for your application
              path "src/main/CMakeLists.txt"
          }
      }
++
 +    buildTypes {
 +        release {
 +            minifyEnabled false
 +            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 +        }
 +    }
++
      compileOptions {
 -        sourceCompatibility = '1.8'
 -        targetCompatibility = '1.8'
@@ -50,7 +73,7 @@ index fca317f1..953279a8 100755
      }
  }
  
-@@ -52,8 +59,7 @@ dependencies {
+@@ -52,8 +57,7 @@ dependencies {
      implementation fileTree(include: ['*.jar'], dir: 'libs')
      implementation 'com.android.support:appcompat-v7:28.0.0'
      implementation 'com.android.support.constraint:constraint-layout:1.1.3'
