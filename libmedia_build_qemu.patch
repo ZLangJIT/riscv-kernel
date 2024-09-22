@@ -1,12 +1,20 @@
-From 7a209587d6391ac99a3321debec833c129a3708c Mon Sep 17 00:00:00 2001
+From 39574e19d276233fde08d6aa9ac4322649588827 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 08:45:28 +0000
+Date: Sun, 22 Sep 2024 09:07:08 +0000
 Subject: [PATCH 1/1] c
 
 ---
  app/build.gradle                              |    2 +-
+ .../kernel}/ExampleInstrumentedTest.kt        |    4 +-
  app/src/main/AndroidManifest.xml              |    2 +-
  app/src/main/CMakeLists.txt                   |    5 +-
+ .../main/java/alpine/term/ExtraKeysView.java  |    2 +-
+ .../main/java/alpine/term/HelpActivity.java   |    2 +-
+ .../java/alpine/term/TerminalActivity.java    |    2 +-
+ .../java/alpine/term/TerminalController.java  |    2 +-
+ .../term/TerminalControllerService.java       |    2 +-
+ .../java/alpine/term/TerminalService.java     |    2 +-
+ .../term/terminal_view/TerminalView.java      |    4 +-
  .../java/libengine/AppInstanceAndroidBase.cpp |   70 +
  .../java/libengine/AppInstanceAndroidBase.h   |   27 +
  app/src/main/java/libengine/CMakeLists.txt    |   32 +
@@ -103,8 +111,10 @@ Subject: [PATCH 1/1] c
  .../EGLTextureView.java                       | 2406 ++++++++++++++++
  .../graphical/tool/kit/Cleaner.java           |   39 +
  .../tool/kit/DiligentEngineView.java          |  189 ++
+ .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 100 files changed, 12313 insertions(+), 175 deletions(-)
+ 109 files changed, 12324 insertions(+), 186 deletions(-)
+ rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.h
  create mode 100644 app/src/main/java/libengine/CMakeLists.txt
@@ -201,6 +211,7 @@ Subject: [PATCH 1/1] c
  create mode 100644 app/src/main/java/smallville7123/EGLSurfaceView_EGLTextureView/EGLTextureView.java
  create mode 100644 app/src/main/java/smallville7123/graphical/tool/kit/Cleaner.java
  create mode 100644 app/src/main/java/smallville7123/graphical/tool/kit/DiligentEngineView.java
+ rename app/src/test/java/{media/player/pro => linux/kernel}/ExampleUnitTest.kt (92%)
 
 diff --git a/app/build.gradle b/app/build.gradle
 index 8365cc7a..172dadc6 100755
@@ -215,6 +226,27 @@ index 8365cc7a..172dadc6 100755
          minSdkVersion 26
          targetSdkVersion 29
          versionCode 1
+diff --git a/app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt b/app/src/androidTest/java/linux/kernel/ExampleInstrumentedTest.kt
+similarity index 86%
+rename from app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt
+rename to app/src/androidTest/java/linux/kernel/ExampleInstrumentedTest.kt
+index d467abb6..9c5b658f 100644
+--- a/app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt
++++ b/app/src/androidTest/java/linux/kernel/ExampleInstrumentedTest.kt
+@@ -1,4 +1,4 @@
+-package media.player.pro
++package linux.kernel
+ 
+ import androidx.test.platform.app.InstrumentationRegistry
+ import androidx.test.ext.junit.runners.AndroidJUnit4
+@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
+     fun useAppContext() {
+         // Context of the app under test.
+         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+-        assertEquals("media.player.pro", appContext.packageName)
++        assertEquals("linux.kernel", appContext.packageName)
+     }
+ }
 diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
 index 6843690f..5180a236 100644
 --- a/app/src/main/AndroidManifest.xml
@@ -241,6 +273,104 @@ index 8e8e3779..9b980553 100644
 +
 +# EngineView
 +add_subdirectory(java/libengine)
+diff --git a/app/src/main/java/alpine/term/ExtraKeysView.java b/app/src/main/java/alpine/term/ExtraKeysView.java
+index 4acd2731..66bda478 100644
+--- a/app/src/main/java/alpine/term/ExtraKeysView.java
++++ b/app/src/main/java/alpine/term/ExtraKeysView.java
+@@ -37,7 +37,7 @@ import android.widget.ToggleButton;
+ import java.util.concurrent.ScheduledExecutorService;
+ 
+ import alpine.term.terminal_view.TerminalView;
+-import media.player.pro.R;
++import linux.kernel.R;
+ 
+ /**
+  * A view showing extra keys (such as Escape, Ctrl, Alt) not normally available on an Android soft
+diff --git a/app/src/main/java/alpine/term/HelpActivity.java b/app/src/main/java/alpine/term/HelpActivity.java
+index afe757ce..8409d9e0 100644
+--- a/app/src/main/java/alpine/term/HelpActivity.java
++++ b/app/src/main/java/alpine/term/HelpActivity.java
+@@ -30,7 +30,7 @@ import android.webkit.WebViewClient;
+ import android.widget.ProgressBar;
+ import android.widget.RelativeLayout;
+ 
+-import media.player.pro.BuildConfig;
++import linux.kernel.BuildConfig;
+ 
+ /**
+  * Basic embedded browser for viewing help pages.
+diff --git a/app/src/main/java/alpine/term/TerminalActivity.java b/app/src/main/java/alpine/term/TerminalActivity.java
+index fb48b3cd..b95e611a 100644
+--- a/app/src/main/java/alpine/term/TerminalActivity.java
++++ b/app/src/main/java/alpine/term/TerminalActivity.java
+@@ -34,7 +34,7 @@ import android.widget.Button;
+ import android.widget.RelativeLayout;
+ import android.widget.TextView;
+ 
+-import media.player.pro.R;
++import linux.kernel.R;
+ 
+ /**
+  * A terminal emulator activity.
+diff --git a/app/src/main/java/alpine/term/TerminalController.java b/app/src/main/java/alpine/term/TerminalController.java
+index 0c1b079e..3430621f 100644
+--- a/app/src/main/java/alpine/term/TerminalController.java
++++ b/app/src/main/java/alpine/term/TerminalController.java
+@@ -51,7 +51,7 @@ import alpine.term.emulator.TerminalColors;
+ import alpine.term.emulator.TerminalSession;
+ import alpine.term.emulator.TextStyle;
+ import alpine.term.terminal_view.TerminalView;
+-import media.player.pro.R;
++import linux.kernel.R;
+ 
+ public class TerminalController {
+ 
+diff --git a/app/src/main/java/alpine/term/TerminalControllerService.java b/app/src/main/java/alpine/term/TerminalControllerService.java
+index 80a203b2..c1b7d750 100644
+--- a/app/src/main/java/alpine/term/TerminalControllerService.java
++++ b/app/src/main/java/alpine/term/TerminalControllerService.java
+@@ -34,7 +34,7 @@ import java.util.Locale;
+ 
+ import alpine.term.emulator.JNI;
+ import alpine.term.emulator.TerminalSession;
+-import media.player.pro.R;
++import linux.kernel.R;
+ 
+ public class TerminalControllerService extends LibService_Service_Connection {
+ 
+diff --git a/app/src/main/java/alpine/term/TerminalService.java b/app/src/main/java/alpine/term/TerminalService.java
+index 814319c6..121cb2a6 100644
+--- a/app/src/main/java/alpine/term/TerminalService.java
++++ b/app/src/main/java/alpine/term/TerminalService.java
+@@ -46,7 +46,7 @@ import java.util.List;
+ import alpine.term.emulator.JNI;
+ import alpine.term.emulator.TerminalSession;
+ import alpine.term.emulator.TerminalSession.SessionChangedCallback;
+-import media.player.pro.R;
++import linux.kernel.R;
+ 
+ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+ 
+diff --git a/app/src/main/java/alpine/term/terminal_view/TerminalView.java b/app/src/main/java/alpine/term/terminal_view/TerminalView.java
+index 4b0dc43e..61dcfb59 100644
+--- a/app/src/main/java/alpine/term/terminal_view/TerminalView.java
++++ b/app/src/main/java/alpine/term/terminal_view/TerminalView.java
+@@ -62,7 +62,7 @@ import libclient_service.LibService_Messenger;
+ 
+ import alpine.term.Config;
+ import alpine.term.LogUtils;
+-import media.player.pro.R;
++import linux.kernel.R;
+ import alpine.term.emulator.KeyHandler;
+ import alpine.term.emulator.TerminalBuffer;
+ import alpine.term.emulator.TerminalEmulator;
+@@ -1543,4 +1543,4 @@ public final class TerminalView extends View {
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
 diff --git a/app/src/main/java/libengine/AppInstanceAndroidBase.cpp b/app/src/main/java/libengine/AppInstanceAndroidBase.cpp
 new file mode 100644
 index 00000000..3ae626ae
@@ -13305,6 +13435,19 @@ index 00000000..449307bf
 +//     }
 +// }
 \ No newline at end of file
+diff --git a/app/src/test/java/media/player/pro/ExampleUnitTest.kt b/app/src/test/java/linux/kernel/ExampleUnitTest.kt
+similarity index 92%
+rename from app/src/test/java/media/player/pro/ExampleUnitTest.kt
+rename to app/src/test/java/linux/kernel/ExampleUnitTest.kt
+index 28d4d9bc..084a9e19 100644
+--- a/app/src/test/java/media/player/pro/ExampleUnitTest.kt
++++ b/app/src/test/java/linux/kernel/ExampleUnitTest.kt
+@@ -1,4 +1,4 @@
+-package media.player.pro
++package linux.kernel
+ 
+ import org.junit.Test
+ 
 diff --git a/settings.gradle b/settings.gradle
 index f9e92492..cb854736 100644
 --- a/settings.gradle
