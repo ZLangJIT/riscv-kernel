@@ -1,6 +1,6 @@
-From 4590b3f9d06fe533dd1c5270ae49f47dfd0a9a9b Mon Sep 17 00:00:00 2001
+From 5124d8fd99ac67078859a63da4893b06f2874c89 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 13:21:45 +0000
+Date: Sun, 22 Sep 2024 13:32:46 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -111,7 +111,7 @@ Subject: [PATCH 1/1] c
  .../RVVM/.github/workflows/codeql.yml         |   41 +
  app/src/main/java/libengine/RVVM/.gitignore   |   39 +
  .../main/java/libengine/RVVM/.gitlab-ci.yml   |  290 ++
- .../main/java/libengine/RVVM/CMakeLists.txt   |  320 ++
+ .../main/java/libengine/RVVM/CMakeLists.txt   |  326 ++
  app/src/main/java/libengine/RVVM/LICENSE-GPL  |  674 +++
  app/src/main/java/libengine/RVVM/LICENSE-MPL  |  373 ++
  app/src/main/java/libengine/RVVM/Makefile     |  360 ++
@@ -280,7 +280,7 @@ Subject: [PATCH 1/1] c
  .../tool/kit/DiligentEngineView.java          |  189 +
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 276 files changed, 59692 insertions(+), 188 deletions(-)
+ 276 files changed, 59698 insertions(+), 188 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/assets/uboot
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
@@ -18104,10 +18104,10 @@ index 00000000..a2efc6a1
 +    - .core-defs
 diff --git a/app/src/main/java/libengine/RVVM/CMakeLists.txt b/app/src/main/java/libengine/RVVM/CMakeLists.txt
 new file mode 100644
-index 00000000..7092c6d6
+index 00000000..155c952a
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/CMakeLists.txt
-@@ -0,0 +1,320 @@
+@@ -0,0 +1,326 @@
 +# CMake configuration file for those who don't like Make (like I do)
 +# Prev-maintainer: cerg2010cerg2010
 +
@@ -18238,7 +18238,6 @@ index 00000000..7092c6d6
 +
 +# General sources
 +file(GLOB RVVM_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
-+	"${RVVM_SRC_DIR}/*.h"
 +	"${RVVM_SRC_DIR}/*.c"
 +	"${RVVM_SRC_DIR}/cpu/riscv_*.c"
 +)
@@ -18280,7 +18279,6 @@ index 00000000..7092c6d6
 +# RVJIT sources
 +if (RVVM_USE_JIT)
 +	file(GLOB RVVM_RVJIT_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
-+		"${RVVM_SRC_DIR}/rvjit/*.h"
 +		"${RVVM_SRC_DIR}/rvjit/*.c"
 +	)
 +	list(APPEND RVVM_SRC ${RVVM_RVJIT_SRC})
@@ -18289,7 +18287,6 @@ index 00000000..7092c6d6
 +
 +# Device sources
 +file(GLOB RVVM_DEVICES_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
-+	"${RVVM_SRC_DIR}/devices/*.h"
 +	"${RVVM_SRC_DIR}/devices/*.c"
 +)
 +set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
@@ -18383,6 +18380,9 @@ index 00000000..7092c6d6
 +add_library(rvvm_static STATIC $<TARGET_OBJECTS:rvvm_objlib>)
 +target_link_libraries(rvvm_static PRIVATE rvvm_common)
 +set_target_properties(rvvm_static PROPERTIES PREFIX "lib")
++target_include_directories(rvvm_static PRIVATE ${RVVM_SRC_DIR})
++target_include_directories(rvvm_static PRIVATE ${RVVM_SRC_DIR}/rvjit)
++target_include_directories(rvvm_static PRIVATE ${RVVM_SRC_DIR}/devices)
 +
 +if (NOT BUILD_LIBRETRO)
 +	# Shared library target
@@ -18393,6 +18393,9 @@ index 00000000..7092c6d6
 +		add_library(rvvm SHARED $<TARGET_OBJECTS:rvvm_objlib>)
 +		target_link_libraries(rvvm PRIVATE rvvm_common)
 +		set_target_properties(rvvm PROPERTIES PREFIX "lib")
++    target_include_directories(rvvm PRIVATE ${RVVM_SRC_DIR})
++    target_include_directories(rvvm PRIVATE ${RVVM_SRC_DIR}/rvjit)
++    target_include_directories(rvvm PRIVATE ${RVVM_SRC_DIR}/devices)
 +	endif()
 +
 +	# Main executable
@@ -18400,6 +18403,9 @@ index 00000000..7092c6d6
 +	target_link_libraries(rvvm_cli PUBLIC rvvm_static)
 +	target_link_libraries(rvvm_cli PRIVATE rvvm_common)
 +	set_target_properties(rvvm_cli PROPERTIES OUTPUT_NAME rvvm)
++  target_include_directories(rvvm_cli PRIVATE ${RVVM_SRC_DIR})
++  target_include_directories(rvvm_cli PRIVATE ${RVVM_SRC_DIR}/rvjit)
++  target_include_directories(rvvm_cli PRIVATE ${RVVM_SRC_DIR}/devices)
 +else()
 +	# libretro core
 +	set(RVVM_LIBRETRO_SRC "${RVVM_SRC_DIR}/bindings/libretro/libretro.c")
