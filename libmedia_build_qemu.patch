@@ -1,6 +1,6 @@
-From 5124d8fd99ac67078859a63da4893b06f2874c89 Mon Sep 17 00:00:00 2001
+From 9da90f0642633650044e74cd255f461bbe0c3c08 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 13:32:46 +0000
+Date: Sun, 22 Sep 2024 14:00:33 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -111,7 +111,7 @@ Subject: [PATCH 1/1] c
  .../RVVM/.github/workflows/codeql.yml         |   41 +
  app/src/main/java/libengine/RVVM/.gitignore   |   39 +
  .../main/java/libengine/RVVM/.gitlab-ci.yml   |  290 ++
- .../main/java/libengine/RVVM/CMakeLists.txt   |  326 ++
+ .../main/java/libengine/RVVM/CMakeLists.txt   |  317 ++
  app/src/main/java/libengine/RVVM/LICENSE-GPL  |  674 +++
  app/src/main/java/libengine/RVVM/LICENSE-MPL  |  373 ++
  app/src/main/java/libengine/RVVM/Makefile     |  360 ++
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
  .../src/bindings/jni/lekkit/rvvm/Syscon.java  |   16 +
  .../RVVM/src/bindings/jni/rvvm_jni.c          |  487 ++
  .../RVVM/src/bindings/jni/tiny-jni.h          |  717 +++
- .../RVVM/src/bindings/libretro/libretro.c     |  540 +++
+ .../RVVM/src/bindings/libretro/libretro.c     |  539 +++
  .../RVVM/src/bindings/libretro/libretro.h     | 3964 +++++++++++++++++
  .../src/bindings/libretro/rvvm_libretro.info  |   24 +
  .../main/java/libengine/RVVM/src/bit_ops.h    |  377 ++
@@ -280,7 +280,7 @@ Subject: [PATCH 1/1] c
  .../tool/kit/DiligentEngineView.java          |  189 +
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 276 files changed, 59698 insertions(+), 188 deletions(-)
+ 276 files changed, 59688 insertions(+), 188 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/assets/uboot
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
@@ -18104,10 +18104,10 @@ index 00000000..a2efc6a1
 +    - .core-defs
 diff --git a/app/src/main/java/libengine/RVVM/CMakeLists.txt b/app/src/main/java/libengine/RVVM/CMakeLists.txt
 new file mode 100644
-index 00000000..155c952a
+index 00000000..2a8d1b10
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/CMakeLists.txt
-@@ -0,0 +1,326 @@
+@@ -0,0 +1,317 @@
 +# CMake configuration file for those who don't like Make (like I do)
 +# Prev-maintainer: cerg2010cerg2010
 +
@@ -18380,9 +18380,6 @@ index 00000000..155c952a
 +add_library(rvvm_static STATIC $<TARGET_OBJECTS:rvvm_objlib>)
 +target_link_libraries(rvvm_static PRIVATE rvvm_common)
 +set_target_properties(rvvm_static PROPERTIES PREFIX "lib")
-+target_include_directories(rvvm_static PRIVATE ${RVVM_SRC_DIR})
-+target_include_directories(rvvm_static PRIVATE ${RVVM_SRC_DIR}/rvjit)
-+target_include_directories(rvvm_static PRIVATE ${RVVM_SRC_DIR}/devices)
 +
 +if (NOT BUILD_LIBRETRO)
 +	# Shared library target
@@ -18393,9 +18390,6 @@ index 00000000..155c952a
 +		add_library(rvvm SHARED $<TARGET_OBJECTS:rvvm_objlib>)
 +		target_link_libraries(rvvm PRIVATE rvvm_common)
 +		set_target_properties(rvvm PROPERTIES PREFIX "lib")
-+    target_include_directories(rvvm PRIVATE ${RVVM_SRC_DIR})
-+    target_include_directories(rvvm PRIVATE ${RVVM_SRC_DIR}/rvjit)
-+    target_include_directories(rvvm PRIVATE ${RVVM_SRC_DIR}/devices)
 +	endif()
 +
 +	# Main executable
@@ -18403,9 +18397,6 @@ index 00000000..155c952a
 +	target_link_libraries(rvvm_cli PUBLIC rvvm_static)
 +	target_link_libraries(rvvm_cli PRIVATE rvvm_common)
 +	set_target_properties(rvvm_cli PROPERTIES OUTPUT_NAME rvvm)
-+  target_include_directories(rvvm_cli PRIVATE ${RVVM_SRC_DIR})
-+  target_include_directories(rvvm_cli PRIVATE ${RVVM_SRC_DIR}/rvjit)
-+  target_include_directories(rvvm_cli PRIVATE ${RVVM_SRC_DIR}/devices)
 +else()
 +	# libretro core
 +	set(RVVM_LIBRETRO_SRC "${RVVM_SRC_DIR}/bindings/libretro/libretro.c")
@@ -22018,30 +22009,30 @@ index 00000000..d913a35b
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/bindings/jni/rvvm_jni.c b/app/src/main/java/libengine/RVVM/src/bindings/jni/rvvm_jni.c
 new file mode 100644
-index 00000000..dcc7c54f
+index 00000000..2dad9f1c
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/bindings/jni/rvvm_jni.c
 @@ -0,0 +1,487 @@
 +#include "tiny-jni.h"
-+#include "compiler.h"
-+#include "utils.h"
-+#include "spinlock.h"
++#include "../../compiler.h"
++#include "../../utils.h"
++#include "../../spinlock.h"
 +
-+#include "rvvmlib.h"
++#include "../../rvvmlib.h"
 +
-+#include "devices/clint.h"
-+#include "devices/plic.h"
-+#include "devices/pci-bus.h"
-+#include "devices/i2c-oc.h"
-+#include "devices/ns16550a.h"
-+#include "devices/rtc-goldfish.h"
-+#include "devices/syscon.h"
-+#include "devices/rtl8169.h"
-+#include "devices/nvme.h"
-+#include "devices/mtd-physmap.h"
-+#include "devices/framebuffer.h"
-+#include "devices/hid_api.h"
-+#include "devices/gpio-sifive.h"
++#include "../../devices/clint.h"
++#include "../../devices/plic.h"
++#include "../../devices/pci-bus.h"
++#include "../../devices/i2c-oc.h"
++#include "../../devices/ns16550a.h"
++#include "../../devices/rtc-goldfish.h"
++#include "../../devices/syscon.h"
++#include "../../devices/rtl8169.h"
++#include "../../devices/nvme.h"
++#include "../../devices/mtd-physmap.h"
++#include "../../devices/framebuffer.h"
++#include "../../devices/hid_api.h"
++#include "../../devices/gpio-sifive.h"
 +
 +PUSH_OPTIMIZATION_SIZE
 +
@@ -23234,10 +23225,10 @@ index 00000000..ada30a54
 +#endif /* !_JAVASOFT_JNI_H_ */
 diff --git a/app/src/main/java/libengine/RVVM/src/bindings/libretro/libretro.c b/app/src/main/java/libengine/RVVM/src/bindings/libretro/libretro.c
 new file mode 100644
-index 00000000..8ce04e33
+index 00000000..69d86a36
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/bindings/libretro/libretro.c
-@@ -0,0 +1,540 @@
+@@ -0,0 +1,539 @@
 +/*
 +libretro.c - RVVM libretro core
 +Copyright (C) 2023  宋文武 <iyzsong@envs.net>
@@ -23266,21 +23257,20 @@ index 00000000..8ce04e33
 +#include "libretro.h"
 +
 +// RVVM headers
-+#include "rvvmlib.h"
-+#include "utils.h"
-+#include "devices/clint.h"
-+#include "devices/plic.h"
-+#include "devices/syscon.h"
-+#include "devices/rtc-goldfish.h"
-+#include "devices/pci-bus.h"
-+#include "devices/nvme.h"
-+#include "devices/framebuffer.h"
-+#include "devices/i2c-oc.h"
-+#include "devices/hid_api.h"
-+#include "devices/ns16550a.h"
-+#include "devices/chardev.h"
-+#include "devices/rtl8169.h"
-+
++#include "../../rvvmlib.h"
++#include "../../utils.h"
++#include "../../devices/clint.h"
++#include "../../devices/plic.h"
++#include "../../devices/syscon.h"
++#include "../../devices/rtc-goldfish.h"
++#include "../../devices/pci-bus.h"
++#include "../../devices/nvme.h"
++#include "../../devices/framebuffer.h"
++#include "../../devices/i2c-oc.h"
++#include "../../devices/hid_api.h"
++#include "../../devices/ns16550a.h"
++#include "../../devices/chardev.h"
++#include "../../devices/rtl8169.h"
 +
 +static void fallback_log(enum retro_log_level level, const char *fmt, ...);
 +static retro_log_printf_t log_cb = fallback_log;
@@ -29072,7 +29062,7 @@ index 00000000..ddf5667e
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/cpu/fpu_lib.h b/app/src/main/java/libengine/RVVM/src/cpu/fpu_lib.h
 new file mode 100644
-index 00000000..6b6f9a3b
+index 00000000..93c1014f
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/cpu/fpu_lib.h
 @@ -0,0 +1,266 @@
@@ -29095,10 +29085,10 @@ index 00000000..6b6f9a3b
 +#ifndef RVVM_FPU_LIB_H
 +#define RVVM_FPU_LIB_H
 +
-+#include "compiler.h"
-+#include "fpu_ops.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
++#include "../compiler.h"
++#include "../fpu_ops.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
 +
 +/* well... */
 +#if defined(_WIN32) && defined(__clang__)
@@ -29344,7 +29334,7 @@ index 00000000..6b6f9a3b
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/cpu/riscv64_interpreter.c b/app/src/main/java/libengine/RVVM/src/cpu/riscv64_interpreter.c
 new file mode 100644
-index 00000000..1d9781c7
+index 00000000..c99dd637
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/cpu/riscv64_interpreter.c
 @@ -0,0 +1,26 @@
@@ -29367,7 +29357,7 @@ index 00000000..1d9781c7
 +#define RV64
 +#define riscv_run_interpreter riscv64_run_interpreter
 +
-+#include "compiler.h"
++#include "../compiler.h"
 +
 +// The interpreter is faster on GCC with -O3 optimization for whatever reason.
 +// This overrides the optimization level set for the whole codebase
@@ -29596,7 +29586,7 @@ index 00000000..00470ca7
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/cpu/riscv_base.h b/app/src/main/java/libengine/RVVM/src/cpu/riscv_base.h
 new file mode 100644
-index 00000000..d160dfa5
+index 00000000..574fb910
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/cpu/riscv_base.h
 @@ -0,0 +1,968 @@
@@ -29619,7 +29609,7 @@ index 00000000..d160dfa5
 +#ifndef RISCV_BASE_H
 +#define RISCV_BASE_H
 +
-+#include "riscv_priv.h"
++#include "../riscv_priv.h"
 +#include "riscv_atomics.h"
 +
 +#ifdef USE_FPU
@@ -31892,7 +31882,7 @@ index 00000000..171dd343
 +#include "riscv_interpreter.h"
 diff --git a/app/src/main/java/libengine/RVVM/src/cpu/riscv_interpreter.h b/app/src/main/java/libengine/RVVM/src/cpu/riscv_interpreter.h
 new file mode 100644
-index 00000000..bd225e23
+index 00000000..bf3bb5a4
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/cpu/riscv_interpreter.h
 @@ -0,0 +1,118 @@
@@ -31915,13 +31905,13 @@ index 00000000..bd225e23
 +#ifndef RISCV_INTERPRETER_H
 +#define RISCV_INTERPRETER_H
 +
-+#include "rvvm.h"
-+#include "riscv_cpu.h"
-+#include "riscv_hart.h"
-+#include "riscv_mmu.h"
++#include "../rvvm.h"
++#include "../riscv_cpu.h"
++#include "../riscv_hart.h"
++#include "../riscv_mmu.h"
 +#include "riscv_jit.h"
-+#include "compiler.h"
-+#include "bit_ops.h"
++#include "../compiler.h"
++#include "../bit_ops.h"
 +
 +/*
 + * Interpreter helpers
@@ -32016,7 +32006,7 @@ index 00000000..bd225e23
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/cpu/riscv_jit.h b/app/src/main/java/libengine/RVVM/src/cpu/riscv_jit.h
 new file mode 100644
-index 00000000..267ad1ba
+index 00000000..5015c947
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/cpu/riscv_jit.h
 @@ -0,0 +1,408 @@
@@ -32043,7 +32033,7 @@ index 00000000..267ad1ba
 +
 +#if defined(USE_JIT) && (!defined(RV64) || defined(RVJIT_NATIVE_64BIT))
 +
-+#include "rvjit/rvjit_emit.h"
++#include "../rvjit/rvjit_emit.h"
 +
 +// Block unrolling configuration
 +#define UNROLL_MAX_BLOCK_SIZE 256
@@ -32430,7 +32420,7 @@ index 00000000..267ad1ba
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ata.c b/app/src/main/java/libengine/RVVM/src/devices/ata.c
 new file mode 100644
-index 00000000..6c34fe83
+index 00000000..9d99862c
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ata.c
 @@ -0,0 +1,865 @@
@@ -32454,13 +32444,13 @@ index 00000000..6c34fe83
 +*/
 +
 +#include "ata.h"
-+#include "blk_io.h"
-+#include "bit_ops.h"
-+#include "mem_ops.h"
-+#include "spinlock.h"
-+#include "utils.h"
-+#include "threading.h"
-+#include "fdtlib.h"
++#include "../blk_io.h"
++#include "../bit_ops.h"
++#include "../mem_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
++#include "../threading.h"
++#include "../fdtlib.h"
 +
 +// Data registers
 +#define ATA_REG_DATA   0x00
@@ -33301,7 +33291,7 @@ index 00000000..6c34fe83
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ata.h b/app/src/main/java/libengine/RVVM/src/devices/ata.h
 new file mode 100644
-index 00000000..4d63d807
+index 00000000..1a076a38
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ata.h
 @@ -0,0 +1,34 @@
@@ -33327,7 +33317,7 @@ index 00000000..4d63d807
 +#ifndef RVVM_ATA_H
 +#define RVVM_ATA_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "pci-bus.h"
 +
 +#define ATA_DATA_DEFAULT_MMIO 0x40000000
@@ -33341,7 +33331,7 @@ index 00000000..4d63d807
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/chardev.h b/app/src/main/java/libengine/RVVM/src/devices/chardev.h
 new file mode 100644
-index 00000000..ac5f3b10
+index 00000000..ca5556ce
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/chardev.h
 @@ -0,0 +1,91 @@
@@ -33367,7 +33357,7 @@ index 00000000..ac5f3b10
 +#ifndef RVVM_CHARDEV_H
 +#define RVVM_CHARDEV_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +/*
 + * IO Device - UART (or else) owning the chardev
@@ -33438,7 +33428,7 @@ index 00000000..ac5f3b10
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/chardev_term.c b/app/src/main/java/libengine/RVVM/src/devices/chardev_term.c
 new file mode 100644
-index 00000000..b98a5441
+index 00000000..4555905d
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/chardev_term.c
 @@ -0,0 +1,302 @@
@@ -33489,11 +33479,11 @@ index 00000000..b98a5441
 +#endif
 +
 +// RVVM internal headers come after system headers because of safe_free()
-+#include "spinlock.h"
-+#include "rvtimer.h"
-+#include "ringbuf.h"
-+#include "utils.h"
-+#include "mem_ops.h"
++#include "../spinlock.h"
++#include "../rvtimer.h"
++#include "../ringbuf.h"
++#include "../utils.h"
++#include "../mem_ops.h"
 +
 +#if defined(POSIX_TERM_IMPL)
 +static struct termios orig_term_opts = {0};
@@ -33746,7 +33736,7 @@ index 00000000..b98a5441
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/clint.c b/app/src/main/java/libengine/RVVM/src/devices/clint.c
 new file mode 100644
-index 00000000..c48f3ed7
+index 00000000..b39af3d9
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/clint.c
 @@ -0,0 +1,168 @@
@@ -33769,9 +33759,9 @@ index 00000000..c48f3ed7
 +*/
 +
 +#include "clint.h"
-+#include "riscv_hart.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
++#include "../riscv_hart.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
 +
 +#define CLINT_MMIO_SIZE    0x10000
 +#define ACLINT_MSWI_SIZE   0x4000
@@ -33920,7 +33910,7 @@ index 00000000..c48f3ed7
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/clint.h b/app/src/main/java/libengine/RVVM/src/devices/clint.h
 new file mode 100644
-index 00000000..d09ccd5f
+index 00000000..f945125b
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/clint.h
 @@ -0,0 +1,29 @@
@@ -33945,7 +33935,7 @@ index 00000000..d09ccd5f
 +#ifndef CLINT_H
 +#define CLINT_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +#define CLINT_DEFAULT_MMIO 0x2000000
 +
@@ -33955,7 +33945,7 @@ index 00000000..d09ccd5f
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/eth-oc.c b/app/src/main/java/libengine/RVVM/src/devices/eth-oc.c
 new file mode 100644
-index 00000000..abf66dd5
+index 00000000..434e255e
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/eth-oc.c
 @@ -0,0 +1,564 @@
@@ -33982,12 +33972,12 @@ index 00000000..abf66dd5
 +
 +#include "eth-oc.h"
 +#include "tap_api.h"
-+#include "mem_ops.h"
-+#include "spinlock.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
 +
 +#ifdef USE_FDT
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#endif
 +
 +// Device registers
@@ -34525,7 +34515,7 @@ index 00000000..abf66dd5
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/eth-oc.h b/app/src/main/java/libengine/RVVM/src/devices/eth-oc.h
 new file mode 100644
-index 00000000..3c021dc3
+index 00000000..0bd0b3ce
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/eth-oc.h
 @@ -0,0 +1,33 @@
@@ -34551,7 +34541,7 @@ index 00000000..3c021dc3
 +#ifndef ETH_OC_H
 +#define ETH_OC_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "plic.h"
 +#include "tap_api.h"
 +
@@ -34564,7 +34554,7 @@ index 00000000..3c021dc3
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/framebuffer.c b/app/src/main/java/libengine/RVVM/src/devices/framebuffer.c
 new file mode 100644
-index 00000000..cce9f036
+index 00000000..3d41f80a
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/framebuffer.c
 @@ -0,0 +1,83 @@
@@ -34587,7 +34577,7 @@ index 00000000..cce9f036
 +*/
 +
 +#include "framebuffer.h"
-+#include "utils.h"
++#include "../utils.h"
 +
 +#ifdef USE_FDT
 +#include "fdtlib.h"
@@ -34653,7 +34643,7 @@ index 00000000..cce9f036
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/framebuffer.h b/app/src/main/java/libengine/RVVM/src/devices/framebuffer.h
 new file mode 100644
-index 00000000..a394fcd4
+index 00000000..5748915e
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/framebuffer.h
 @@ -0,0 +1,98 @@
@@ -34678,7 +34668,7 @@ index 00000000..a394fcd4
 +#ifndef RVVM_FRAMEBUFFER_H
 +#define RVVM_FRAMEBUFFER_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +#define RGB_FMT_INVALID  0x0
 +#define RGB_FMT_R5G6B5   0x02
@@ -34757,7 +34747,7 @@ index 00000000..a394fcd4
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.c b/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.c
 new file mode 100644
-index 00000000..963cdf36
+index 00000000..aba0ceeb
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.c
 @@ -0,0 +1,331 @@
@@ -34781,8 +34771,8 @@ index 00000000..963cdf36
 +
 +#include "gpio-sifive.h"
 +#include "plic.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +#include "fdtlib.h"
 +
 +// See https://static.dev.sifive.com/FU540-C000-v1.0.pdf
@@ -35094,7 +35084,7 @@ index 00000000..963cdf36
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.h b/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.h
 new file mode 100644
-index 00000000..79afe4c2
+index 00000000..9a619fc4
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.h
 @@ -0,0 +1,34 @@
@@ -35119,7 +35109,7 @@ index 00000000..79afe4c2
 +#ifndef RVVM_GPIO_SIFIVE_H
 +#define RVVM_GPIO_SIFIVE_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "gpio_api.h"
 +
 +#define GPIO_SIFIVE_PINS 32
@@ -35208,7 +35198,7 @@ index 00000000..8cef5021
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/gui_window.c b/app/src/main/java/libengine/RVVM/src/devices/gui_window.c
 new file mode 100644
-index 00000000..ca80d72d
+index 00000000..bbd9774a
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/gui_window.c
 @@ -0,0 +1,292 @@
@@ -35231,8 +35221,8 @@ index 00000000..ca80d72d
 +*/
 +
 +#include "gui_window.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +
 +#ifdef USE_GUI
 +
@@ -35577,7 +35567,7 @@ index 00000000..4a982f9c
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/haiku_window.cpp b/app/src/main/java/libengine/RVVM/src/devices/haiku_window.cpp
 new file mode 100644
-index 00000000..c5966e02
+index 00000000..9ee56797
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/haiku_window.cpp
 @@ -0,0 +1,360 @@
@@ -35602,7 +35592,7 @@ index 00000000..c5966e02
 +
 +extern "C" {
 +#include "gui_window.h"
-+#include "utils.h"
++#include "../utils.h"
 +}
 +
 +#include <Application.h>
@@ -35943,7 +35933,7 @@ index 00000000..c5966e02
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/hid-keyboard.c b/app/src/main/java/libengine/RVVM/src/devices/hid-keyboard.c
 new file mode 100644
-index 00000000..c9dabfc6
+index 00000000..c4d41650
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/hid-keyboard.c
 @@ -0,0 +1,204 @@
@@ -35967,10 +35957,10 @@ index 00000000..c9dabfc6
 +
 +#include "i2c-hid.h"
 +#include "hid_api.h"
-+#include "spinlock.h"
-+#include "utils.h"
-+#include "bit_ops.h"
-+#include "mem_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
++#include "../bit_ops.h"
++#include "../mem_ops.h"
 +
 +#define MAX_PRESSED_KEYS 6
 +
@@ -36153,7 +36143,7 @@ index 00000000..c9dabfc6
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/hid-mouse.c b/app/src/main/java/libengine/RVVM/src/devices/hid-mouse.c
 new file mode 100644
-index 00000000..66cdf05e
+index 00000000..bfcc12b2
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/hid-mouse.c
 @@ -0,0 +1,315 @@
@@ -36177,9 +36167,9 @@ index 00000000..66cdf05e
 +
 +#include "i2c-hid.h"
 +#include "hid_api.h"
-+#include "spinlock.h"
-+#include "utils.h"
-+#include "bit_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
++#include "../bit_ops.h"
 +
 +static const uint8_t mouse_hid_report_descriptor[] = {
 +    0x05, 0x01,     /* Usage Page (Generic Desktop) */
@@ -36474,7 +36464,7 @@ index 00000000..66cdf05e
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/hid_api.h b/app/src/main/java/libengine/RVVM/src/devices/hid_api.h
 new file mode 100644
-index 00000000..2fbaaa4f
+index 00000000..994b0817
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/hid_api.h
 @@ -0,0 +1,289 @@
@@ -36499,7 +36489,7 @@ index 00000000..2fbaaa4f
 +#ifndef RVVM_HID_API_H
 +#define RVVM_HID_API_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +//! Keyboard key
 +typedef uint8_t hid_key_t;
@@ -36837,7 +36827,7 @@ index 00000000..4feea224
 +#endif    // RVVM_HID_DEV_H
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.c b/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.c
 new file mode 100644
-index 00000000..dd6a809a
+index 00000000..f3e16ab5
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.c
 @@ -0,0 +1,425 @@
@@ -36863,9 +36853,9 @@ index 00000000..dd6a809a
 +#include "hid_api.h"
 +#include "i2c-oc.h"
 +#include "plic.h"
-+#include "spinlock.h"
-+#include "utils.h"
-+#include "bit_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
++#include "../bit_ops.h"
 +
 +#include <stdio.h>
 +
@@ -37268,7 +37258,7 @@ index 00000000..dd6a809a
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.h b/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.h
 new file mode 100644
-index 00000000..6241362d
+index 00000000..f94872d7
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.h
 @@ -0,0 +1,27 @@
@@ -37294,14 +37284,14 @@ index 00000000..6241362d
 +#define _I2C_HID_H_
 +
 +#include "hid_dev.h"
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +PUBLIC void i2c_hid_init_auto(rvvm_machine_t* machine, hid_dev_t* hid_dev);
 +
 +#endif  // _I2C_HID_H_
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.c b/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.c
 new file mode 100644
-index 00000000..bee4c976
+index 00000000..a00a8deb
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.c
 @@ -0,0 +1,276 @@
@@ -37325,10 +37315,10 @@ index 00000000..bee4c976
 +
 +#include "i2c-oc.h"
 +#include "plic.h"
-+#include "spinlock.h"
-+#include "vector.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../spinlock.h"
++#include "../vector.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +
 +#ifdef USE_FDT
 +#include "fdtlib.h"
@@ -37583,7 +37573,7 @@ index 00000000..bee4c976
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.h b/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.h
 new file mode 100644
-index 00000000..5113c5e3
+index 00000000..cfdc0949
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.h
 @@ -0,0 +1,54 @@
@@ -37608,7 +37598,7 @@ index 00000000..5113c5e3
 +#ifndef RVVM_I2C_OC_H
 +#define RVVM_I2C_OC_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +#define I2C_OC_DEFAULT_MMIO 0x10030000
 +
@@ -37643,7 +37633,7 @@ index 00000000..5113c5e3
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.c b/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.c
 new file mode 100644
-index 00000000..f4180801
+index 00000000..51df86ba
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.c
 @@ -0,0 +1,106 @@
@@ -37666,9 +37656,9 @@ index 00000000..f4180801
 +*/
 +
 +#include "mtd-physmap.h"
-+#include "blk_io.h"
++#include "../blk_io.h"
 +#include "fdtlib.h"
-+#include "utils.h"
++#include "../utils.h"
 +
 +typedef struct {
 +    blkdev_t* blk;
@@ -37755,7 +37745,7 @@ index 00000000..f4180801
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.h b/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.h
 new file mode 100644
-index 00000000..5ffa019e
+index 00000000..a69de2a0
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.h
 @@ -0,0 +1,36 @@
@@ -37780,7 +37770,7 @@ index 00000000..5ffa019e
 +#ifndef RVVM_MTD_PHYSMAP_H
 +#define RVVM_MTD_PHYSMAP_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +/*
 + * The main purpose of this device is to allow guests to flash
@@ -37797,7 +37787,7 @@ index 00000000..5ffa019e
 +
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ns16550a.c b/app/src/main/java/libengine/RVVM/src/devices/ns16550a.c
 new file mode 100644
-index 00000000..60f7471d
+index 00000000..febbc231
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ns16550a.c
 @@ -0,0 +1,258 @@
@@ -37822,9 +37812,9 @@ index 00000000..60f7471d
 +
 +#include "ns16550a.h"
 +#include "chardev.h"
-+#include "spinlock.h"
-+#include "utils.h"
-+#include "mem_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
++#include "../mem_ops.h"
 +
 +#ifdef USE_FDT
 +#include "fdtlib.h"
@@ -38061,7 +38051,7 @@ index 00000000..60f7471d
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ns16550a.h b/app/src/main/java/libengine/RVVM/src/devices/ns16550a.h
 new file mode 100644
-index 00000000..9c9f95bb
+index 00000000..14a947d3
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ns16550a.h
 @@ -0,0 +1,34 @@
@@ -38087,7 +38077,7 @@ index 00000000..9c9f95bb
 +#ifndef RVVM_NS16550A_H
 +#define RVVM_NS16550A_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "plic.h"
 +#include "chardev.h"
 +
@@ -38101,7 +38091,7 @@ index 00000000..9c9f95bb
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/nvme.c b/app/src/main/java/libengine/RVVM/src/devices/nvme.c
 new file mode 100644
-index 00000000..90658c38
+index 00000000..1e718b7e
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/nvme.c
 @@ -0,0 +1,621 @@
@@ -38124,14 +38114,14 @@ index 00000000..90658c38
 +*/
 +
 +#include "nvme.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
-+#include "utils.h"
-+#include "spinlock.h"
-+#include "atomics.h"
-+#include "threading.h"
-+#include "blk_io.h"
-+#include "rvtimer.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
++#include "../utils.h"
++#include "../spinlock.h"
++#include "../atomics.h"
++#include "../threading.h"
++#include "../blk_io.h"
++#include "../rvtimer.h"
 +
 +// Controller Registers
 +#define NVME_CAP1  0x0   // Controller Capabilities
@@ -38728,7 +38718,7 @@ index 00000000..90658c38
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/nvme.h b/app/src/main/java/libengine/RVVM/src/devices/nvme.h
 new file mode 100644
-index 00000000..2ae27516
+index 00000000..3522d0b6
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/nvme.h
 @@ -0,0 +1,29 @@
@@ -38753,7 +38743,7 @@ index 00000000..2ae27516
 +#ifndef NVME_H
 +#define NVME_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "pci-bus.h"
 +
 +PUBLIC pci_dev_t* nvme_init_blk(pci_bus_t* pci_bus, void* blk_dev);
@@ -38763,7 +38753,7 @@ index 00000000..2ae27516
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/pci-bus.c b/app/src/main/java/libengine/RVVM/src/devices/pci-bus.c
 new file mode 100644
-index 00000000..63f14964
+index 00000000..84931c6c
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/pci-bus.c
 @@ -0,0 +1,489 @@
@@ -38788,10 +38778,10 @@ index 00000000..63f14964
 +
 +#include "pci-bus.h"
 +#include "fdtlib.h"
-+#include "utils.h"
-+#include "atomics.h"
-+#include "bit_ops.h"
-+#include "mem_ops.h"
++#include "../utils.h"
++#include "../atomics.h"
++#include "../bit_ops.h"
++#include "../mem_ops.h"
 +
 +#define PCI_REG_DEV_VEN_ID    0x0
 +#define PCI_REG_STATUS_CMD    0x4
@@ -39258,7 +39248,7 @@ index 00000000..63f14964
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/pci-bus.h b/app/src/main/java/libengine/RVVM/src/devices/pci-bus.h
 new file mode 100644
-index 00000000..f66635b3
+index 00000000..f6e2384b
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/pci-bus.h
 @@ -0,0 +1,84 @@
@@ -39284,7 +39274,7 @@ index 00000000..f66635b3
 +#ifndef PCI_BUS_H
 +#define PCI_BUS_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "plic.h"
 +
 +#define PCI_IRQ_PIN_INTA 1
@@ -39348,7 +39338,7 @@ index 00000000..f66635b3
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/pci-vfio.c b/app/src/main/java/libengine/RVVM/src/devices/pci-vfio.c
 new file mode 100644
-index 00000000..05178b10
+index 00000000..50c4f654
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/pci-vfio.c
 @@ -0,0 +1,435 @@
@@ -39376,10 +39366,10 @@ index 00000000..05178b10
 +#define _DEFAULT_SOURCE
 +
 +#include "pci-vfio.h"
-+#include "compiler.h"
-+#include "threading.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../compiler.h"
++#include "../threading.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +
 +// Check that <linux/vfio.h> include is available
 +#if defined(__linux__) && defined(USE_VFIO) && !CHECK_INCLUDE(linux/vfio.h)
@@ -39821,7 +39811,7 @@ index 00000000..2e15d82e
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/plic.c b/app/src/main/java/libengine/RVVM/src/devices/plic.c
 new file mode 100644
-index 00000000..24225949
+index 00000000..d26436a2
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/plic.c
 @@ -0,0 +1,466 @@
@@ -39845,10 +39835,10 @@ index 00000000..24225949
 +*/
 +
 +#include "plic.h"
-+#include "riscv_hart.h"
-+#include "bit_ops.h"
-+#include "mem_ops.h"
-+#include "atomics.h"
++#include "../riscv_hart.h"
++#include "../bit_ops.h"
++#include "../mem_ops.h"
++#include "../atomics.h"
 +
 +#define PLIC_CTXFLAG_THRESHOLD     0x0
 +#define PLIC_CTXFLAG_CLAIMCOMPLETE 0x1
@@ -40293,7 +40283,7 @@ index 00000000..24225949
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/plic.h b/app/src/main/java/libengine/RVVM/src/devices/plic.h
 new file mode 100644
-index 00000000..6004e652
+index 00000000..8fc2f6a2
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/plic.h
 @@ -0,0 +1,43 @@
@@ -40319,7 +40309,7 @@ index 00000000..6004e652
 +#ifndef RVVM_PLIC_H
 +#define RVVM_PLIC_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +#define PLIC_DEFAULT_MMIO 0xC000000
 +
@@ -40342,7 +40332,7 @@ index 00000000..6004e652
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.c b/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.c
 new file mode 100644
-index 00000000..ad2dcb80
+index 00000000..21920a60
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.c
 @@ -0,0 +1,143 @@
@@ -40365,9 +40355,9 @@ index 00000000..ad2dcb80
 +*/
 +
 +#include "ps2-altera.h"
-+#include "mem_ops.h"
-+#include "atomics.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../atomics.h"
++#include "../utils.h"
 +#include "fdtlib.h"
 +
 +#define ALTERA_REG_DATA 0x0
@@ -40491,7 +40481,7 @@ index 00000000..ad2dcb80
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.h b/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.h
 new file mode 100644
-index 00000000..29576664
+index 00000000..eaba76fd
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.h
 @@ -0,0 +1,30 @@
@@ -40516,7 +40506,7 @@ index 00000000..29576664
 +#ifndef PS2_ALTERA_H
 +#define PS2_ALTERA_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "plic.h"
 +#include "chardev.h"
 +
@@ -40527,7 +40517,7 @@ index 00000000..29576664
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ps2-keyboard.c b/app/src/main/java/libengine/RVVM/src/devices/ps2-keyboard.c
 new file mode 100644
-index 00000000..858e7e35
+index 00000000..0883b95d
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ps2-keyboard.c
 @@ -0,0 +1,484 @@
@@ -40552,11 +40542,11 @@ index 00000000..858e7e35
 +
 +#include "ps2-altera.h"
 +#include "hid_api.h"
-+#include "ringbuf.h"
-+#include "rvtimer.h"
-+#include "spinlock.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../ringbuf.h"
++#include "../rvtimer.h"
++#include "../spinlock.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +
 +#define PS2_CMD_RESET 0xFF
 +#define PS2_CMD_RESEND 0xFE
@@ -41017,7 +41007,7 @@ index 00000000..858e7e35
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ps2-mouse.c b/app/src/main/java/libengine/RVVM/src/devices/ps2-mouse.c
 new file mode 100644
-index 00000000..4836a150
+index 00000000..9067cf59
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ps2-mouse.c
 @@ -0,0 +1,381 @@
@@ -41042,9 +41032,9 @@ index 00000000..4836a150
 +
 +#include "ps2-altera.h"
 +#include "hid_api.h"
-+#include "ringbuf.h"
-+#include "spinlock.h"
-+#include "utils.h"
++#include "../ringbuf.h"
++#include "../spinlock.h"
++#include "../utils.h"
 +
 +#define PS2_CMD_RESET 0xFF
 +#define PS2_CMD_RESEND 0xFE
@@ -41404,7 +41394,7 @@ index 00000000..4836a150
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.c b/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.c
 new file mode 100644
-index 00000000..3bbf34ed
+index 00000000..023b3a10
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.c
 @@ -0,0 +1,120 @@
@@ -41427,8 +41417,8 @@ index 00000000..3bbf34ed
 +*/
 +
 +#include "rtc-ds1742.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +#include "fdtlib.h"
 +#include <time.h>
 +
@@ -41530,7 +41520,7 @@ index 00000000..3bbf34ed
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.h b/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.h
 new file mode 100644
-index 00000000..5d06a616
+index 00000000..45f2ed83
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.h
 @@ -0,0 +1,30 @@
@@ -41555,7 +41545,7 @@ index 00000000..5d06a616
 +#ifndef RVVM_RTC_DS1742_H
 +#define RVVM_RTC_DS1742_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +#define RTC_DS1742_DEFAULT_MMIO 0x101000
 +
@@ -41566,7 +41556,7 @@ index 00000000..5d06a616
 +
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.c b/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.c
 new file mode 100644
-index 00000000..b3e9a496
+index 00000000..fd3a1884
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.c
 @@ -0,0 +1,144 @@
@@ -41589,8 +41579,8 @@ index 00000000..b3e9a496
 +*/
 +
 +#include "rtc-goldfish.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +#include "fdtlib.h"
 +#include <time.h>
 +
@@ -41716,7 +41706,7 @@ index 00000000..b3e9a496
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.h b/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.h
 new file mode 100644
-index 00000000..b5b904a3
+index 00000000..63c15b25
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.h
 @@ -0,0 +1,32 @@
@@ -41741,7 +41731,7 @@ index 00000000..b5b904a3
 +#ifndef RTC_GOLDFISH_H
 +#define RTC_GOLDFISH_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +#include "plic.h"
 +
 +#define RTC_GOLDFISH_DEFAULT_MMIO 0x101000
@@ -41754,7 +41744,7 @@ index 00000000..b5b904a3
 +
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtl8169.c b/app/src/main/java/libengine/RVVM/src/devices/rtl8169.c
 new file mode 100644
-index 00000000..e1ec4764
+index 00000000..a5176d40
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtl8169.c
 @@ -0,0 +1,530 @@
@@ -41781,10 +41771,10 @@ index 00000000..e1ec4764
 +#include "rtl8169.h"
 +#include "tap_api.h"
 +#include "pci-bus.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
-+#include "spinlock.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
++#include "../spinlock.h"
++#include "../utils.h"
 +
 +#define RTL8169_REG_IDR0  0x0  // ID Register 0-3 (For MAC Address)
 +#define RTL8169_REG_IDR4  0x4  // ID Register 4-5
@@ -42324,7 +42314,7 @@ index 00000000..ef726288
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/sdl_window.c b/app/src/main/java/libengine/RVVM/src/devices/sdl_window.c
 new file mode 100644
-index 00000000..092c3010
+index 00000000..7400678c
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/sdl_window.c
 @@ -0,0 +1,666 @@
@@ -42345,10 +42335,10 @@ index 00000000..092c3010
 +*/
 +
 +#include "gui_window.h"
-+#include "dlib.h"
-+#include "vma_ops.h"
-+#include "utils.h"
-+#include "compiler.h"
++#include "../dlib.h"
++#include "../vma_ops.h"
++#include "../utils.h"
++#include "../compiler.h"
 +
 +#if !defined(__EMSCRIPTEN__) && !defined(_MSC_VER)
 +#define SDL_DYNAMIC_LOADING
@@ -42996,7 +42986,7 @@ index 00000000..092c3010
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/syscon.c b/app/src/main/java/libengine/RVVM/src/devices/syscon.c
 new file mode 100644
-index 00000000..5fb653b8
+index 00000000..a9638ca8
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/syscon.c
 @@ -0,0 +1,86 @@
@@ -43019,7 +43009,7 @@ index 00000000..5fb653b8
 +*/
 +
 +#include "syscon.h"
-+#include "mem_ops.h"
++#include "../mem_ops.h"
 +#include "fdtlib.h"
 +
 +#define SYSCON_POWEROFF 0x5555
@@ -43088,7 +43078,7 @@ index 00000000..5fb653b8
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/syscon.h b/app/src/main/java/libengine/RVVM/src/devices/syscon.h
 new file mode 100644
-index 00000000..aef18ff5
+index 00000000..662aaf36
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/syscon.h
 @@ -0,0 +1,29 @@
@@ -43113,7 +43103,7 @@ index 00000000..aef18ff5
 +#ifndef RVVM_SYSCON_H
 +#define RVVM_SYSCON_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +#define SYSCON_DEFAULT_MMIO 0x100000
 +
@@ -43123,7 +43113,7 @@ index 00000000..aef18ff5
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/tap_api.h b/app/src/main/java/libengine/RVVM/src/devices/tap_api.h
 new file mode 100644
-index 00000000..0641c4a9
+index 00000000..953d4dbe
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/tap_api.h
 @@ -0,0 +1,60 @@
@@ -43148,7 +43138,7 @@ index 00000000..0641c4a9
 +#ifndef RVVM_TAP_H
 +#define RVVM_TAP_H
 +
-+#include "rvvmlib.h"
++#include "../rvvmlib.h"
 +
 +// Maximum size for an Ethernet II header + payload
 +#define TAP_FRAME_SIZE 1514
@@ -43189,7 +43179,7 @@ index 00000000..0641c4a9
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/tap_linux.c b/app/src/main/java/libengine/RVVM/src/devices/tap_linux.c
 new file mode 100644
-index 00000000..b2a5fecf
+index 00000000..f4faf7de
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/tap_linux.c
 @@ -0,0 +1,183 @@
@@ -43213,8 +43203,8 @@ index 00000000..b2a5fecf
 +*/
 +
 +#include "tap_api.h"
-+#include "threading.h"
-+#include "utils.h"
++#include "../threading.h"
++#include "../utils.h"
 +
 +#include <string.h>
 +#include <unistd.h>
@@ -43378,7 +43368,7 @@ index 00000000..b2a5fecf
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/tap_user.c b/app/src/main/java/libengine/RVVM/src/devices/tap_user.c
 new file mode 100644
-index 00000000..81d085f6
+index 00000000..85725233
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/tap_user.c
 @@ -0,0 +1,1158 @@
@@ -43402,14 +43392,14 @@ index 00000000..81d085f6
 +*/
 +
 +#include "tap_api.h"
-+#include "networking.h"
-+#include "threading.h"
-+#include "spinlock.h"
-+#include "rvtimer.h"
-+#include "hashmap.h"
-+#include "vector.h"
-+#include "mem_ops.h"
-+#include "utils.h"
++#include "../networking.h"
++#include "../threading.h"
++#include "../spinlock.h"
++#include "../rvtimer.h"
++#include "../hashmap.h"
++#include "../vector.h"
++#include "../mem_ops.h"
++#include "../utils.h"
 +
 +#define GATEWAY_MAC ((const uint8_t*)"\x00\x08\x97\xDE\xC0\xDE")
 +#define GATEWAY_IP  ((const uint8_t*)"\xC0\xA8\x00\x01")
@@ -44542,7 +44532,7 @@ index 00000000..81d085f6
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/win32window.c b/app/src/main/java/libengine/RVVM/src/devices/win32window.c
 new file mode 100644
-index 00000000..d63189ec
+index 00000000..04810d22
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/win32window.c
 @@ -0,0 +1,313 @@
@@ -44569,8 +44559,8 @@ index 00000000..d63189ec
 +#endif
 +
 +#include "gui_window.h"
-+#include "utils.h"
-+#include "vma_ops.h"
++#include "../utils.h"
++#include "../vma_ops.h"
 +
 +#include <windows.h>
 +
@@ -44861,7 +44851,7 @@ index 00000000..d63189ec
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/x11window_xlib.c b/app/src/main/java/libengine/RVVM/src/devices/x11window_xlib.c
 new file mode 100644
-index 00000000..feb63aa5
+index 00000000..4609ccd2
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/x11window_xlib.c
 @@ -0,0 +1,772 @@
@@ -44884,10 +44874,10 @@ index 00000000..feb63aa5
 +*/
 +
 +#include "gui_window.h"
-+#include "dlib.h"
-+#include "vma_ops.h"
-+#include "utils.h"
-+#include "compiler.h"
++#include "../dlib.h"
++#include "../vma_ops.h"
++#include "../utils.h"
++#include "../compiler.h"
 +
 +#define X11_DYNAMIC_LOADING
 +
@@ -52169,7 +52159,7 @@ index 00000000..721fd5ec
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit.c b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit.c
 new file mode 100644
-index 00000000..5b758d66
+index 00000000..660d32a2
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit.c
 @@ -0,0 +1,297 @@
@@ -52193,11 +52183,11 @@ index 00000000..5b758d66
 +
 +#include "rvjit.h"
 +#include "rvjit_emit.h"
-+#include "utils.h"
-+#include "vector.h"
-+#include "atomics.h"
-+#include "bit_ops.h"
-+#include "vma_ops.h"
++#include "../utils.h"
++#include "../vector.h"
++#include "../atomics.h"
++#include "../bit_ops.h"
++#include "../vma_ops.h"
 +
 +#if defined(_WIN32) && !defined(RVJIT_X86) && !defined(GNU_EXTS)
 +#include <windows.h>
@@ -52472,7 +52462,7 @@ index 00000000..5b758d66
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit.h b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit.h
 new file mode 100644
-index 00000000..0d30f088
+index 00000000..31f726dd
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit.h
 @@ -0,0 +1,245 @@
@@ -52497,9 +52487,9 @@ index 00000000..0d30f088
 +#ifndef RVJIT_H
 +#define RVJIT_H
 +
-+#include "rvvm_types.h"
-+#include "hashmap.h"
-+#include "vector.h"
++#include "../rvvm_types.h"
++#include "../hashmap.h"
++#include "../vector.h"
 +
 +// RISC-V register allocator details
 +#define RVJIT_REGISTERS 32
@@ -52723,7 +52713,7 @@ index 00000000..0d30f088
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_arm.h b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_arm.h
 new file mode 100644
-index 00000000..b8b1fff2
+index 00000000..5fc8bd8f
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_arm.h
 @@ -0,0 +1,953 @@
@@ -52747,8 +52737,8 @@ index 00000000..b8b1fff2
 +*/
 +
 +#include "rvjit.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
 +
 +#if defined(__linux__)
 +#include <sys/auxv.h>
@@ -53682,7 +53672,7 @@ index 00000000..b8b1fff2
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_arm64.h b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_arm64.h
 new file mode 100644
-index 00000000..ed01f45a
+index 00000000..cf9ad928
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_arm64.h
 @@ -0,0 +1,1358 @@
@@ -53706,8 +53696,8 @@ index 00000000..ed01f45a
 +*/
 +
 +#include "rvjit.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
 +
 +#ifndef RVJIT_ARM64_H
 +#define RVJIT_ARM64_H
@@ -55046,7 +55036,7 @@ index 00000000..ed01f45a
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_emit.c b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_emit.c
 new file mode 100644
-index 00000000..1a0edc38
+index 00000000..7b3098c9
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_emit.c
 @@ -0,0 +1,925 @@
@@ -55069,8 +55059,8 @@ index 00000000..1a0edc38
 +*/
 +
 +#include "rvjit_emit.h"
-+#include "rvvm.h"
-+#include "bit_ops.h"
++#include "../rvvm.h"
++#include "../bit_ops.h"
 +
 +#ifdef RVJIT_X86
 +#include "rvjit_x86.h"
@@ -56299,7 +56289,7 @@ index 00000000..d2fce1a1
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_riscv.h b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_riscv.h
 new file mode 100644
-index 00000000..ac87b4a3
+index 00000000..bb3ea8b8
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_riscv.h
 @@ -0,0 +1,1089 @@
@@ -56322,10 +56312,10 @@ index 00000000..ac87b4a3
 +*/
 +
 +#include "rvjit.h"
-+#include "mem_ops.h"
-+#include "bit_ops.h"
-+#include "compiler.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../bit_ops.h"
++#include "../compiler.h"
++#include "../utils.h"
 +
 +#ifndef RVJIT_RISCV_H
 +#define RVJIT_RISCV_H
@@ -57394,7 +57384,7 @@ index 00000000..ac87b4a3
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_x86.h b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_x86.h
 new file mode 100644
-index 00000000..65749fcc
+index 00000000..612b777b
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/rvjit/rvjit_x86.h
 @@ -0,0 +1,1868 @@
@@ -57420,9 +57410,9 @@ index 00000000..65749fcc
 +#define RVJIT_X86_H
 +
 +#include "rvjit.h"
-+#include "mem_ops.h"
-+#include "compiler.h"
-+#include "utils.h"
++#include "../mem_ops.h"
++#include "../compiler.h"
++#include "../utils.h"
 +
 +#if defined(RVJIT_NATIVE_64BIT) && defined(_MSC_VER)
 +#include <intrin.h> // For cpuid
