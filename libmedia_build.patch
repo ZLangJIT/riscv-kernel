@@ -70,7 +70,7 @@ index fca317f1..e515fb74 100755
  
  repositories {
 diff --git a/app/src/main/java/media/player/pro/MainActivity.kt b/app/src/main/java/media/player/pro/MainActivity.kt
-index 74a362bc..64ed4d3e 100644
+index 74a362bc..f935f6c8 100644
 --- a/app/src/main/java/media/player/pro/MainActivity.kt
 +++ b/app/src/main/java/media/player/pro/MainActivity.kt
 @@ -9,7 +9,6 @@ import android.view.MenuItem
@@ -81,7 +81,7 @@ index 74a362bc..64ed4d3e 100644
  import liblayout.Builder
  import liblayout.UiThread
  import libmedia.Media
-@@ -19,20 +18,19 @@ class MainActivity : AppCompatActivity() {
+@@ -19,38 +18,36 @@ class MainActivity : AppCompatActivity() {
      var media: Media? = null
      var terminalController: TerminalController? = null
  
@@ -102,16 +102,18 @@ index 74a362bc..64ed4d3e 100644
          // obtain log view instance
          terminalController = TerminalController()
 -        terminalController!!.onCreate(this, terminal_view)
-+        terminalController!!.onCreate(this, findViewById<View>(R.id.terminal_view))
++        terminalController!!.onCreate(this, findViewById<TerminalView>(R.id.terminal_view))
  
          when(terminalController!!.terminalContainer.visibility) {
-             View.INVISIBLE -> toggle_terminal.setText(R.string.Show_LogTerminal)
-@@ -40,17 +38,16 @@ class MainActivity : AppCompatActivity() {
+-            View.INVISIBLE -> toggle_terminal.setText(R.string.Show_LogTerminal)
+-            else -> toggle_terminal.setText(R.string.Hide_LogTerminal)
++            View.INVISIBLE -> findViewById<Button>(R.id.toggle_terminal).setText(R.string.Show_LogTerminal)
++            else -> findViewById<Button>(R.id.toggle_terminal).setText(R.string.Hide_LogTerminal)
          }
  
          toggle_terminal.setOnClickListener {
 -            terminalController!!.onClick(toggle_terminal)
-+            terminalController!!.onClick(findViewById<ButtonView>(R.id.toggleterminal))
++            terminalController!!.onClick(findViewById<Button>(R.id.toggle_terminal))
          }
  
          media = Media(this).also {
