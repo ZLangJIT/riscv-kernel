@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..ff9722f6 100755
+index fca317f1..e515fb74 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -1,12 +1,19 @@
@@ -18,8 +18,8 @@ index fca317f1..ff9722f6 100755
 +        exclude "**/module-info.class"
 +    }
 +
-+    buildFeatures {
-+	viewBinding true
++    viewBinding {
++        enabled true
 +    }
 +
      defaultConfig {
