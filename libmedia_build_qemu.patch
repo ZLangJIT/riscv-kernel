@@ -1,6 +1,6 @@
-From a6a0df07f247d1544257d39a2bf6ab8cb1d47a08 Mon Sep 17 00:00:00 2001
+From 134259f688716991b24f18b71e9751041d7d5e86 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 15:19:53 +0000
+Date: Sun, 22 Sep 2024 15:28:45 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -271,7 +271,7 @@ Subject: [PATCH 1/1] c
  .../main/java/libengine/RVVM/src/vma_ops.c    |  403 ++
  .../main/java/libengine/RVVM/src/vma_ops.h    |   63 +
  app/src/main/java/libengine/native.cpp        |  206 +
- .../main/java/linux/kernel/MainActivity.kt    |  183 +
+ .../main/java/linux/kernel/MainActivity.kt    |  180 +
  .../pro => linux/kernel}/UpdatingTextView.kt  |    2 +-
  .../java/media/player/pro/MainActivity.kt     |  170 -
  .../EGLSurfaceView.java                       | 2426 ++++++++++
@@ -281,7 +281,7 @@ Subject: [PATCH 1/1] c
  app/src/main/res/values/strings.xml           |    2 +-
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 277 files changed, 59758 insertions(+), 189 deletions(-)
+ 277 files changed, 59755 insertions(+), 189 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/assets/uboot
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
@@ -66086,10 +66086,10 @@ index 00000000..faca3417
 +}
 diff --git a/app/src/main/java/linux/kernel/MainActivity.kt b/app/src/main/java/linux/kernel/MainActivity.kt
 new file mode 100644
-index 00000000..e50efba1
+index 00000000..26e5645a
 --- /dev/null
 +++ b/app/src/main/java/linux/kernel/MainActivity.kt
-@@ -0,0 +1,183 @@
+@@ -0,0 +1,180 @@
 +package linux.kernel
 +
 +// proot -
@@ -66119,72 +66119,69 @@ index 00000000..e50efba1
 +    
 +    private val LOG_TAG = "LINUX KERNEL 6.11"
 +    
-+    inner class Classes {
-+        inner class assetsManager {
-+            fun copyAssetFolder(assetManager: AssetManager): Boolean = copyAssetFolder(assetManager, null, ASSETS)
-+            fun copyAssetFolder(
-+                assetManager: AssetManager,
-+                toPath: String
-+            ): Boolean = copyAssetFolder(assetManager, null, toPath)
-+            fun copyAssetFolder(
-+                assetManager: AssetManager,
-+                fromAssetPath: String?,
-+                toPath: String
-+            ): Boolean {
-+                val files: Array<String>? =
-+                    assetManager.list(if (fromAssetPath.isNullOrBlank()) "" else fromAssetPath)
-+                if (files == null) return false else if (files.isEmpty()) return false
-+                Log.i(LOG_TAG, "obtained a list of assets")
-+                File(toPath).mkdirs()
-+                var res = true
-+                files.forEach {
-+                    // attempting to open a directory will return a filenotfound exception
-+                    var f = ""
-+                    f = if (fromAssetPath.isNullOrBlank()) it
-+                    else "$fromAssetPath/$it"
-+                    res = try {
-+                        val dummy = assetManager.open(f)
-+                        // if this point has been reached, we found a file
-+                        dummy.close()
-+                        res and copyAsset(assetManager, f, "$toPath/$it")
-+                    } catch (e: IOException) {
-+                        // we didnt find a file, assume it must be a folder
-+                        res and copyAssetFolder(assetManager, f, "$toPath/$it")
-+                    }
++    inner class AssetsManager {
++        fun copyAssetFolder(
++            assetManager: AssetManager,
++            toPath: String
++        ): Boolean = copyAssetFolder(assetManager, null, toPath)
++        fun copyAssetFolder(
++            assetManager: AssetManager,
++            fromAssetPath: String?,
++            toPath: String
++        ): Boolean {
++            val files: Array<String>? =
++                assetManager.list(if (fromAssetPath.isNullOrBlank()) "" else fromAssetPath)
++            if (files == null) return false else if (files.isEmpty()) return false
++            Log.i(LOG_TAG, "obtained a list of assets")
++            File(toPath).mkdirs()
++            var res = true
++            files.forEach {
++                // attempting to open a directory will return a filenotfound exception
++                var f = ""
++                f = if (fromAssetPath.isNullOrBlank()) it
++                else "$fromAssetPath/$it"
++                res = try {
++                    val dummy = assetManager.open(f)
++                    // if this point has been reached, we found a file
++                    dummy.close()
++                    res and copyAsset(assetManager, f, "$toPath/$it")
++                } catch (e: IOException) {
++                    // we didnt find a file, assume it must be a folder
++                    res and copyAssetFolder(assetManager, f, "$toPath/$it")
 +                }
-+                return res
 +            }
-+            fun copyAsset(
-+                assetManager: AssetManager,
-+                fromAssetPath: String, toPath: String
-+            ): Boolean {
-+                var `in`: InputStream? = null
-+                var out: OutputStream? = null
-+                Log.i(LOG_TAG, "copying \"$fromAssetPath\" to \"$toPath\"")
-+                try {
-+                    `in` = assetManager.open(fromAssetPath)
-+                } catch (e: Exception) {
-+                    e.printStackTrace()
-+                    return false
-+                }
-+                File(toPath).createNewFile()
-+                out = FileOutputStream(toPath)
-+                copyFile(`in`!!, out)
-+                `in`.close()
-+                `in` = null
-+                out.flush()
-+                out.close()
-+                out = null
-+                return true
++            return res
++        }
++        fun copyAsset(
++            assetManager: AssetManager,
++            fromAssetPath: String, toPath: String
++        ): Boolean {
++            var `in`: InputStream? = null
++            var out: OutputStream? = null
++            Log.i(LOG_TAG, "copying \"$fromAssetPath\" to \"$toPath\"")
++            try {
++                `in` = assetManager.open(fromAssetPath)
++            } catch (e: Exception) {
++                e.printStackTrace()
++                return false
 +            }
-+            @Throws(IOException::class)
-+            fun copyFile(`in`: InputStream, out: OutputStream) {
-+                val buffer = ByteArray(1024)
-+                var read = `in`.read(buffer)
-+                while (read != -1) {
-+                    out.write(buffer, 0, read)
-+                    read = `in`.read(buffer)
-+                }
++            File(toPath).createNewFile()
++            out = FileOutputStream(toPath)
++            copyFile(`in`!!, out)
++            `in`.close()
++            `in` = null
++            out.flush()
++            out.close()
++            out = null
++            return true
++        }
++        @Throws(IOException::class)
++        fun copyFile(`in`: InputStream, out: OutputStream) {
++            val buffer = ByteArray(1024)
++            var read = `in`.read(buffer)
++            while (read != -1) {
++                out.write(buffer, 0, read)
++                read = `in`.read(buffer)
 +            }
 +        }
 +    }
@@ -66196,14 +66193,14 @@ index 00000000..e50efba1
 +        val ASSETS = "$filesDir/ASSETS"
 +        val CACHE = "$filesDir/CACHE"
 +        Log.i(LOG_TAG, "copying assets folder")
-+        Classes.assetsManager().copyAssetFolder(assets)
++        AssetsManager().copyAssetFolder(assets, ASSETS)
 +        val binDir = "$ASSETS/usr/bin"
 +        if (File(binDir).exists()) {
-+            Chmod.main(arrayOf("-R", "a=rwx", binDir))
++            libmedia.Chmod.main(arrayOf("-R", "a=rwx", binDir))
 +        }
 +
 +        if (File("$ASSETS/rvvm").exists()) {
-+            Chmod.main(arrayOf("-R", "a=rwx", "$ASSETS/rvvm"))
++            libmedia.Chmod.main(arrayOf("-R", "a=rwx", "$ASSETS/rvvm"))
 +        }
 +
 +        // If this method is called more than once with the same library name
