@@ -1,6 +1,6 @@
-From 9da90f0642633650044e74cd255f461bbe0c3c08 Mon Sep 17 00:00:00 2001
+From da415601b6ad1efe1dca539eccdfba44fa1053d7 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 14:00:33 +0000
+Date: Sun, 22 Sep 2024 14:11:51 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -34554,7 +34554,7 @@ index 00000000..0bd0b3ce
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/framebuffer.c b/app/src/main/java/libengine/RVVM/src/devices/framebuffer.c
 new file mode 100644
-index 00000000..3d41f80a
+index 00000000..7a73a644
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/framebuffer.c
 @@ -0,0 +1,83 @@
@@ -34580,7 +34580,7 @@ index 00000000..3d41f80a
 +#include "../utils.h"
 +
 +#ifdef USE_FDT
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#endif
 +
 +static void fb_remove(rvvm_mmio_dev_t* device)
@@ -34747,7 +34747,7 @@ index 00000000..5748915e
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.c b/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.c
 new file mode 100644
-index 00000000..aba0ceeb
+index 00000000..20a5260c
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/gpio-sifive.c
 @@ -0,0 +1,331 @@
@@ -34773,7 +34773,7 @@ index 00000000..aba0ceeb
 +#include "plic.h"
 +#include "../mem_ops.h"
 +#include "../utils.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +
 +// See https://static.dev.sifive.com/FU540-C000-v1.0.pdf
 +
@@ -36827,7 +36827,7 @@ index 00000000..4feea224
 +#endif    // RVVM_HID_DEV_H
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.c b/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.c
 new file mode 100644
-index 00000000..f3e16ab5
+index 00000000..488c76d4
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/i2c-hid.c
 @@ -0,0 +1,425 @@
@@ -36860,7 +36860,7 @@ index 00000000..f3e16ab5
 +#include <stdio.h>
 +
 +#ifdef USE_FDT
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#endif
 +
 +#define I2C_HID_DESC_REG    1
@@ -37291,7 +37291,7 @@ index 00000000..f94872d7
 +#endif  // _I2C_HID_H_
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.c b/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.c
 new file mode 100644
-index 00000000..a00a8deb
+index 00000000..4b1f1d1b
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/i2c-oc.c
 @@ -0,0 +1,276 @@
@@ -37321,7 +37321,7 @@ index 00000000..a00a8deb
 +#include "../utils.h"
 +
 +#ifdef USE_FDT
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#endif
 +
 +struct i2c_bus {
@@ -37633,7 +37633,7 @@ index 00000000..cfdc0949
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.c b/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.c
 new file mode 100644
-index 00000000..51df86ba
+index 00000000..b228ec3f
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/mtd-physmap.c
 @@ -0,0 +1,106 @@
@@ -37657,7 +37657,7 @@ index 00000000..51df86ba
 +
 +#include "mtd-physmap.h"
 +#include "../blk_io.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#include "../utils.h"
 +
 +typedef struct {
@@ -37787,7 +37787,7 @@ index 00000000..a69de2a0
 +
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ns16550a.c b/app/src/main/java/libengine/RVVM/src/devices/ns16550a.c
 new file mode 100644
-index 00000000..febbc231
+index 00000000..b002b123
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ns16550a.c
 @@ -0,0 +1,258 @@
@@ -37817,7 +37817,7 @@ index 00000000..febbc231
 +#include "../mem_ops.h"
 +
 +#ifdef USE_FDT
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#endif
 +
 +#define NS16550A_MMIO_SIZE 0x8
@@ -38753,7 +38753,7 @@ index 00000000..3522d0b6
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/pci-bus.c b/app/src/main/java/libengine/RVVM/src/devices/pci-bus.c
 new file mode 100644
-index 00000000..84931c6c
+index 00000000..a492de0b
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/pci-bus.c
 @@ -0,0 +1,489 @@
@@ -38777,7 +38777,7 @@ index 00000000..84931c6c
 +*/
 +
 +#include "pci-bus.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#include "../utils.h"
 +#include "../atomics.h"
 +#include "../bit_ops.h"
@@ -40332,7 +40332,7 @@ index 00000000..8fc2f6a2
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.c b/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.c
 new file mode 100644
-index 00000000..21920a60
+index 00000000..ad6ad8cd
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/ps2-altera.c
 @@ -0,0 +1,143 @@
@@ -40358,7 +40358,7 @@ index 00000000..21920a60
 +#include "../mem_ops.h"
 +#include "../atomics.h"
 +#include "../utils.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +
 +#define ALTERA_REG_DATA 0x0
 +#define ALTERA_REG_CTRL 0x4
@@ -41394,7 +41394,7 @@ index 00000000..9067cf59
 +}
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.c b/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.c
 new file mode 100644
-index 00000000..023b3a10
+index 00000000..9506c0a2
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtc-ds1742.c
 @@ -0,0 +1,120 @@
@@ -41419,7 +41419,7 @@ index 00000000..023b3a10
 +#include "rtc-ds1742.h"
 +#include "../mem_ops.h"
 +#include "../utils.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#include <time.h>
 +
 +#define DS1742_REG_CTL_CENT 0x0 // Control, Century
@@ -41556,7 +41556,7 @@ index 00000000..45f2ed83
 +
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.c b/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.c
 new file mode 100644
-index 00000000..fd3a1884
+index 00000000..0ea8778d
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/rtc-goldfish.c
 @@ -0,0 +1,144 @@
@@ -41581,7 +41581,7 @@ index 00000000..fd3a1884
 +#include "rtc-goldfish.h"
 +#include "../mem_ops.h"
 +#include "../utils.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +#include <time.h>
 +
 +#define RTC_TIME_LOW     0x0
@@ -42986,7 +42986,7 @@ index 00000000..7400678c
 +#endif
 diff --git a/app/src/main/java/libengine/RVVM/src/devices/syscon.c b/app/src/main/java/libengine/RVVM/src/devices/syscon.c
 new file mode 100644
-index 00000000..a9638ca8
+index 00000000..3124fa6a
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/src/devices/syscon.c
 @@ -0,0 +1,86 @@
@@ -43010,7 +43010,7 @@ index 00000000..a9638ca8
 +
 +#include "syscon.h"
 +#include "../mem_ops.h"
-+#include "fdtlib.h"
++#include "../fdtlib.h"
 +
 +#define SYSCON_POWEROFF 0x5555
 +#define SYSCON_RESET    0x7777
