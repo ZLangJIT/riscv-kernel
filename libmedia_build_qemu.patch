@@ -1,6 +1,6 @@
-From 07bc7d55b1051744fbb8b93695b1e0fa10ce7de4 Mon Sep 17 00:00:00 2001
+From 89d9155a7d5084e3067c032176ebe0318264676a Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 08:14:26 +0000
+Date: Sun, 22 Sep 2024 08:40:46 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -102,9 +102,9 @@ Subject: [PATCH 1/1] c
  .../EGLSurfaceView.java                       | 2426 +++++++++++++++++
  .../EGLTextureView.java                       | 2406 ++++++++++++++++
  .../graphical/tool/kit/Cleaner.java           |   39 +
- .../tool/kit/DiligentEngineView.java          |  169 ++
+ .../tool/kit/DiligentEngineView.java          |  189 ++
  settings.gradle                               |    2 +-
- 100 files changed, 12293 insertions(+), 175 deletions(-)
+ 100 files changed, 12313 insertions(+), 175 deletions(-)
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.h
  create mode 100644 app/src/main/java/libengine/CMakeLists.txt
@@ -7931,7 +7931,7 @@ index 00000000..3002e6a9
 \ No newline at end of file
 diff --git a/app/src/main/java/linux/kernel/MainActivity.kt b/app/src/main/java/linux/kernel/MainActivity.kt
 new file mode 100644
-index 00000000..1324ed60
+index 00000000..ca12d7a3
 --- /dev/null
 +++ b/app/src/main/java/linux/kernel/MainActivity.kt
 @@ -0,0 +1,95 @@
@@ -7957,14 +7957,12 @@ index 00000000..1324ed60
 +
 +class MainActivity : AppCompatActivity() {
 +
-+    var terminalController: TerminalController? = null
-+    var engineView : DiligentEngineView? = null;
++    var terminalController : TerminalController? = null
++    var engineView : DiligentEngineView? = null
 +
 +    override fun onCreate(savedInstanceState: Bundle?) {
 +        super.onCreate(savedInstanceState)
 +        
-+        engineView = DiligentEngineView(this)
-+
 +        // If this method is called more than once with the same library name
 +        // the second and subsequent calls are ignored.
 +
@@ -7974,6 +7972,8 @@ index 00000000..1324ed60
 +        // obtain log view instance
 +        terminalController = TerminalController()
 +        terminalController!!.onCreate(this, findViewById<TerminalView>(R.id.terminal_view))
++
++        engineView = DiligentEngineView(this)
 +
 +        when(terminalController!!.terminalContainer.visibility) {
 +            View.INVISIBLE -> findViewById<Button>(R.id.toggle_terminal).setText(R.string.Show_LogTerminal)
@@ -7985,7 +7985,7 @@ index 00000000..1324ed60
 +        }
 +
 +        Builder(this, findViewById<View>(R.id.mainView))
-+            .row().column { engineView }
++            .row().column { engineView!! }
 +            .build()
 +    }
 +
@@ -7996,12 +7996,12 @@ index 00000000..1324ed60
 +
 +    override fun onResume() {
 +        super.onResume()
-+        engineView.onStart();
++        engineView!!.onStart();
 +    }
 +
 +    override fun onPause() {
 +        super.onPause()
-+        engineView.onPause();
++        engineView!!.onPause();
 +    }
 +
 +    override fun onStop() {
@@ -13111,10 +13111,10 @@ index 00000000..04e23155
 \ No newline at end of file
 diff --git a/app/src/main/java/smallville7123/graphical/tool/kit/DiligentEngineView.java b/app/src/main/java/smallville7123/graphical/tool/kit/DiligentEngineView.java
 new file mode 100644
-index 00000000..eca06cbe
+index 00000000..449307bf
 --- /dev/null
 +++ b/app/src/main/java/smallville7123/graphical/tool/kit/DiligentEngineView.java
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,189 @@
 +package smallville7123.graphical.tool.kit;
 +
 +import android.content.Context;
@@ -13284,6 +13284,27 @@ index 00000000..eca06cbe
 +        }
 +    }
 +}
++
++// public class DiligentEngineController {
++//     DiligentEngineView mEngine;
++    
++//     public void onCreate(Context context) {
++//         mEngine = new DiligentEngineView(context);
++//     }
++    
++//     DiligentEngineView view() {
++//       return mEngine;
++//     }
++
++//     public void onPause() {
++//       mEngine.onPause();
++//     }
++
++//     public void onResume() {
++//       mEngine.onResume();
++//     }
++// }
+\ No newline at end of file
 diff --git a/settings.gradle b/settings.gradle
 index f9e92492..cb854736 100644
 --- a/settings.gradle
