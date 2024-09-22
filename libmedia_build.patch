@@ -1,25 +1,30 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..f72b2aa3 100755
+index fca317f1..544cac33 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
-@@ -1,12 +1,15 @@
+@@ -1,19 +1,24 @@
  apply plugin: 'com.android.application'
  apply plugin: 'kotlin-android'
 -apply plugin: 'kotlin-android-extensions'
  
  android { // main settings for your application
-     compileSdkVersion = 29
-     buildToolsVersion = '29.0.3'
-     ndkVersion '21.4.7075529'
- 
+-    compileSdkVersion = 29
+-    buildToolsVersion = '29.0.3'
+-    ndkVersion '21.4.7075529'
++    compileSdk 29
++    buildTools '29.0.3'
++    ndk '21.4.7075529'
++
 +    packagingOptions {
 +        exclude "**/module-info.class"
 +    }
-+
+ 
      defaultConfig {
          applicationId "media.player.pro"
-         minSdkVersion 26
-@@ -14,6 +17,8 @@ android { // main settings for your application
+-        minSdkVersion 26
+-        targetSdkVersion 29
++        minSdk 26
++        targetSdk 29
          versionCode 1
          versionName "1.0"
  
