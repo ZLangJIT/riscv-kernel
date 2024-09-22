@@ -245,15 +245,53 @@ jobs:
         . ~/.bashrc
         sdkmanager --list --sdk_root=/android-sdk || true
 
-    - name: clone libmedia
+    - name: clone libmedia_qemu
       run: |
-        git clone https://github.com/mgood7123/libmedia --depth=1
+        git clone https://github.com/mgood7123/libmedia --depth=1 libmedia_qemu
 
     - name: Install ndk 21
       shell: bash
       run: |
         . ~/.bashrc
         yes | sdkmanager --install "ndk;21.4.7075529" --sdk_root=/android-sdk || true
+
+    - name: Grant execute permission for gradlew [libmedia_qemu]
+      run: |
+        chmod +x libmedia_qemu/gradlew
+
+    - name: Build with Gradle [libmedia_qemu]
+      shell: bash
+      run: |
+        . ~/.bashrc
+        archlinux-java set java-8-openjdk
+        cd libmedia_qemu
+        git apply ../libmedia_build.patch
+        rm -rf ffmpeg
+        rm -rf ADB_PULL_DATA.media.player.pro
+        rm -rf APKS
+        rm -rf app/debug
+        rm -rf app/release
+        rm -rf app/libs/arm64-v8a/*
+        rm -rf app/src/main/assets/0*
+        rm -rf app/src/main/assets/CLAP.raw
+        rm -rf app/src/main/assets/FUNKY_HOUSE.raw
+        rm -rf app/src/main/assets/Rhythm8
+        rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
+        git apply ../libmedia_build_qemu.patch
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.26/Image.gz
+        mv Image.gz app/src/main/assets/usr/Image.gz
+        ./gradlew build
+
+    - name: Build debug APK [libmedia_qemu]
+      shell: bash
+      run: |
+        . ~/.bashrc
+        cd libmedia_qemu
+        ./gradlew assembleDebug --stacktrace
+
+    - name: clone libmedia
+      run: |
+        git clone https://github.com/mgood7123/libmedia --depth=1
 
     - name: Grant execute permission for gradlew [libmedia]
       run: |
@@ -263,10 +301,10 @@ jobs:
       shell: bash
       run: |
         . ~/.bashrc
-        #cp android/gradle/wrapper/gradle-wrapper.properties libmedia/gradle/wrapper/gradle-wrapper.properties
         archlinux-java set java-8-openjdk
-        cd libmedia ; git apply ../libmedia_build.patch ; ./gradlew build
-        #cd libmedia ; ./gradlew build
+        cd libmedia
+        git apply ../libmedia_build.patch
+        ./gradlew build
 
     - name: Build debug APK [libmedia]
       shell: bash
@@ -297,6 +335,7 @@ jobs:
         ls -al libmedia/app/build/outputs/apk/debug
         mv android/app/build/outputs/apk/debug/app-debug.apk apk-debug.apk
         mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
+        mv libmedia_qemu/app/build/outputs/apk/debug/app-debug.apk libmedia_qemu.apk
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
         cd build_dir
@@ -337,6 +376,7 @@ jobs:
         files: |
           apk-debug.apk
           libmedia.apk
+          libmedia_qemu.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
           build_dir/Image
