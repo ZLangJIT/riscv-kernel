@@ -1,6 +1,6 @@
-From a73ce92da768c40cdece6158b366e1c709fc3353 Mon Sep 17 00:00:00 2001
+From d4602d80f9fa83429ae08a447caa22b0cafb489b Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 13:07:48 +0000
+Date: Sun, 22 Sep 2024 13:14:14 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -111,7 +111,7 @@ Subject: [PATCH 1/1] c
  .../RVVM/.github/workflows/codeql.yml         |   41 +
  app/src/main/java/libengine/RVVM/.gitignore   |   39 +
  .../main/java/libengine/RVVM/.gitlab-ci.yml   |  290 ++
- .../main/java/libengine/RVVM/CMakeLists.txt   |  321 ++
+ .../main/java/libengine/RVVM/CMakeLists.txt   |  320 ++
  app/src/main/java/libengine/RVVM/LICENSE-GPL  |  674 +++
  app/src/main/java/libengine/RVVM/LICENSE-MPL  |  373 ++
  app/src/main/java/libengine/RVVM/Makefile     |  360 ++
@@ -280,7 +280,7 @@ Subject: [PATCH 1/1] c
  .../tool/kit/DiligentEngineView.java          |  189 +
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 276 files changed, 59695 insertions(+), 188 deletions(-)
+ 276 files changed, 59694 insertions(+), 188 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/assets/uboot
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
@@ -18106,10 +18106,10 @@ index 00000000..a2efc6a1
 +    - .core-defs
 diff --git a/app/src/main/java/libengine/RVVM/CMakeLists.txt b/app/src/main/java/libengine/RVVM/CMakeLists.txt
 new file mode 100644
-index 00000000..36cfdbb8
+index 00000000..7092c6d6
 --- /dev/null
 +++ b/app/src/main/java/libengine/RVVM/CMakeLists.txt
-@@ -0,0 +1,321 @@
+@@ -0,0 +1,320 @@
 +# CMake configuration file for those who don't like Make (like I do)
 +# Prev-maintainer: cerg2010cerg2010
 +
@@ -18380,7 +18380,6 @@ index 00000000..36cfdbb8
 +
 +# Compile all object files once
 +add_library(rvvm_objlib OBJECT ${RVVM_SRC} ${RVVM_DEVICES_SRC})
-+target_link_libraries(rvvm_objlib PRIVATE rvvm_common)
 +
 +# Static library target
 +add_library(rvvm_static STATIC $<TARGET_OBJECTS:rvvm_objlib>)
