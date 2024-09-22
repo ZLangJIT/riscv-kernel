@@ -335,7 +335,7 @@ jobs:
           * `Image.gz` for riscv ( built-in busybox ramdisk )
 
         files: |
-          app-debug.apk
+          apk-debug.apk
           libmedia.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
