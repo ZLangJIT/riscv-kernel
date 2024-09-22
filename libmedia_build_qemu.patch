@@ -1,6 +1,6 @@
-From 408503599361c247192183da57f7c7dfb4ceaf04 Mon Sep 17 00:00:00 2001
+From 71a0984df9cb2d69a7f153f6c73e20d58f49a70a Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 14:29:15 +0000
+Date: Sun, 22 Sep 2024 15:11:42 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -271,16 +271,17 @@ Subject: [PATCH 1/1] c
  .../main/java/libengine/RVVM/src/vma_ops.c    |  403 ++
  .../main/java/libengine/RVVM/src/vma_ops.h    |   63 +
  app/src/main/java/libengine/native.cpp        |  206 +
- .../main/java/linux/kernel/MainActivity.kt    |   95 +
+ .../main/java/linux/kernel/MainActivity.kt    |  184 +
  .../pro => linux/kernel}/UpdatingTextView.kt  |    2 +-
  .../java/media/player/pro/MainActivity.kt     |  170 -
  .../EGLSurfaceView.java                       | 2426 ++++++++++
  .../EGLTextureView.java                       | 2406 ++++++++++
  .../graphical/tool/kit/Cleaner.java           |   39 +
  .../tool/kit/DiligentEngineView.java          |  189 +
+ app/src/main/res/values/strings.xml           |    2 +-
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 276 files changed, 59669 insertions(+), 188 deletions(-)
+ 277 files changed, 59759 insertions(+), 189 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/assets/uboot
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
@@ -66085,10 +66086,10 @@ index 00000000..faca3417
 +}
 diff --git a/app/src/main/java/linux/kernel/MainActivity.kt b/app/src/main/java/linux/kernel/MainActivity.kt
 new file mode 100644
-index 00000000..59ecfb03
+index 00000000..a6ba31a8
 --- /dev/null
 +++ b/app/src/main/java/linux/kernel/MainActivity.kt
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,184 @@
 +package linux.kernel
 +
 +// proot -
@@ -66096,6 +66097,7 @@ index 00000000..59ecfb03
 +
 +import alpine.term.TerminalController
 +import alpine.term.terminal_view.TerminalView
++import android.content.res.AssetManager
 +import android.os.Bundle
 +import android.view.ContextMenu
 +import android.view.ContextMenu.ContextMenuInfo
@@ -66106,17 +66108,105 @@ index 00000000..59ecfb03
 +import androidx.appcompat.app.AppCompatActivity
 +import liblayout.Builder
 +import liblayout.UiThread
-+import android.opengl.GLSurfaceView
 +import smallville7123.graphical.tool.kit.DiligentEngineView
++import java.io.*
 +
 +class MainActivity : AppCompatActivity() {
 +
 +    var terminalController : TerminalController? = null
 +    var engineView : DiligentEngineView? = null
++    
++    inner class assetsManager {
++
++        fun copyAssetFolder(assetManager: AssetManager): Boolean = copyAssetFolder(assetManager, null, ASSETS)
++    
++        fun copyAssetFolder(
++            assetManager: AssetManager,
++            toPath: String
++        ): Boolean = copyAssetFolder(assetManager, null, toPath)
++    
++        fun copyAssetFolder(
++            assetManager: AssetManager,
++            fromAssetPath: String?,
++            toPath: String
++        ): Boolean {
++            val files: Array<String>? =
++                assetManager.list(if (fromAssetPath.isNullOrBlank()) "" else fromAssetPath)
++            if (files == null) return false else if (files.isEmpty()) return false
++            Log.i(LOG_TAG, "obtained a list of assets")
++            File(toPath).mkdirs()
++            var res = true
++            files.forEach {
++                // attempting to open a directory will return a filenotfound exception
++                var f = ""
++                f = if (fromAssetPath.isNullOrBlank()) it
++                else "$fromAssetPath/$it"
++                res = try {
++                    val dummy = assetManager.open(f)
++                    // if this point has been reached, we found a file
++                    dummy.close()
++                    res and copyAsset(assetManager, f, "$toPath/$it")
++                } catch (e: IOException) {
++                    // we didnt find a file, assume it must be a folder
++                    res and copyAssetFolder(assetManager, f, "$toPath/$it")
++                }
++            }
++            return res
++        }
++    
++        fun copyAsset(
++            assetManager: AssetManager,
++            fromAssetPath: String, toPath: String
++        ): Boolean {
++            var `in`: InputStream? = null
++            var out: OutputStream? = null
++            Log.i(LOG_TAG, "copying \"$fromAssetPath\" to \"$toPath\"")
++            try {
++                `in` = assetManager.open(fromAssetPath)
++            } catch (e: Exception) {
++                e.printStackTrace()
++                return false
++            }
++            File(toPath).createNewFile()
++            out = FileOutputStream(toPath)
++            copyFile(`in`!!, out)
++            `in`.close()
++            `in` = null
++            out.flush()
++            out.close()
++            out = null
++            return true
++        }
++    
++        @Throws(IOException::class)
++        fun copyFile(`in`: InputStream, out: OutputStream) {
++            val buffer = ByteArray(1024)
++            var read = `in`.read(buffer)
++            while (read != -1) {
++                out.write(buffer, 0, read)
++                read = `in`.read(buffer)
++            }
++        }
++    }
++
 +
 +    override fun onCreate(savedInstanceState: Bundle?) {
 +        super.onCreate(savedInstanceState)
 +        
++        val filesDir = activity.filesDir.absolutePath;
++        val ASSETS = "$filesDir/ASSETS"
++        val CACHE = "$filesDir/CACHE"
++        Log.i(LOG_TAG, "copying assets folder")
++        assetsManager().copyAssetFolder(activity.assets)
++        val binDir = "$ASSETS/usr/bin"
++        if (File(binDir).exists()) {
++            Chmod.main(arrayOf("-R", "a=rwx", binDir))
++        }
++
++        if (File("$ASSETS/rvvm").exists()) {
++            Chmod.main(arrayOf("-R", "a=rwx", "$ASSETS/rvvm"))
++        }
++
 +        // If this method is called more than once with the same library name
 +        // the second and subsequent calls are ignored.
 +
@@ -71459,6 +71549,17 @@ index 00000000..449307bf
 +//     }
 +// }
 \ No newline at end of file
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 236db7ed..897f283a 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1,5 +1,5 @@
+ <resources>
+-    <string name="app_name">Media Player Pro</string>
++    <string name="app_name">Linux Kernel 6.11</string>
+ 
+     <!-- Common -->
+     <string name="cancel_label">Cancel</string>
 diff --git a/app/src/test/java/media/player/pro/ExampleUnitTest.kt b/app/src/test/java/linux/kernel/ExampleUnitTest.kt
 similarity index 92%
 rename from app/src/test/java/media/player/pro/ExampleUnitTest.kt
