@@ -70,7 +70,7 @@ index fca317f1..e515fb74 100755
  
  repositories {
 diff --git a/app/src/main/java/media/player/pro/MainActivity.kt b/app/src/main/java/media/player/pro/MainActivity.kt
-index 74a362bc..73382004 100644
+index 74a362bc..64ed4d3e 100644
 --- a/app/src/main/java/media/player/pro/MainActivity.kt
 +++ b/app/src/main/java/media/player/pro/MainActivity.kt
 @@ -9,7 +9,6 @@ import android.view.MenuItem
@@ -81,18 +81,14 @@ index 74a362bc..73382004 100644
  import liblayout.Builder
  import liblayout.UiThread
  import libmedia.Media
-@@ -19,20 +18,24 @@ class MainActivity : AppCompatActivity() {
+@@ -19,20 +18,19 @@ class MainActivity : AppCompatActivity() {
      var media: Media? = null
      var terminalController: TerminalController? = null
  
-+    private lateinit var binding: SlideOutTerminalBinding
 +
      override fun onCreate(savedInstanceState: Bundle?) {
-         super.onCreate(savedInstanceState)
-+
-+        tbinding = TerminalViewBinding.inflate(layoutInflater)
-+
-+	
+-        super.onCreate(savedInstanceState)
++        super.onCreate(savedInstanceState)	
 +
          // If this method is called more than once with the same library name
          // the second and subsequent calls are ignored.
@@ -106,16 +102,16 @@ index 74a362bc..73382004 100644
          // obtain log view instance
          terminalController = TerminalController()
 -        terminalController!!.onCreate(this, terminal_view)
-+        terminalController!!.onCreate(this, binding.terminal_view)
++        terminalController!!.onCreate(this, findViewById<View>(R.id.terminal_view))
  
          when(terminalController!!.terminalContainer.visibility) {
              View.INVISIBLE -> toggle_terminal.setText(R.string.Show_LogTerminal)
-@@ -40,13 +43,12 @@ class MainActivity : AppCompatActivity() {
+@@ -40,17 +38,16 @@ class MainActivity : AppCompatActivity() {
          }
  
          toggle_terminal.setOnClickListener {
 -            terminalController!!.onClick(toggle_terminal)
-+            terminalController!!.onClick(binding.toggle_terminal)
++            terminalController!!.onClick(findViewById<ButtonView>(R.id.toggleterminal))
          }
  
          media = Media(this).also {
@@ -125,7 +121,12 @@ index 74a362bc..73382004 100644
              it.loop(true)
          }
  
-@@ -169,4 +171,4 @@ class MainActivity : AppCompatActivity() {
+-        Builder(this, mainView)
++        Builder(this, findViewById<View>(R.id.mainView))
+             .row().height(80)
+             .column {
+                 media!!.WaveformView(
+@@ -169,4 +166,4 @@ class MainActivity : AppCompatActivity() {
      override fun onBackPressed() {
          if (!terminalController!!.onBackPressed()) super.onBackPressed()
      }
