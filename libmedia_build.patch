@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..544cac33 100755
+index fca317f1..1fc593ae 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -1,19 +1,24 @@
@@ -11,7 +11,7 @@ index fca317f1..544cac33 100755
 -    compileSdkVersion = 29
 -    buildToolsVersion = '29.0.3'
 -    ndkVersion '21.4.7075529'
-+    compileSdk 29
++    compileSdkVersion 29
 +    buildTools '29.0.3'
 +    ndk '21.4.7075529'
 +
