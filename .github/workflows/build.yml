@@ -155,7 +155,7 @@ jobs:
       run: |
         rm -rf build_dir/linux-xlnx
 
-    - name: Install android commandline-tools + JDK17
+    - name: Install android commandline-tools + JDK17 + JDK8
       run: |
         TOOLS_URL=$(wget -qO- http://developer.android.com/sdk/index.html | grep latest.zip | grep linux | grep href | grep -o https.*zip)
         TOOLS_FILE=$(echo $TOOLS_URL | grep -o command.*zip)
@@ -247,7 +247,7 @@ jobs:
 
     - name: clone libmedia_qemu
       run: |
-        git clone https://github.com/mgood7123/libmedia --depth=1 libmedia_qemu
+        git clone https://github.com/mgood7123/libmedia --depth=1 linux.kernel.rvvm
 
     - name: Install ndk 21
       shell: bash
@@ -255,16 +255,16 @@ jobs:
         . ~/.bashrc
         yes | sdkmanager --install "ndk;21.4.7075529" --sdk_root=/android-sdk || true
 
-    - name: Grant execute permission for gradlew [libmedia_qemu]
+    - name: Grant execute permission for gradlew [linux.kernel.rvvm]
       run: |
-        chmod +x libmedia_qemu/gradlew
+        chmod +x linux.kernel.rvvm/gradlew
 
-    - name: Build with Gradle [libmedia_qemu]
+    - name: Build with Gradle [linux.kernel.rvvm]
       shell: bash
       run: |
         . ~/.bashrc
         archlinux-java set java-8-openjdk
-        cd libmedia_qemu
+        cd linux.kernel.rvvm
         git apply ../libmedia_build.patch
         rm -rf ffmpeg
         rm -rf ADB_PULL_DATA.media.player.pro
@@ -279,25 +279,28 @@ jobs:
         rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
         git apply ../libmedia_build_qemu.patch
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.26/Image.gz
-        mv Image.gz app/src/main/assets/usr/Image.gz
+        mv Image.gz app/src/main/assets/Image.gz
         ./gradlew build
 
-    - name: Build debug APK [libmedia_qemu]
+    - name: Build debug APK [linux.kernel.rvvm]
       shell: bash
       run: |
         . ~/.bashrc
-        cd libmedia_qemu
+        cd linux.kernel.rvvm
         ./gradlew assembleDebug --stacktrace
 
     - name: clone libmedia
+      if: false
       run: |
         git clone https://github.com/mgood7123/libmedia --depth=1
 
     - name: Grant execute permission for gradlew [libmedia]
+      if: false
       run: |
         chmod +x libmedia/gradlew
 
     - name: Build with Gradle [libmedia]
+      if: false
       shell: bash
       run: |
         . ~/.bashrc
@@ -307,16 +310,19 @@ jobs:
         ./gradlew build
 
     - name: Build debug APK [libmedia]
+      if: false
       shell: bash
       run: |
         . ~/.bashrc
         cd libmedia ; ./gradlew assembleDebug --stacktrace
 
     - name: Grant execute permission for gradlew [android]
+      if: false
       run: |
         chmod +x android/gradlew
 
     - name: Build with Gradle [android]
+      if: false
       shell: bash
       run: |
         . ~/.bashrc
@@ -324,6 +330,7 @@ jobs:
         cd android ; ./gradlew build --stacktrace
 
     - name: Build debug APK [android]
+      if: false
       shell: bash
       run: |
         . ~/.bashrc
@@ -331,11 +338,11 @@ jobs:
 
     - name: Check files
       run: |
-        ls -al android/app/build/outputs/apk/debug
-        ls -al libmedia/app/build/outputs/apk/debug
-        mv android/app/build/outputs/apk/debug/app-debug.apk apk-debug.apk
-        mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
-        mv libmedia_qemu/app/build/outputs/apk/debug/app-debug.apk libmedia_qemu.apk
+        #ls -al android/app/build/outputs/apk/debug
+        #ls -al libmedia/app/build/outputs/apk/debug
+        #mv android/app/build/outputs/apk/debug/app-debug.apk apk-debug.apk
+        #mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
+        mv libmedia_qemu/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.apk
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
         cd build_dir
@@ -374,9 +381,7 @@ jobs:
           * `Image.gz` for riscv ( built-in busybox ramdisk )
 
         files: |
-          apk-debug.apk
-          libmedia.apk
-          libmedia_qemu.apk
+          linux.kernel.rvvm.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
           build_dir/Image
