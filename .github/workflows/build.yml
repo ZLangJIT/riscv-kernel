@@ -342,8 +342,7 @@ jobs:
         #ls -al libmedia/app/build/outputs/apk/debug
         #mv android/app/build/outputs/apk/debug/app-debug.apk apk-debug.apk
         #mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
-        ls -alh linux.kernel.rvvm/app/build/outputs
-        ls -alh linux.kernel.rvvm/app/build/outputs/*
+        ls -alh linux.kernel.rvvm/app/build/outputs/apk/*
         mv linux.kernel.rvvm/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.debug.apk
         #mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release.apk linux.kernel.rvvm.release.apk
         TAG=6.11.26 # use kernel from 6.11.26
