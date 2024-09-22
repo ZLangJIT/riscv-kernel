@@ -70,7 +70,7 @@ index fca317f1..e515fb74 100755
  
  repositories {
 diff --git a/app/src/main/java/media/player/pro/MainActivity.kt b/app/src/main/java/media/player/pro/MainActivity.kt
-index 74a362bc..f6e70784 100644
+index 74a362bc..73382004 100644
 --- a/app/src/main/java/media/player/pro/MainActivity.kt
 +++ b/app/src/main/java/media/player/pro/MainActivity.kt
 @@ -9,7 +9,6 @@ import android.view.MenuItem
@@ -85,12 +85,12 @@ index 74a362bc..f6e70784 100644
      var media: Media? = null
      var terminalController: TerminalController? = null
  
-+    private lateinit var binding: ResultProfileBinding
++    private lateinit var binding: SlideOutTerminalBinding
 +
      override fun onCreate(savedInstanceState: Bundle?) {
          super.onCreate(savedInstanceState)
 +
-+        binding = ResultProfileBinding.inflate(layoutInflater)
++        tbinding = TerminalViewBinding.inflate(layoutInflater)
 +
 +	
 +
