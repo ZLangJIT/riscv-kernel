@@ -146,6 +146,30 @@ index 74a362bc..68bc1f72 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/app/src/main/java/media/player/pro/UpdatingTextView.kt b/app/src/main/java/media/player/pro/UpdatingTextView.kt
+index b1e92661..229660a3 100644
+--- a/app/src/main/java/media/player/pro/UpdatingTextView.kt
++++ b/app/src/main/java/media/player/pro/UpdatingTextView.kt
+@@ -7,9 +7,9 @@ import android.util.Log
+ import androidx.appcompat.widget.AppCompatTextView
+ 
+ class UpdatingTextView: AppCompatTextView {
+-    constructor(context: Context?) : super(context)
+-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
++    constructor(context: Context) : super(context)
++    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
++    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+         context,
+         attrs,
+         defStyleAttr
+@@ -38,4 +38,4 @@ class UpdatingTextView: AppCompatTextView {
+         else drawQueue.forEach { it(this) }
+     }
+ 
+-}
+\ No newline at end of file
++}
 diff --git a/build.gradle b/build.gradle
 index df8fe1b9..ee332e6f 100644
 --- a/build.gradle
