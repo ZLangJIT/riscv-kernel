@@ -1,6 +1,6 @@
-From 39574e19d276233fde08d6aa9ac4322649588827 Mon Sep 17 00:00:00 2001
+From df8a91efc91aa81b07586062f9bfc6c7435217df Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 09:07:08 +0000
+Date: Sun, 22 Sep 2024 09:22:52 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -482,7 +482,7 @@ index 00000000..860ddd6e
 +#endif //GRAPHICAL_TOOL_KIT_APPINSTANCEANDROIDBASE_H
 diff --git a/app/src/main/java/libengine/CMakeLists.txt b/app/src/main/java/libengine/CMakeLists.txt
 new file mode 100644
-index 00000000..aa264f39
+index 00000000..52b871d5
 --- /dev/null
 +++ b/app/src/main/java/libengine/CMakeLists.txt
 @@ -0,0 +1,32 @@
@@ -499,7 +499,7 @@ index 00000000..aa264f39
 +set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 +set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 +
-+add_subdirectory(DilligentLog)
++add_subdirectory(DiligentLog)
 +
 +add_library (
 +        native-lib SHARED
@@ -518,7 +518,6 @@ index 00000000..aa264f39
 +        m
 +        DilligentLog
 +)
-\ No newline at end of file
 diff --git a/app/src/main/java/libengine/DiligentLog/CMakeLists.txt b/app/src/main/java/libengine/DiligentLog/CMakeLists.txt
 new file mode 100644
 index 00000000..2053abe3
