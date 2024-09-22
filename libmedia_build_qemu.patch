@@ -1,6 +1,6 @@
-From 3768b4fe39c69e52807c39be35f60b2b8953fe69 Mon Sep 17 00:00:00 2001
+From ebbe3417804155039fef09fe63d677c7f082a4a0 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 16:07:01 +0000
+Date: Sun, 22 Sep 2024 16:09:25 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -8,6 +8,7 @@ Subject: [PATCH 1/1] c
  .../kernel}/ExampleInstrumentedTest.kt        |    4 +-
  app/src/main/AndroidManifest.xml              |    2 +-
  app/src/main/CMakeLists.txt                   |    5 +-
+ app/src/main/assets/boot_rvvm_disk.sh         |    3 +
  app/src/main/assets/uboot                     |  Bin 0 -> 2835064 bytes
  .../main/java/alpine/term/ExtraKeysView.java  |    2 +-
  .../main/java/alpine/term/HelpActivity.java   |    2 +-
@@ -281,8 +282,9 @@ Subject: [PATCH 1/1] c
  app/src/main/res/values/strings.xml           |    2 +-
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 277 files changed, 59755 insertions(+), 189 deletions(-)
+ 278 files changed, 59758 insertions(+), 189 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
+ create mode 100755 app/src/main/assets/boot_rvvm_disk.sh
  create mode 100644 app/src/main/assets/uboot
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.h
@@ -614,6 +616,15 @@ index 8e8e3779..9b980553 100644
 +
 +# EngineView
 +add_subdirectory(java/libengine)
+diff --git a/app/src/main/assets/boot_rvvm_disk.sh b/app/src/main/assets/boot_rvvm_disk.sh
+new file mode 100755
+index 00000000..5f6d5d5c
+--- /dev/null
++++ b/app/src/main/assets/boot_rvvm_disk.sh
+@@ -0,0 +1,3 @@
++rm disk.img
++dd if=/dev/zero of=disk.img bs=1M count=100
++.rvvm .uboot -v -k Image -m 100m -cmdline="console=ttyS0 rootflags=discard rw $1" -k disk.img $2
 diff --git a/app/src/main/assets/uboot b/app/src/main/assets/uboot
 new file mode 100644
 index 0000000000000000000000000000000000000000..d37529a34df288e3112bb77ec9d4be474a08c547
