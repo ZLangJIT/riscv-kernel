@@ -342,7 +342,10 @@ jobs:
         #ls -al libmedia/app/build/outputs/apk/debug
         #mv android/app/build/outputs/apk/debug/app-debug.apk apk-debug.apk
         #mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
-        mv linux.kernel.rvvm/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.apk
+        ls -alh linux.kernel.rvvm/app/build/output
+        ls -alh linux.kernel.rvvm/app/build/output/*
+        mv linux.kernel.rvvm/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.debug.apk
+        #mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release.apk linux.kernel.rvvm.release.apk
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
         cd build_dir
@@ -381,7 +384,7 @@ jobs:
           * `Image.gz` for riscv ( built-in busybox ramdisk )
 
         files: |
-          linux.kernel.rvvm.apk
+          linux.kernel.rvvm.debug.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
           build_dir/Image
