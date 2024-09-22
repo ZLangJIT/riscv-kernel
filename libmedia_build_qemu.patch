@@ -1,6 +1,6 @@
-From 5e234c4c7293adc068d1c66e0eeecba1a7db893b Mon Sep 17 00:00:00 2001
+From 1d684a72dd5af0125907c5406f7e2994b898f2fa Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 10:16:41 +0000
+Date: Sun, 22 Sep 2024 10:38:25 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -1037,7 +1037,7 @@ index 00000000..cef4bdab
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidFileSystem.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidFileSystem.hpp
 new file mode 100644
-index 00000000..1f5b6d8b
+index 00000000..cd352477
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidFileSystem.hpp
 @@ -0,0 +1,99 @@
@@ -1076,7 +1076,7 @@ index 00000000..1f5b6d8b
 +#include <android/asset_manager.h>
 +
 +#include "../../Basic/interface/BasicFileSystem.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/DataBlob.h"
++#include "../../Primitives/interface/DataBlob.h"
 +
 +struct ANativeActivity;
 +struct AAssetManager;
@@ -1142,7 +1142,7 @@ index 00000000..1f5b6d8b
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidNativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidNativeWindow.h
 new file mode 100644
-index 00000000..be6a1d97
+index 00000000..16e8badd
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidNativeWindow.h
 @@ -0,0 +1,39 @@
@@ -1175,7 +1175,7 @@ index 00000000..be6a1d97
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -1187,7 +1187,7 @@ index 00000000..be6a1d97
 +DILIGENT_END_NAMESPACE // namespace Diligent
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidPlatformDefinitions.h b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidPlatformDefinitions.h
 new file mode 100644
-index 00000000..6aa0084c
+index 00000000..6a912ac2
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidPlatformDefinitions.h
 @@ -0,0 +1,40 @@
@@ -1216,7 +1216,7 @@ index 00000000..6aa0084c
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +#if DILIGENT_C_INTERFACE
 +
@@ -1233,7 +1233,7 @@ index 00000000..6aa0084c
 +#endif
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidPlatformMisc.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidPlatformMisc.hpp
 new file mode 100644
-index 00000000..879e4514
+index 00000000..22dac338
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Android/interface/AndroidPlatformMisc.hpp
 @@ -0,0 +1,36 @@
@@ -1267,7 +1267,7 @@ index 00000000..879e4514
 +#pragma once
 +
 +#include "../../Basic/interface/BasicPlatformMisc.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp"
++#include "../../Basic/interface/DebugUtilities.hpp"
 +#include "../../Linux/interface/LinuxPlatformMisc.hpp"
 +
 +struct AndroidMisc : public LinuxMisc
@@ -1895,7 +1895,7 @@ index 00000000..71528b0a
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/ApplePlatformDefinitions.h b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/ApplePlatformDefinitions.h
 new file mode 100644
-index 00000000..bc4fb45b
+index 00000000..6038471a
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/ApplePlatformDefinitions.h
 @@ -0,0 +1,44 @@
@@ -1928,7 +1928,7 @@ index 00000000..bc4fb45b
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +#if DILIGENT_C_INTERFACE
 +
@@ -1945,7 +1945,7 @@ index 00000000..bc4fb45b
 +#endif
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/ApplePlatformMisc.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/ApplePlatformMisc.hpp
 new file mode 100644
-index 00000000..571ec761
+index 00000000..6e434e45
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/ApplePlatformMisc.hpp
 @@ -0,0 +1,36 @@
@@ -1979,7 +1979,7 @@ index 00000000..571ec761
 +#pragma once
 +
 +#include "../../Basic/interface/BasicPlatformMisc.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp"
++#include "../../Basic/interface/DebugUtilities.hpp"
 +#include "../../Linux/interface/LinuxPlatformMisc.hpp"
 +
 +struct AppleMisc : public LinuxMisc
@@ -2046,7 +2046,7 @@ index 00000000..8d9a3d15
 +using CFURLWrapper    = CFObjectWrapper<CFURLRef>;
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/IOSNativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/IOSNativeWindow.h
 new file mode 100644
-index 00000000..3f0e1bc8
+index 00000000..71a37c91
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/IOSNativeWindow.h
 @@ -0,0 +1,48 @@
@@ -2079,7 +2079,7 @@ index 00000000..3f0e1bc8
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -2100,7 +2100,7 @@ index 00000000..3f0e1bc8
 +DILIGENT_END_NAMESPACE // namespace Diligent
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/MacOSNativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/MacOSNativeWindow.h
 new file mode 100644
-index 00000000..5b3ac26d
+index 00000000..592575d8
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/MacOSNativeWindow.h
 @@ -0,0 +1,48 @@
@@ -2133,7 +2133,7 @@ index 00000000..5b3ac26d
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -2154,7 +2154,7 @@ index 00000000..5b3ac26d
 +DILIGENT_END_NAMESPACE // namespace Diligent
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/TVOSNativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/TVOSNativeWindow.h
 new file mode 100644
-index 00000000..0fd90904
+index 00000000..c502515c
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Apple/interface/TVOSNativeWindow.h
 @@ -0,0 +1,47 @@
@@ -2186,7 +2186,7 @@ index 00000000..0fd90904
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -2561,7 +2561,7 @@ index 00000000..2ae640ec
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicFileSystem.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicFileSystem.hpp
 new file mode 100644
-index 00000000..446e1963
+index 00000000..40e67e23
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicFileSystem.hpp
 @@ -0,0 +1,108 @@
@@ -2595,7 +2595,7 @@ index 00000000..446e1963
 +#pragma once
 +
 +#include <vector>
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/BasicTypes.h"
++#include "../../../Primitives/interface/BasicTypes.h"
 +
 +enum class EFileAccessMode
 +{
@@ -2675,7 +2675,7 @@ index 00000000..446e1963
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicPlatformDebug.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicPlatformDebug.hpp
 new file mode 100644
-index 00000000..8ea35bc4
+index 00000000..c44ef7cb
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicPlatformDebug.hpp
 @@ -0,0 +1,46 @@
@@ -2708,7 +2708,7 @@ index 00000000..8ea35bc4
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/Errors.hpp"
++#include "../../../Primitives/interface/Errors.hpp"
 +
 +struct BasicPlatformDebug
 +{
@@ -2727,7 +2727,7 @@ index 00000000..8ea35bc4
 +void DebugAssertionFailed(const Diligent::Char* Message, const char* Function, const char* File, int Line);
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicPlatformMisc.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicPlatformMisc.hpp
 new file mode 100644
-index 00000000..333c159c
+index 00000000..5692cf9d
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/BasicPlatformMisc.hpp
 @@ -0,0 +1,69 @@
@@ -2760,7 +2760,7 @@ index 00000000..333c159c
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/BasicTypes.h"
++#include "../../../Primitives/interface/BasicTypes.h"
 +
 +struct BasicPlatformMisc
 +{
@@ -2802,7 +2802,7 @@ index 00000000..333c159c
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp
 new file mode 100644
-index 00000000..7c8a982f
+index 00000000..5ad0f0d5
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp
 @@ -0,0 +1,108 @@
@@ -2835,8 +2835,8 @@ index 00000000..7c8a982f
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/FormatString.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/Errors.hpp"
++#include "../../../Primitives/interface/FormatString.hpp"
++#include "../../../Primitives/interface/Errors.hpp"
 +#include "BasicPlatformDebug.hpp"
 +
 +#ifdef DILIGENT_DEBUG
@@ -2916,7 +2916,7 @@ index 00000000..7c8a982f
 +#endif
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/StandardFile.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/StandardFile.hpp
 new file mode 100644
-index 00000000..88d22fcf
+index 00000000..f567bec7
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Basic/interface/StandardFile.hpp
 @@ -0,0 +1,55 @@
@@ -2951,7 +2951,7 @@ index 00000000..88d22fcf
 +
 +#include <stdio.h>
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/DataBlob.h"
++#include "../../../Primitives/interface/DataBlob.h"
 +#include "BasicFileSystem.hpp"
 +
 +class StandardFile : public BasicFile
@@ -3540,7 +3540,7 @@ index 00000000..9025360c
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxNativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxNativeWindow.h
 new file mode 100644
-index 00000000..cae99ce7
+index 00000000..a7d1b87c
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxNativeWindow.h
 @@ -0,0 +1,42 @@
@@ -3573,8 +3573,8 @@ index 00000000..cae99ce7
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/BasicTypes.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/BasicTypes.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -3588,7 +3588,7 @@ index 00000000..cae99ce7
 +DILIGENT_END_NAMESPACE // namespace Diligent
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxPlatformDefinitions.h b/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxPlatformDefinitions.h
 new file mode 100644
-index 00000000..bc4fb45b
+index 00000000..6038471a
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxPlatformDefinitions.h
 @@ -0,0 +1,44 @@
@@ -3621,7 +3621,7 @@ index 00000000..bc4fb45b
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +#if DILIGENT_C_INTERFACE
 +
@@ -3638,7 +3638,7 @@ index 00000000..bc4fb45b
 +#endif
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxPlatformMisc.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxPlatformMisc.hpp
 new file mode 100644
-index 00000000..2a4aa167
+index 00000000..3df07bc9
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Linux/interface/LinuxPlatformMisc.hpp
 @@ -0,0 +1,102 @@
@@ -3672,7 +3672,7 @@ index 00000000..2a4aa167
 +#pragma once
 +
 +#include "../../Basic/interface/BasicPlatformMisc.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp"
++#include "../../Basic/interface/DebugUtilities.hpp"
 +
 +struct LinuxMisc : public BasicPlatformMisc
 +{
@@ -4009,7 +4009,7 @@ index 00000000..31e77041
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPDefinitions.h b/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPDefinitions.h
 new file mode 100644
-index 00000000..23b13165
+index 00000000..ca1e60b1
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPDefinitions.h
 @@ -0,0 +1,30 @@
@@ -4042,10 +4042,10 @@ index 00000000..23b13165
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPFileSystem.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPFileSystem.hpp
 new file mode 100644
-index 00000000..c0139d81
+index 00000000..978b07cf
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPFileSystem.hpp
 @@ -0,0 +1,80 @@
@@ -4081,7 +4081,7 @@ index 00000000..c0139d81
 +#include <memory>
 +
 +#include "../../Basic/interface/BasicFileSystem.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/DataBlob.h"
++#include "../../../Primitives/interface/DataBlob.h"
 +
 +// Do not include windows headers here as they will mess up CreateDirectory()
 +// and DeleteFile() functions!
@@ -4131,7 +4131,7 @@ index 00000000..c0139d81
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPNativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPNativeWindow.h
 new file mode 100644
-index 00000000..8b878bde
+index 00000000..53e6032d
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/UWP/interface/UWPNativeWindow.h
 @@ -0,0 +1,49 @@
@@ -4164,7 +4164,7 @@ index 00000000..8b878bde
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -4727,7 +4727,7 @@ index 00000000..47fa2c8b
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32FileSystem.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32FileSystem.hpp
 new file mode 100644
-index 00000000..8b74ab8a
+index 00000000..480655fe
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32FileSystem.hpp
 @@ -0,0 +1,136 @@
@@ -4763,7 +4763,7 @@ index 00000000..8b74ab8a
 +#include <memory>
 +#include "../../Basic/interface/BasicFileSystem.hpp"
 +#include "../../Basic/interface/StandardFile.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/FlagEnum.h"
++#include "../../../Primitives/interface/FlagEnum.h"
 +
 +class WindowsFile : public StandardFile
 +{
@@ -4869,7 +4869,7 @@ index 00000000..8b74ab8a
 +};
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32NativeWindow.h b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32NativeWindow.h
 new file mode 100644
-index 00000000..a079101d
+index 00000000..ae3d7a8e
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32NativeWindow.h
 @@ -0,0 +1,48 @@
@@ -4902,7 +4902,7 @@ index 00000000..a079101d
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 +
 +DILIGENT_BEGIN_NAMESPACE(Diligent)
 +
@@ -4923,7 +4923,7 @@ index 00000000..a079101d
 +DILIGENT_END_NAMESPACE // namespace Diligent
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32PlatformDefinitions.h b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32PlatformDefinitions.h
 new file mode 100644
-index 00000000..23b13165
+index 00000000..ca1e60b1
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32PlatformDefinitions.h
 @@ -0,0 +1,30 @@
@@ -4956,10 +4956,10 @@ index 00000000..23b13165
 +
 +#pragma once
 +
-+#include "../../../../../MultiTouch/DiligentLog/Primitives/interface/CommonDefinitions.h"
++#include "../../../Primitives/interface/CommonDefinitions.h"
 diff --git a/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32PlatformMisc.hpp b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32PlatformMisc.hpp
 new file mode 100644
-index 00000000..79941f7a
+index 00000000..c23a7135
 --- /dev/null
 +++ b/app/src/main/java/libengine/DiligentLog/Platforms/Win32/interface/Win32PlatformMisc.hpp
 @@ -0,0 +1,141 @@
@@ -4993,7 +4993,7 @@ index 00000000..79941f7a
 +#pragma once
 +
 +#include "../../Basic/interface/BasicPlatformMisc.hpp"
-+#include "../../../../../MultiTouch/DiligentLog/Platforms/Basic/interface/DebugUtilities.hpp"
++#include "../../../Platforms/Basic/interface/DebugUtilities.hpp"
 +
 +#include <intrin.h>
 +
@@ -7840,7 +7840,7 @@ index 00000000..b16824db
 +#endif //GRAPHICAL_TOOL_KIT_JVM_MANAGER_H
 diff --git a/app/src/main/java/libengine/native.cpp b/app/src/main/java/libengine/native.cpp
 new file mode 100644
-index 00000000..5027e7d6
+index 00000000..c6dac847
 --- /dev/null
 +++ b/app/src/main/java/libengine/native.cpp
 @@ -0,0 +1,209 @@
@@ -7855,7 +7855,7 @@ index 00000000..5027e7d6
 +    void onEglSetup(JNIEnv *jenv, jobject classInstance, jstring name, jstring signature) override {
 +      AppInstanceAndroidBase::onEglSetup(jenv, classInstance, name, signature);
 +    }
-+    void onEglTearDown() {
++    void onEglTearDown() override {
 +      destroyResources();
 +      AppInstanceAndroidBase::onEglTearDown();
 +    }
@@ -7866,7 +7866,7 @@ index 00000000..5027e7d6
 +      swapBuffers();
 +    }
 +    //bool onTouchEvent(MultiTouch & touchEvent);
-+    void swapBuffers() {
++    void swapBuffers() override {
 +      AppInstanceAndroidBase::swapBuffers();
 +    }
 +    void destroyResources() {
