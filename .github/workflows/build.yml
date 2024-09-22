@@ -344,6 +344,7 @@ jobs:
         #mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
         ls -alh linux.kernel.rvvm/app/build/outputs/apk/*
         mv linux.kernel.rvvm/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.debug.apk
+        mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release-unsigned.apk linux.kernel.rvvm.release.unsigned.apk
         #mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release.apk linux.kernel.rvvm.release.apk
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
@@ -384,6 +385,7 @@ jobs:
 
         files: |
           linux.kernel.rvvm.debug.apk
+          linux.kernel.rvvm.release.unsigned.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
           build_dir/Image
