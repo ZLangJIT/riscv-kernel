@@ -36,15 +36,15 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
-    - name: System upgrade
+    - name: Update pacman repository
       run: |
-        pacman -Syu --noconfirm
+        pacman -Sy
 
     - name: install important packages
       run: |
         pacman -S --noconfirm ccache zip unzip
 
-    - name: Initialize ccache -
+    - name: Initialize ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         max-size: 2048M
