@@ -1,10 +1,10 @@
-From dd655510f4c84cbaa6d677fb0a60020123195f5b Mon Sep 17 00:00:00 2001
+From 0f69253554e54d7c34decb75a9e99f9da4a7730d Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 11:56:09 +0000
+Date: Sun, 22 Sep 2024 11:57:35 +0000
 Subject: [PATCH 1/1] c
 
 ---
- app/build.gradle                              |    2 +-
+ app/build.gradle                              |    6 +-
  .../kernel}/ExampleInstrumentedTest.kt        |    4 +-
  app/src/main/AndroidManifest.xml              |    2 +-
  app/src/main/CMakeLists.txt                   |    5 +-
@@ -113,7 +113,7 @@ Subject: [PATCH 1/1] c
  .../tool/kit/DiligentEngineView.java          |  189 ++
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 109 files changed, 12320 insertions(+), 186 deletions(-)
+ 109 files changed, 12322 insertions(+), 188 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.h
@@ -214,10 +214,10 @@ Subject: [PATCH 1/1] c
  rename app/src/test/java/{media/player/pro => linux/kernel}/ExampleUnitTest.kt (92%)
 
 diff --git a/app/build.gradle b/app/build.gradle
-index 8365cc7a..172dadc6 100755
+index 8365cc7a..f022aa78 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
-@@ -15,7 +15,7 @@ android { // main settings for your application
+@@ -15,11 +15,11 @@ android { // main settings for your application
      }
  
      defaultConfig {
@@ -225,7 +225,13 @@ index 8365cc7a..172dadc6 100755
 +        applicationId "linux.kernel"
          minSdkVersion 26
          targetSdkVersion 29
-         versionCode 1
+-        versionCode 1
+-        versionName "1.0"
++        versionCode 2
++        versionName "1.1"
+ 
+         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+ 
 diff --git a/app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt b/app/src/androidTest/java/linux/kernel/ExampleInstrumentedTest.kt
 similarity index 86%
 rename from app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt
