@@ -1,6 +1,6 @@
-From 4051a708e4767a50e174ca370769f2472ae46ec0 Mon Sep 17 00:00:00 2001
+From e9f8e3a8dc3f8993df477ce3a7466f75e5e13bc5 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Sun, 22 Sep 2024 09:50:42 +0000
+Date: Sun, 22 Sep 2024 10:14:22 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -103,7 +103,7 @@ Subject: [PATCH 1/1] c
  .../java/libengine/DiligentLog/common.cpp     |   25 +
  app/src/main/java/libengine/JVM_MANAGER.cpp   |   45 +
  app/src/main/java/libengine/JVM_MANAGER.h     |   26 +
- app/src/main/java/libengine/native.cpp        |  210 ++
+ app/src/main/java/libengine/native.cpp        |  209 ++
  .../main/java/linux/kernel/MainActivity.kt    |   95 +
  .../pro => linux/kernel}/UpdatingTextView.kt  |    2 +-
  .../java/media/player/pro/MainActivity.kt     |  170 --
@@ -113,7 +113,7 @@ Subject: [PATCH 1/1] c
  .../tool/kit/DiligentEngineView.java          |  189 ++
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 109 files changed, 12321 insertions(+), 186 deletions(-)
+ 109 files changed, 12320 insertions(+), 186 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.cpp
  create mode 100644 app/src/main/java/libengine/AppInstanceAndroidBase.h
@@ -7840,10 +7840,10 @@ index 00000000..b16824db
 +#endif //GRAPHICAL_TOOL_KIT_JVM_MANAGER_H
 diff --git a/app/src/main/java/libengine/native.cpp b/app/src/main/java/libengine/native.cpp
 new file mode 100644
-index 00000000..80cd76ce
+index 00000000..5027e7d6
 --- /dev/null
 +++ b/app/src/main/java/libengine/native.cpp
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,209 @@
 +#include <string>
 +#include "AppInstanceAndroidBase.h"
 +#include "DiligentLog/Log.h"
@@ -7853,11 +7853,11 @@ index 00000000..80cd76ce
 +
 +struct Renderer : AppInstanceAndroidBase {
 +    void onEglSetup(JNIEnv *jenv, jobject classInstance, jstring name, jstring signature) override {
-+      AppInstancePlatformBase::onEglSetup(jenv, classInstance, name, signature);
++      AppInstanceAndroidBase::onEglSetup(jenv, classInstance, name, signature);
 +    }
 +    void onEglTearDown() {
 +      destroyResources();
-+      AppInstancePlatformBase::onEglTearDown();
++      AppInstanceAndroidBase::onEglTearDown();
 +    }
 +    void surfaceChanged(int w, int h) {
 +      
@@ -7867,10 +7867,9 @@ index 00000000..80cd76ce
 +    }
 +    //bool onTouchEvent(MultiTouch & touchEvent);
 +    void swapBuffers() {
-+      AppInstancePlatformBase::swapBuffers();
++      AppInstanceAndroidBase::swapBuffers();
 +    }
 +    void destroyResources() {
-+      
 +    }
 +    ~Renderer() {
 +      destroyResources();
