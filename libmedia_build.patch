@@ -70,7 +70,7 @@ index fca317f1..e515fb74 100755
  
  repositories {
 diff --git a/app/src/main/java/media/player/pro/MainActivity.kt b/app/src/main/java/media/player/pro/MainActivity.kt
-index 74a362bc..d93b8008 100644
+index 74a362bc..f6e70784 100644
 --- a/app/src/main/java/media/player/pro/MainActivity.kt
 +++ b/app/src/main/java/media/player/pro/MainActivity.kt
 @@ -9,7 +9,6 @@ import android.view.MenuItem
@@ -81,7 +81,23 @@ index 74a362bc..d93b8008 100644
  import liblayout.Builder
  import liblayout.UiThread
  import libmedia.Media
-@@ -28,8 +27,6 @@ class MainActivity : AppCompatActivity() {
+@@ -19,20 +18,24 @@ class MainActivity : AppCompatActivity() {
+     var media: Media? = null
+     var terminalController: TerminalController? = null
+ 
++    private lateinit var binding: ResultProfileBinding
++
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
++
++        binding = ResultProfileBinding.inflate(layoutInflater)
++
++	
++
+         // If this method is called more than once with the same library name
+         // the second and subsequent calls are ignored.
+-        // set log view
+ 
          // set log view
          setContentView(R.layout.slide_out_terminal)
  
@@ -89,8 +105,19 @@ index 74a362bc..d93b8008 100644
 -
          // obtain log view instance
          terminalController = TerminalController()
-         terminalController!!.onCreate(this, terminal_view)
-@@ -46,7 +43,6 @@ class MainActivity : AppCompatActivity() {
+-        terminalController!!.onCreate(this, terminal_view)
++        terminalController!!.onCreate(this, binding.terminal_view)
+ 
+         when(terminalController!!.terminalContainer.visibility) {
+             View.INVISIBLE -> toggle_terminal.setText(R.string.Show_LogTerminal)
+@@ -40,13 +43,12 @@ class MainActivity : AppCompatActivity() {
+         }
+ 
+         toggle_terminal.setOnClickListener {
+-            terminalController!!.onClick(toggle_terminal)
++            terminalController!!.onClick(binding.toggle_terminal)
+         }
+ 
          media = Media(this).also {
              it.init()
              it.loadMediaAssetAsFile("00001313_48000.raw")
@@ -98,7 +125,7 @@ index 74a362bc..d93b8008 100644
              it.loop(true)
          }
  
-@@ -169,4 +165,4 @@ class MainActivity : AppCompatActivity() {
+@@ -169,4 +171,4 @@ class MainActivity : AppCompatActivity() {
      override fun onBackPressed() {
          if (!terminalController!!.onBackPressed()) super.onBackPressed()
      }
