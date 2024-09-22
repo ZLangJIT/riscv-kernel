@@ -1,5 +1,5 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index fca317f1..b6897789 100755
+index fca317f1..ef110831 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -1,12 +1,15 @@
@@ -11,7 +11,7 @@ index fca317f1..b6897789 100755
 -    compileSdkVersion = 29
 -    buildToolsVersion = '29.0.3'
 +    compileSdkVersion 29
-+    buildTools '29.0.3'
++    buildToolsVersion '29.0.3'
      ndkVersion '21.4.7075529'
  
 +    packagingOptions {
@@ -97,7 +97,7 @@ index df8fe1b9..ee332e6f 100644
  }
  
 diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
-index 5acc58f1..083f4989 100644
+index 5acc58f1..cdf93caf 100644
 --- a/gradle/wrapper/gradle-wrapper.properties
 +++ b/gradle/wrapper/gradle-wrapper.properties
 @@ -3,4 +3,4 @@ distributionBase=GRADLE_USER_HOME
@@ -105,4 +105,4 @@ index 5acc58f1..083f4989 100644
  zipStoreBase=GRADLE_USER_HOME
  zipStorePath=wrapper/dists
 -distributionUrl=https\://services.gradle.org/distributions/gradle-5.4.1-all.zip
-+distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.4-all.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-6.1-all.zip
