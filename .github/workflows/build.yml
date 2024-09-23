@@ -262,7 +262,6 @@ jobs:
 
 
     - name: Patch [linux.kernel.rvvm]
-      if: ${{ env.REBUILD_FLAG }}
       run: |
         cd linux.kernel.rvvm
         git apply ../libmedia_build.patch
