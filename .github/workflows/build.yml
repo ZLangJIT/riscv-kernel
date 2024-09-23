@@ -288,6 +288,7 @@ jobs:
       run: |
         . ~/.bashrc
         archlinux-java set java-8-openjdk
+        cd linux.kernel.rvvm
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.26/Image.gz
         mv Image.gz app/src/main/assets/Image.gz
         ./gradlew build
@@ -330,7 +331,8 @@ jobs:
       shell: bash
       run: |
         . ~/.bashrc
-        cd libmedia ; ./gradlew assembleDebug --stacktrace
+        cd libmedia
+        ./gradlew assembleDebug --stacktrace
 
     - name: Grant execute permission for gradlew [android]
       if: false
@@ -343,14 +345,16 @@ jobs:
       run: |
         . ~/.bashrc
         archlinux-java set java-17-openjdk
-        cd android ; ./gradlew build --stacktrace
+        cd android
+        ./gradlew build --stacktrace
 
     - name: Build debug APK [android]
       if: false
       shell: bash
       run: |
         . ~/.bashrc
-        cd android ; ./gradlew assembleDebug --stacktrace
+        cd android
+        ./gradlew assembleDebug --stacktrace
 
     - name: Check files
       run: |
