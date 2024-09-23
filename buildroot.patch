@@ -1,3 +1,24 @@
+From e5262877869b6e001278682a0bc9a4eacf54fa03 Mon Sep 17 00:00:00 2001
+From: root <root@localhost.localdomain>
+Date: Mon, 23 Sep 2024 05:33:18 +0000
+Subject: [PATCH 1/1] c
+
+---
+ fs/cpio/init                                                 | 3 +++
+ .../toolchain-external-custom/Config.in.options              | 5 +++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/fs/cpio/init b/fs/cpio/init
+index f74ef7e15f..3a858b0d23 100755
+--- a/fs/cpio/init
++++ b/fs/cpio/init
+@@ -13,3 +13,6 @@ if (exec 0</dev/console) 2>/dev/null; then
+ fi
+ 
+ exec /sbin/init "$@"
++/bin/busybox echo "fell off end of /init"
++/bin/busybox echo "powering off..."
++/bin/busybox poweroff -f
 diff --git a/toolchain/toolchain-external/toolchain-external-custom/Config.in.options b/toolchain/toolchain-external/toolchain-external-custom/Config.in.options
 index f7825cb88e..252b7196fa 100644
 --- a/toolchain/toolchain-external/toolchain-external-custom/Config.in.options
@@ -16,3 +37,6 @@ index f7825cb88e..252b7196fa 100644
  	select BR2_TOOLCHAIN_GCC_AT_LEAST_13
  
  config BR2_TOOLCHAIN_EXTERNAL_GCC_12
+-- 
+2.46.0
+

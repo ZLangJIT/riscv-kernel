@@ -93,18 +93,18 @@ jobs:
         pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld zip unzip
         pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
         pacman -S --noconfirm riscv64-unknown-elf-gcc
-        which riscv64-linux-gnu-gcc || true
-        which riscv64-unknown-elf-gcc || true
-        set -v
         ln -s /usr/riscv64-linux-gnu/include/linux /usr/riscv64-linux-gnu/usr/include/linux || true
-        ls -lahp /usr/riscv64-linux-gnu/usr/include/linux/version.h || true
-        ls -lahp /usr/riscv64-linux-gnu/include/linux/version.h || true
         echo "CLANG_VERSION=$(pacman -Qs clang | grep local/clang | sed 's#^.*local\/clang.*[^0-9]\(.*\) (\(.*\))#\1#')" | tee -a $GITHUB_ENV
 
     - name: Clone buildroot
       if: ${{ env.REBUILD_FLAG }}
       run: |
         su --command="cd build_dir ; git clone https://github.com/ATS-INTC/buildroot.git --depth=1 buildroot" build
+
+    - name: Patch buildroot [buildroot]
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
+        su --command="cd build_dir/buildroot ; git apply ../../buildroot.patch" build
 
     - name: Build rootfs [buildroot]
       if: ${{ env.REBUILD_FLAG }}
@@ -114,7 +114,7 @@ jobs:
         else
             export LOGICAL_CORES=$(nproc --all)
         fi
-        su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/buildroot ; git apply ../../buildroot_gcc14.patch ; git apply ../../buildroot_init.patch ; cp ../../.buildrootconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
+        su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/buildroot ; cp ../../.buildrootconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
 
     - name: Copy rootfs [buildroot]
       if: ${{ env.REBUILD_FLAG }}
@@ -132,7 +132,12 @@ jobs:
       run: |
         su --command="cd build_dir ; git clone https://github.com/torvalds/linux -b v6.11 --depth 1 linux-xlnx" build
 
-    - name: Build kernel [linux 6.11]
+    - name: Patch kernel [linux 6.11]
+      if: ${{ env.REBUILD_FLAG }}
+      run: |
+        su --command="cd build_dir/linux-xlnx ; git apply ../../kernel.patch" build
+
+    - name: build kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
       run: |
         if [ "$(cat /sys/devices/system/cpu/smt/active)" = "1" ]; then
@@ -245,25 +250,20 @@ jobs:
         . ~/.bashrc
         sdkmanager --list --sdk_root=/android-sdk || true
 
-    - name: clone libmedia_qemu
-      run: |
-        git clone https://github.com/mgood7123/libmedia --depth=1 linux.kernel.rvvm
-
     - name: Install ndk 21
       shell: bash
       run: |
         . ~/.bashrc
         yes | sdkmanager --install "ndk;21.4.7075529" --sdk_root=/android-sdk || true
 
-    - name: Grant execute permission for gradlew [linux.kernel.rvvm]
+    - name: Clone libmedia [linux.kernel.rvvm]
       run: |
-        chmod +x linux.kernel.rvvm/gradlew
+        git clone https://github.com/mgood7123/libmedia --depth=1 linux.kernel.rvvm
 
-    - name: Build with Gradle [linux.kernel.rvvm]
-      shell: bash
+
+    - name: Patch [linux.kernel.rvvm]
+      if: ${{ env.REBUILD_FLAG }}
       run: |
-        . ~/.bashrc
-        archlinux-java set java-8-openjdk
         cd linux.kernel.rvvm
         git apply ../libmedia_build.patch
         rm -rf ffmpeg
@@ -277,7 +277,17 @@ jobs:
         rm -rf app/src/main/assets/FUNKY_HOUSE.raw
         rm -rf app/src/main/assets/Rhythm8
         rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
-        git apply ../libmedia_build_qemu.patch
+        git apply ../libmedia.patch
+
+    - name: Grant execute permission for gradlew [linux.kernel.rvvm]
+      run: |
+        chmod +x linux.kernel.rvvm/gradlew
+
+    - name: Build with Gradle [linux.kernel.rvvm]
+      shell: bash
+      run: |
+        . ~/.bashrc
+        archlinux-java set java-8-openjdk
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.26/Image.gz
         mv Image.gz app/src/main/assets/Image.gz
         ./gradlew build
@@ -289,10 +299,17 @@ jobs:
         cd linux.kernel.rvvm
         ./gradlew assembleDebug --stacktrace
 
-    - name: clone libmedia
+    - name: Clone libmedia
       if: false
       run: |
         git clone https://github.com/mgood7123/libmedia --depth=1
+
+    - name: Patch [libmedia]
+      if: false
+      shell: bash
+      run: |
+        cd libmedia
+        git apply ../libmedia_build.patch
 
     - name: Grant execute permission for gradlew [libmedia]
       if: false
@@ -306,7 +323,6 @@ jobs:
         . ~/.bashrc
         archlinux-java set java-8-openjdk
         cd libmedia
-        git apply ../libmedia_build.patch
         ./gradlew build
 
     - name: Build debug APK [libmedia]
