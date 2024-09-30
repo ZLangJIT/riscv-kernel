@@ -1,3 +1,4 @@
+./gen_patch__rvvm.sh
 set -x
 touch libmedia.patch
 cd libmedia
