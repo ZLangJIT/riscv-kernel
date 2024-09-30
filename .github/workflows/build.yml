@@ -256,6 +256,12 @@ jobs:
         . ~/.bashrc
         yes | sdkmanager --install "ndk;21.4.7075529" --sdk_root=/android-sdk || true
 
+    - name: Install cmake 3.10.2.4988404
+      shell: bash
+      run: |
+        . ~/.bashrc
+        yes | sdkmanager --install "cmake;3.10.2.4988404" --sdk_root=/android-sdk || true
+
     - name: Clone libmedia [linux.kernel.rvvm]
       run: |
         git clone https://github.com/mgood7123/libmedia --depth=1 linux.kernel.rvvm
