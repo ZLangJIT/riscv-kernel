@@ -7,8 +7,8 @@ on:
     branches: [ main ]
   workflow_dispatch:
     # manual trigger
-  schedule:
-    - cron: '0 0 * * *' # https://crontab.guru
+  #schedule:
+  #  - cron: '0 0 * * *' # https://crontab.guru
 
 env:
   IS_LTS: NO
@@ -104,7 +104,7 @@ jobs:
     - name: Patch buildroot [buildroot]
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="set -v ; cd build_dir/buildroot ; git apply ../../buildroot.patch" build
+        su --command="set -v ; cd build_dir/buildroot ; git apply --allow-empty ../../buildroot.patch" build
 
     - name: Build rootfs [buildroot]
       if: ${{ env.REBUILD_FLAG }}
@@ -135,7 +135,7 @@ jobs:
     - name: Patch kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="set -v ; cd build_dir/linux-xlnx ; git apply ../../kernel.patch" build
+        su --command="set -v ; cd build_dir/linux-xlnx ; git apply --allow-empty ../../kernel.patch" build
 
     - name: build kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
@@ -271,7 +271,7 @@ jobs:
       run: |
         set -v
         cd linux.kernel.rvvm
-        git apply ../libmedia_build.patch
+        git apply --allow-empty ../libmedia_build.patch
         rm -rf ffmpeg
         rm -rf ADB_PULL_DATA.media.player.pro
         rm -rf APKS
@@ -283,10 +283,10 @@ jobs:
         rm -rf app/src/main/assets/FUNKY_HOUSE.raw
         rm -rf app/src/main/assets/Rhythm8
         rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
-        git apply ../libmedia.patch
+        git apply --allow-empty ../libmedia.patch
         cd app/src/main/java/libengine/RVVM
         mv .git0 .git
-        git apply ../../../../../../../rvvm.patch
+        git apply --allow-empty ../../../../../../../rvvm.patch
         git status
         git log -n 3
         grep -n --color isize src/rvjit/rvjit.c
@@ -323,7 +323,7 @@ jobs:
       run: |
         set -v
         cd libmedia
-        git apply ../libmedia_build.patch
+        git apply --allow-empty ../libmedia_build.patch
 
     - name: Grant execute permission for gradlew [libmedia]
       if: false
