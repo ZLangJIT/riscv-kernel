@@ -1,13 +1,13 @@
-From d9daa2acc07329a9ff1c4faa0d4ee63b9ab0a2e0 Mon Sep 17 00:00:00 2001
+From 09851629d16db6cb6c62b8f7ba04e48e9e34e4d8 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 15:28:16 +0000
+Date: Mon, 30 Sep 2024 15:33:01 +0000
 Subject: [PATCH 1/1] c
 
 ---
  src/riscv_cpu.c        |   8 +-
  src/rvjit/rvjit.c      |   2 +-
- src/rvjit/rvjit_emit.c | 195 +++++++++++++++++++++--------------------
- 3 files changed, 107 insertions(+), 98 deletions(-)
+ src/rvjit/rvjit_emit.c | 194 +++++++++++++++++++++--------------------
+ 3 files changed, 106 insertions(+), 98 deletions(-)
 
 diff --git a/src/riscv_cpu.c b/src/riscv_cpu.c
 index cb472ae..1f41a79 100644
@@ -42,7 +42,7 @@ index 8ad74f8..bd66e8d 100644
  
      // Drain data cache
 diff --git a/src/rvjit/rvjit_emit.c b/src/rvjit/rvjit_emit.c
-index 1a0edc3..4fb2e50 100644
+index 1a0edc3..3192658 100644
 --- a/src/rvjit/rvjit_emit.c
 +++ b/src/rvjit/rvjit_emit.c
 @@ -266,12 +266,12 @@ RVJIT_CALL static void rvjit_tail_lookup(rvvm_hart_t* vm)
@@ -293,12 +293,11 @@ index 1a0edc3..4fb2e50 100644
  #else
      UNUSED(addr);
      UNUSED(offset);
-@@ -448,7 +454,10 @@ void rvjit_linker_patch_jmp(void* addr, int32_t offset)
+@@ -448,7 +454,9 @@ void rvjit_linker_patch_jmp(void* addr, int32_t offset)
  void rvjit_linker_patch_ret(void* addr)
  {
  #ifdef RVJIT_NATIVE_LINKER
 -    rvjit_patch_ret(addr);
-+#ifdef RVJIT_NATIVE_LINKER
 +    if (!rvvm_has_arg("rvjit_disable_native_linker")) {
 +        rvjit_patch_ret(addr);
 +    }
