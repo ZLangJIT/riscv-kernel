@@ -289,6 +289,7 @@ jobs:
         git apply ../../../../../../../rvvm.patch
         git status
         git log -n 3
+        grep -n --color isize src/rvjit/rvjit.c
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
       run: |
