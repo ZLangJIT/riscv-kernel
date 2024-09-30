@@ -1,10 +1,10 @@
-From 7ed35a1005cc4283c2b83fe5144de63b29c4bc86 Mon Sep 17 00:00:00 2001
+From 4f47de66032af438d7692f9d8972ebdc4c220391 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 09:15:03 +0000
+Date: Mon, 30 Sep 2024 09:45:40 +0000
 Subject: [PATCH 1/1] c
 
 ---
- app/build.gradle                              |    7 +-
+ app/build.gradle                              |    6 +-
  .../kernel}/ExampleInstrumentedTest.kt        |    4 +-
  app/src/main/AndroidManifest.xml              |    2 +-
  app/src/main/CMakeLists.txt                   |    5 +-
@@ -277,7 +277,7 @@ Subject: [PATCH 1/1] c
  app/src/main/res/values/strings.xml           |    2 +-
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
  settings.gradle                               |    2 +-
- 273 files changed, 60405 insertions(+), 189 deletions(-)
+ 273 files changed, 60404 insertions(+), 189 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100755 app/src/main/assets/boot_rvvm_disk.sh
  create mode 100644 app/src/main/assets/uboot
@@ -541,7 +541,7 @@ Subject: [PATCH 1/1] c
  rename app/src/test/java/{media/player/pro => linux/kernel}/ExampleUnitTest.kt (92%)
 
 diff --git a/app/build.gradle b/app/build.gradle
-index 8365cc7a..94555d5c 100755
+index 8365cc7a..89f4ba8a 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -15,11 +15,11 @@ android { // main settings for your application
@@ -559,14 +559,6 @@ index 8365cc7a..94555d5c 100755
  
          testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
  
-@@ -56,6 +56,7 @@ android { // main settings for your application
-     externalNativeBuild {
-         cmake {
-             path "src/main/CMakeLists.txt"
-+            version = "3.30.3"
-         }
-     }
-     compileOptions {
 diff --git a/app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt b/app/src/androidTest/java/linux/kernel/ExampleInstrumentedTest.kt
 similarity index 86%
 rename from app/src/androidTest/java/media/player/pro/ExampleInstrumentedTest.kt
