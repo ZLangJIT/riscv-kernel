@@ -1,5 +1,9 @@
 ./gen_patch__rvvm.sh
 set -x
+if [[ -f libmedia.patch ]]
+	then
+		rm -v libmedia.patch
+fi
 touch libmedia.patch
 cd libmedia
 git reset 0f06c20bf1341da28213178545ba056f1791896f
