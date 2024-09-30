@@ -1,12 +1,33 @@
-From b8ec03c4ad1338530065db1061eeda86df7f9feb Mon Sep 17 00:00:00 2001
+From d9daa2acc07329a9ff1c4faa0d4ee63b9ab0a2e0 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 14:43:59 +0000
+Date: Mon, 30 Sep 2024 15:28:16 +0000
 Subject: [PATCH 1/1] c
 
 ---
- src/rvjit/rvjit.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/riscv_cpu.c        |   8 +-
+ src/rvjit/rvjit.c      |   2 +-
+ src/rvjit/rvjit_emit.c | 195 +++++++++++++++++++++--------------------
+ 3 files changed, 107 insertions(+), 98 deletions(-)
 
+diff --git a/src/riscv_cpu.c b/src/riscv_cpu.c
+index cb472ae..1f41a79 100644
+--- a/src/riscv_cpu.c
++++ b/src/riscv_cpu.c
+@@ -127,10 +127,10 @@ slow_path bool riscv_jit_tlb_lookup(rvvm_hart_t* vm)
+     virt_addr_t tpc = vm->jtlb[entry].pc;
+     if (likely(pc == tpc)) {
+         vm->jtlb[entry].block(vm);
+-#ifndef RVJIT_NATIVE_LINKER
+-        // Try to execute more blocks if they aren't linked
+-        for (size_t i=0; i<10 && riscv_jtlb_lookup(vm); ++i);
+-#endif
++        if (rvvm_has_arg("rvjit_disable_native_linker")) {
++            // Try to execute more blocks if they aren't linked
++            for (size_t i=0; i<10 && riscv_jtlb_lookup(vm); ++i);
++        }
+         return true;
+     } else {
+         return riscv_jit_lookup(vm);
 diff --git a/src/rvjit/rvjit.c b/src/rvjit/rvjit.c
 index 8ad74f8..bd66e8d 100644
 --- a/src/rvjit/rvjit.c
@@ -20,6 +41,270 @@ index 8ad74f8..bd66e8d 100644
      size_t end = ((size_t)addr) + size;
  
      // Drain data cache
+diff --git a/src/rvjit/rvjit_emit.c b/src/rvjit/rvjit_emit.c
+index 1a0edc3..4fb2e50 100644
+--- a/src/rvjit/rvjit_emit.c
++++ b/src/rvjit/rvjit_emit.c
+@@ -266,12 +266,12 @@ RVJIT_CALL static void rvjit_tail_lookup(rvvm_hart_t* vm)
+ static void rvjit_lookup_block(rvjit_block_t* block)
+ {
+ #ifdef RVJIT_NATIVE_LINKER
+-
++    if (!rvvm_has_arg("rvjit_disable_native_linker")) {
+ #ifdef RVJIT_LOOKUP_TAILCALL
+-    regid_t reg = rvjit_claim_hreg(block);
+-    rvjit_native_setregw(block, reg, (size_t)rvjit_tail_lookup);
+-    rvjit_jmp_reg(block, reg);
+-    rvjit_free_hreg(block, reg);
++        regid_t reg = rvjit_claim_hreg(block);
++        rvjit_native_setregw(block, reg, (size_t)rvjit_tail_lookup);
++        rvjit_jmp_reg(block, reg);
++        rvjit_free_hreg(block, reg);
+ #elif defined(RVJIT_X86) && defined(RVJIT_NATIVE_64BIT)
+ /*
+  * For future reference:
+@@ -307,95 +307,97 @@ static void rvjit_lookup_block(rvjit_block_t* block)
+     L1:
+     ret
+  */
+-    uint8_t code[41] = {0x48, 0x8B, 0x90, 0x08, 0x01, 0x00, 0x00, 0x89,
+-        0xD0, 0xC1, 0xE0, 0x03, 0x25, 0xF0, 0x0F, 0x00, 0x00, 0x48, 0x01,
+-        0xC0, 0x48, 0x39, 0x90, 0x20, 0x22, 0x00, 0x00, 0x75, 0x0B, 0x83,
+-        0x38, 0x00, 0x74, 0x06, 0xFF, 0xA0, 0x18, 0x22, 0x00, 0x00, 0xC3};
+-    code[2] |= VM_PTR_REG;
+-    code[19] |= (VM_PTR_REG << 3);
+-    code[30] |= VM_PTR_REG;
+-    write_uint32_le_m(code + 3, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
+-    code[11] = VM_TLB_SHIFT - 2;
+-    write_uint32_le_m(code + 13, VM_TLB_MASK << (VM_TLB_SHIFT - 1));
+-    write_uint32_le_m(code + 23, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
+-    write_uint32_le_m(code + 36, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
+-    rvjit_put_code(block, code, sizeof(code));
++        uint8_t code[41] = {0x48, 0x8B, 0x90, 0x08, 0x01, 0x00, 0x00, 0x89,
++            0xD0, 0xC1, 0xE0, 0x03, 0x25, 0xF0, 0x0F, 0x00, 0x00, 0x48, 0x01,
++            0xC0, 0x48, 0x39, 0x90, 0x20, 0x22, 0x00, 0x00, 0x75, 0x0B, 0x83,
++            0x38, 0x00, 0x74, 0x06, 0xFF, 0xA0, 0x18, 0x22, 0x00, 0x00, 0xC3};
++        code[2] |= VM_PTR_REG;
++        code[19] |= (VM_PTR_REG << 3);
++        code[30] |= VM_PTR_REG;
++        write_uint32_le_m(code + 3, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
++        code[11] = VM_TLB_SHIFT - 2;
++        write_uint32_le_m(code + 13, VM_TLB_MASK << (VM_TLB_SHIFT - 1));
++        write_uint32_le_m(code + 23, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
++        write_uint32_le_m(code + 36, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
++        rvjit_put_code(block, code, sizeof(code));
+ #elif defined(RVJIT_X86) && defined(RVJIT_ABI_FASTCALL)
+-    uint8_t code[38] = {0x8B, 0x91, 0x04, 0x01, 0x00, 0x00, 0x89, 0xD0,
+-        0xC1, 0xE0, 0x03, 0x25, 0xF0, 0x0F, 0x00, 0x00, 0x01, 0xC8, 0x39,
+-        0x90, 0x1C, 0x22, 0x00, 0x00, 0x75, 0x0B, 0x83, 0x39, 0x00, 0x74,
+-        0x06, 0xFF, 0xA0, 0x14, 0x22, 0x00, 0x00, 0xC3};
+-    write_uint32_le_m(code + 2, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
+-    code[10] = VM_TLB_SHIFT - 2;
+-    write_uint32_le_m(code + 12, VM_TLB_MASK << (VM_TLB_SHIFT - 1));
+-    write_uint32_le_m(code + 20, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
+-    write_uint32_le_m(code + 33, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
+-    rvjit_put_code(block, code, sizeof(code));
++        uint8_t code[38] = {0x8B, 0x91, 0x04, 0x01, 0x00, 0x00, 0x89, 0xD0,
++            0xC1, 0xE0, 0x03, 0x25, 0xF0, 0x0F, 0x00, 0x00, 0x01, 0xC8, 0x39,
++            0x90, 0x1C, 0x22, 0x00, 0x00, 0x75, 0x0B, 0x83, 0x39, 0x00, 0x74,
++            0x06, 0xFF, 0xA0, 0x14, 0x22, 0x00, 0x00, 0xC3};
++        write_uint32_le_m(code + 2, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
++        code[10] = VM_TLB_SHIFT - 2;
++        write_uint32_le_m(code + 12, VM_TLB_MASK << (VM_TLB_SHIFT - 1));
++        write_uint32_le_m(code + 20, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
++        write_uint32_le_m(code + 33, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
++        rvjit_put_code(block, code, sizeof(code));
+ #else
+-    regid_t pc = rvjit_try_claim_hreg(block);
+-    regid_t tpc = rvjit_try_claim_hreg(block);
+-    regid_t cpc = rvjit_try_claim_hreg(block);
+-
+-    static bool allow_ir_lookup = true;
+-    if (!allow_ir_lookup || pc == REG_ILL || tpc == REG_ILL || cpc == REG_ILL) {
+-        if (allow_ir_lookup) {
+-            allow_ir_lookup = false;
+-            // This is usually the case on i386
+-            rvvm_warn("Insufficient RVJIT registers for IR-based block lookup");
++        regid_t pc = rvjit_try_claim_hreg(block);
++        regid_t tpc = rvjit_try_claim_hreg(block);
++        regid_t cpc = rvjit_try_claim_hreg(block);
++    
++        static bool allow_ir_lookup = true;
++        if (!allow_ir_lookup || pc == REG_ILL || tpc == REG_ILL || cpc == REG_ILL) {
++            if (allow_ir_lookup) {
++                allow_ir_lookup = false;
++                // This is usually the case on i386
++                rvvm_warn("Insufficient RVJIT registers for IR-based block lookup");
++            }
++            rvjit_native_ret(block);
++            return;
+         }
+-        rvjit_native_ret(block);
+-        return;
+-    }
+ 
+ #if defined(RVJIT_NATIVE_64BIT) && defined(USE_RV64)
+-    rvjit64_native_ld(block, pc, VM_PTR_REG, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
++        rvjit64_native_ld(block, pc, VM_PTR_REG, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
+ #else
+-    rvjit32_native_lw(block, pc, VM_PTR_REG, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
++        rvjit32_native_lw(block, pc, VM_PTR_REG, offsetof(rvvm_hart_t, registers[REGISTER_PC]));
+ #endif
+ 
+ #if defined(RVJIT_X86) || defined(RVJIT_ARM64)
+-    // x86 & ARM64 can carry big mask immediate without spilling
+-    rvjit32_native_slli(block, tpc, pc, VM_TLB_SHIFT - 2);
+-    rvjit32_native_andi(block, tpc, tpc, VM_TLB_MASK << (VM_TLB_SHIFT - 1));
++        // x86 & ARM64 can carry big mask immediate without spilling
++        rvjit32_native_slli(block, tpc, pc, VM_TLB_SHIFT - 2);
++        rvjit32_native_andi(block, tpc, tpc, VM_TLB_MASK << (VM_TLB_SHIFT - 1));
+ #else
+-    rvjit32_native_srli(block, tpc, pc, 1);
+-    rvjit32_native_andi(block, tpc, tpc, VM_TLB_MASK);
+-    rvjit32_native_slli(block, tpc, tpc, VM_TLB_SHIFT - 1);
++        rvjit32_native_srli(block, tpc, pc, 1);
++        rvjit32_native_andi(block, tpc, tpc, VM_TLB_MASK);
++        rvjit32_native_slli(block, tpc, tpc, VM_TLB_SHIFT - 1);
+ #endif
+ 
+ #ifdef RVJIT_NATIVE_64BIT
+-    rvjit64_native_add(block, tpc, tpc, VM_PTR_REG);
++        rvjit64_native_add(block, tpc, tpc, VM_PTR_REG);
+ #else
+-    rvjit32_native_add(block, tpc, tpc, VM_PTR_REG);
++        rvjit32_native_add(block, tpc, tpc, VM_PTR_REG);
+ #endif
+ #if defined(RVJIT_NATIVE_64BIT) && defined(USE_RV64)
+-    rvjit64_native_ld(block, cpc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
+-    branch_t l1 = rvjit64_native_bne(block, cpc, pc, BRANCH_NEW, false);
++        rvjit64_native_ld(block, cpc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
++        branch_t l1 = rvjit64_native_bne(block, cpc, pc, BRANCH_NEW, false);
+ #else
+-    rvjit32_native_lw(block, cpc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
+-    branch_t l1 = rvjit32_native_bne(block, cpc, pc, BRANCH_NEW, false);
++        rvjit32_native_lw(block, cpc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, pc));
++        branch_t l1 = rvjit32_native_bne(block, cpc, pc, BRANCH_NEW, false);
+ #endif
+-    rvjit32_native_lw(block, cpc, VM_PTR_REG, 0);
+-    branch_t l2 = rvjit32_native_beqz(block, cpc, BRANCH_NEW, false);
++        rvjit32_native_lw(block, cpc, VM_PTR_REG, 0);
++        branch_t l2 = rvjit32_native_beqz(block, cpc, BRANCH_NEW, false);
+ #ifdef RVJIT_NATIVE_64BIT
+-    rvjit64_native_ld(block, pc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
++        rvjit64_native_ld(block, pc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
+ #else
+-    rvjit32_native_lw(block, pc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
++        rvjit32_native_lw(block, pc, tpc, offsetof(rvvm_hart_t, jtlb) + offsetof(rvvm_jtlb_entry_t, block));
+ #endif
+-    rvjit_jmp_reg(block, pc);
++        rvjit_jmp_reg(block, pc);
+ #if defined(RVJIT_NATIVE_64BIT) && defined(USE_RV64)
+-    rvjit64_native_bne(block, cpc, pc, l1, true);
++        rvjit64_native_bne(block, cpc, pc, l1, true);
+ #else
+-    rvjit32_native_bne(block, cpc, pc, l1, true);
++        rvjit32_native_bne(block, cpc, pc, l1, true);
+ #endif
+-    rvjit32_native_beqz(block, cpc, l2, true);
+-    rvjit_native_ret(block);
+-
+-    rvjit_free_hreg(block, pc);
+-    rvjit_free_hreg(block, tpc);
+-    rvjit_free_hreg(block, cpc);
++        rvjit32_native_beqz(block, cpc, l2, true);
++        rvjit_native_ret(block);
++    
++        rvjit_free_hreg(block, pc);
++        rvjit_free_hreg(block, tpc);
++        rvjit_free_hreg(block, cpc);
+ #endif
+-
++    } else {
++        rvjit_native_ret(block);
++    }
+ #else
+     rvjit_native_ret(block);
+ #endif
+@@ -404,32 +406,34 @@ static void rvjit_lookup_block(rvjit_block_t* block)
+ static void rvjit_link_block(rvjit_block_t* block)
+ {
+ #ifdef RVJIT_NATIVE_LINKER
+-    phys_addr_t next_pc = block->phys_pc + block->pc_off;
+-    size_t exit_ptr = (size_t)(block->heap.data + block->heap.curr + block->size);
+-    size_t next_block;
+-    if (next_pc == block->phys_pc) {
+-        next_block = (size_t)(block->heap.data + block->heap.curr);
+-    } else {
+-        next_block = hashmap_get(&block->heap.blocks, next_pc);
+-        if (next_block && block->heap.code) {
+-            next_block += (size_t)(block->heap.data) - (size_t)(block->heap.code);
++    if (!rvvm_has_arg("rvjit_disable_native_linker")) {
++        phys_addr_t next_pc = block->phys_pc + block->pc_off;
++        size_t exit_ptr = (size_t)(block->heap.data + block->heap.curr + block->size);
++        size_t next_block;
++        if (next_pc == block->phys_pc) {
++            next_block = (size_t)(block->heap.data + block->heap.curr);
++        } else {
++            next_block = hashmap_get(&block->heap.blocks, next_pc);
++            if (next_block && block->heap.code) {
++                next_block += (size_t)(block->heap.data) - (size_t)(block->heap.code);
++            }
+         }
+-    }
+-
+-    if ((next_pc >> 12) == (block->phys_pc >> 12)) {
+-        if (next_block) {
+-            rvjit_tail_bnez(block, VM_PTR_REG, next_block - exit_ptr);
+-            //rvjit_tail_jmp(block, next_block - exit_ptr);
++    
++        if ((next_pc >> 12) == (block->phys_pc >> 12)) {
++            if (next_block) {
++                rvjit_tail_bnez(block, VM_PTR_REG, next_block - exit_ptr);
++                //rvjit_tail_jmp(block, next_block - exit_ptr);
++            } else {
++                rvjit_patchable_ret(block);
++                vector_emplace_back(block->links);
++                vector_at(block->links, vector_size(block->links) - 1).dest = next_pc;
++                vector_at(block->links, vector_size(block->links) - 1).ptr = exit_ptr;
++                return;
++            }
+         } else {
+-            rvjit_patchable_ret(block);
+-            vector_emplace_back(block->links);
+-            vector_at(block->links, vector_size(block->links) - 1).dest = next_pc;
+-            vector_at(block->links, vector_size(block->links) - 1).ptr = exit_ptr;
++            rvjit_lookup_block(block);
+             return;
+         }
+-    } else {
+-        rvjit_lookup_block(block);
+-        return;
+     }
+ #endif
+     rvjit_native_ret(block);
+@@ -438,7 +442,9 @@ static void rvjit_link_block(rvjit_block_t* block)
+ void rvjit_linker_patch_jmp(void* addr, int32_t offset)
+ {
+ #ifdef RVJIT_NATIVE_LINKER
+-    rvjit_patch_jmp(addr, offset);
++    if (!rvvm_has_arg("rvjit_disable_native_linker")) {
++        rvjit_patch_jmp(addr, offset);
++    }
+ #else
+     UNUSED(addr);
+     UNUSED(offset);
+@@ -448,7 +454,10 @@ void rvjit_linker_patch_jmp(void* addr, int32_t offset)
+ void rvjit_linker_patch_ret(void* addr)
+ {
+ #ifdef RVJIT_NATIVE_LINKER
+-    rvjit_patch_ret(addr);
++#ifdef RVJIT_NATIVE_LINKER
++    if (!rvvm_has_arg("rvjit_disable_native_linker")) {
++        rvjit_patch_ret(addr);
++    }
+ #else
+     UNUSED(addr);
+ #endif
 -- 
 2.46.0
 
