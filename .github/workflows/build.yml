@@ -286,6 +286,7 @@ jobs:
         cd app/src/main/java/libengine/RVVM
         mv .git0 .git
         git apply ../../../../../../../rvvm.patch
+        git log -n 3
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
       run: |
