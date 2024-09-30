@@ -104,7 +104,7 @@ jobs:
     - name: Patch buildroot [buildroot]
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="cd build_dir/buildroot ; git apply ../../buildroot.patch" build
+        su --command="set -v ; cd build_dir/buildroot ; git apply ../../buildroot.patch" build
 
     - name: Build rootfs [buildroot]
       if: ${{ env.REBUILD_FLAG }}
@@ -135,7 +135,7 @@ jobs:
     - name: Patch kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="cd build_dir/linux-xlnx ; git apply ../../kernel.patch" build
+        su --command="set -v ; cd build_dir/linux-xlnx ; git apply ../../kernel.patch" build
 
     - name: build kernel [linux 6.11]
       if: ${{ env.REBUILD_FLAG }}
@@ -269,6 +269,7 @@ jobs:
 
     - name: Patch [linux.kernel.rvvm]
       run: |
+        set -v
         cd linux.kernel.rvvm
         git apply ../libmedia_build.patch
         rm -rf ffmpeg
@@ -286,6 +287,7 @@ jobs:
         cd app/src/main/java/libengine/RVVM
         mv .git0 .git
         git apply ../../../../../../../rvvm.patch
+        git status
         git log -n 3
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
@@ -318,6 +320,7 @@ jobs:
       if: false
       shell: bash
       run: |
+        set -v
         cd libmedia
         git apply ../libmedia_build.patch
 
