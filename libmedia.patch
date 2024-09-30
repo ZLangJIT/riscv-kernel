@@ -1,6 +1,6 @@
-From 611a7db098a857abea685694414120ba758aef5a Mon Sep 17 00:00:00 2001
+From c04b95514add98f0ce8aff2b00c74b350dee2900 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 10:18:11 +0000
+Date: Mon, 30 Sep 2024 10:27:22 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -19,7 +19,7 @@ Subject: [PATCH 1/1] c
  .../term/terminal_view/TerminalView.java      |    4 +-
  .../java/libengine/AppInstanceAndroidBase.cpp |   70 +
  .../java/libengine/AppInstanceAndroidBase.h   |   27 +
- app/src/main/java/libengine/CMakeLists.txt    |   41 +
+ app/src/main/java/libengine/CMakeLists.txt    |   44 +
  .../java/libengine/DiligentLog/CMakeLists.txt |  332 ++
  app/src/main/java/libengine/DiligentLog/Log.h |   71 +
  .../Platforms/Android/CMakeLists.txt          |   46 +
@@ -279,7 +279,7 @@ Subject: [PATCH 1/1] c
  build.gradle                                  |    2 +-
  gradle/wrapper/gradle-wrapper.properties      |    2 +-
  settings.gradle                               |    2 +-
- 275 files changed, 60407 insertions(+), 191 deletions(-)
+ 275 files changed, 60410 insertions(+), 191 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100755 app/src/main/assets/boot_rvvm_disk.sh
  create mode 100644 app/src/main/assets/uboot
@@ -10187,10 +10187,10 @@ index 00000000..860ddd6e
 +#endif //GRAPHICAL_TOOL_KIT_APPINSTANCEANDROIDBASE_H
 diff --git a/app/src/main/java/libengine/CMakeLists.txt b/app/src/main/java/libengine/CMakeLists.txt
 new file mode 100644
-index 00000000..e7301023
+index 00000000..9fd378f4
 --- /dev/null
 +++ b/app/src/main/java/libengine/CMakeLists.txt
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,44 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +set(CMAKE_CXX_STANDARD 11)
@@ -10226,10 +10226,13 @@ index 00000000..e7301023
 +        Diligent-Log
 +)
 +
++set(RVVM_USE_LIB OFF)
++set(RVVM_USE_JNI OFF)
++
 +add_subdirectory(RVVM)
 +add_dependencies(native-lib rvvm_cli)
 +add_custom_command(TARGET native-lib
-+                   POST_BUILD
++                   PRE_BUILD
 +                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rvvm_cli> ${CMAKE_CURRENT_SOURCE_DIR}/../../assets/rvvm
 +)
 diff --git a/app/src/main/java/libengine/DiligentLog/CMakeLists.txt b/app/src/main/java/libengine/DiligentLog/CMakeLists.txt
