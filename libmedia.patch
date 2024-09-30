@@ -1,6 +1,6 @@
-From b4d2aeca897c7dc5e0f31b67255b8ac9253b6fae Mon Sep 17 00:00:00 2001
+From 611a7db098a857abea685694414120ba758aef5a Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 10:15:08 +0000
+Date: Mon, 30 Sep 2024 10:18:11 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -276,8 +276,10 @@ Subject: [PATCH 1/1] c
  .../tool/kit/DiligentEngineView.java          |  189 +
  app/src/main/res/values/strings.xml           |    2 +-
  .../pro => linux/kernel}/ExampleUnitTest.kt   |    2 +-
+ build.gradle                                  |    2 +-
+ gradle/wrapper/gradle-wrapper.properties      |    2 +-
  settings.gradle                               |    2 +-
- 273 files changed, 60405 insertions(+), 189 deletions(-)
+ 275 files changed, 60407 insertions(+), 191 deletions(-)
  rename app/src/androidTest/java/{media/player/pro => linux/kernel}/ExampleInstrumentedTest.kt (86%)
  create mode 100755 app/src/main/assets/boot_rvvm_disk.sh
  create mode 100644 app/src/main/assets/uboot
@@ -72194,6 +72196,29 @@ index 28d4d9bc..084a9e19 100644
  
  import org.junit.Test
  
+diff --git a/build.gradle b/build.gradle
+index ee332e6f..7b2e55c7 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -8,7 +8,7 @@ buildscript {
+         mavenCentral()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:3.6.1'
++        classpath 'com.android.tools.build:gradle:4.1.2'
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index cdf93caf..62d19dee 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -3,4 +3,4 @@ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-6.1-all.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-6.5-all.zip
 diff --git a/settings.gradle b/settings.gradle
 index f9e92492..cb854736 100644
 --- a/settings.gradle
