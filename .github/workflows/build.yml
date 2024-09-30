@@ -283,6 +283,7 @@ jobs:
         rm -rf app/src/main/assets/Rhythm8
         rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
         git apply ../libmedia.patch
+        mv app/src/main/java/libengine/RVVM/.git0 app/src/main/java/libengine/RVVM/.git
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
       run: |
