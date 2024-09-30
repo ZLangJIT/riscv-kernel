@@ -1,33 +1,50 @@
-From 09851629d16db6cb6c62b8f7ba04e48e9e34e4d8 Mon Sep 17 00:00:00 2001
+From c12a8eea683478f7c28b8e5d7932fe79e782ba48 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 15:33:01 +0000
+Date: Mon, 30 Sep 2024 15:40:13 +0000
 Subject: [PATCH 1/1] c
 
 ---
- src/riscv_cpu.c        |   8 +-
+ src/riscv_cpu.c        |  11 +--
  src/rvjit/rvjit.c      |   2 +-
  src/rvjit/rvjit_emit.c | 194 +++++++++++++++++++++--------------------
- 3 files changed, 106 insertions(+), 98 deletions(-)
+ 3 files changed, 108 insertions(+), 99 deletions(-)
 
 diff --git a/src/riscv_cpu.c b/src/riscv_cpu.c
-index cb472ae..1f41a79 100644
+index cb472ae..a980617 100644
 --- a/src/riscv_cpu.c
 +++ b/src/riscv_cpu.c
-@@ -127,10 +127,10 @@ slow_path bool riscv_jit_tlb_lookup(rvvm_hart_t* vm)
+@@ -100,8 +100,6 @@ static bool riscv_jit_lookup(rvvm_hart_t* vm)
+     return false;
+ }
+ 
+-#ifndef RVJIT_NATIVE_LINKER
+-
+ static inline bool riscv_jtlb_lookup(rvvm_hart_t* vm)
+ {
+     // Try to find & execute a block
+@@ -116,8 +114,6 @@ static inline bool riscv_jtlb_lookup(rvvm_hart_t* vm)
+     }
+ }
+ 
+-#endif
+-
+ slow_path bool riscv_jit_tlb_lookup(rvvm_hart_t* vm)
+ {
+     if (unlikely(!vm->jit_enabled)) return false;
+@@ -127,7 +123,12 @@ slow_path bool riscv_jit_tlb_lookup(rvvm_hart_t* vm)
      virt_addr_t tpc = vm->jtlb[entry].pc;
      if (likely(pc == tpc)) {
          vm->jtlb[entry].block(vm);
 -#ifndef RVJIT_NATIVE_LINKER
--        // Try to execute more blocks if they aren't linked
--        for (size_t i=0; i<10 && riscv_jtlb_lookup(vm); ++i);
--#endif
++#ifdef RVJIT_NATIVE_LINKER
 +        if (rvvm_has_arg("rvjit_disable_native_linker")) {
 +            // Try to execute more blocks if they aren't linked
 +            for (size_t i=0; i<10 && riscv_jtlb_lookup(vm); ++i);
 +        }
-         return true;
-     } else {
-         return riscv_jit_lookup(vm);
++#else
+         // Try to execute more blocks if they aren't linked
+         for (size_t i=0; i<10 && riscv_jtlb_lookup(vm); ++i);
+ #endif
 diff --git a/src/rvjit/rvjit.c b/src/rvjit/rvjit.c
 index 8ad74f8..bd66e8d 100644
 --- a/src/rvjit/rvjit.c
