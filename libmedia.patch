@@ -1,6 +1,6 @@
-From de11008ac5cd85cb19b5ade7a5ca1684c6943883 Mon Sep 17 00:00:00 2001
+From 3357db9c5f9c0dca2a759fc83a863880eeacf4e4 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Mon, 30 Sep 2024 10:01:00 +0000
+Date: Mon, 30 Sep 2024 10:07:57 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -541,7 +541,7 @@ Subject: [PATCH 1/1] c
  rename app/src/test/java/{media/player/pro => linux/kernel}/ExampleUnitTest.kt (92%)
 
 diff --git a/app/build.gradle b/app/build.gradle
-index 8365cc7a..3ae8cafb 100755
+index 8365cc7a..77ebc62c 100755
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -15,11 +15,11 @@ android { // main settings for your application
@@ -563,7 +563,7 @@ index 8365cc7a..3ae8cafb 100755
      externalNativeBuild {
          cmake {
              path "src/main/CMakeLists.txt"
-+            version = "3.10.2.4988404"
++            version = "3.18.1"
          }
      }
      compileOptions {
