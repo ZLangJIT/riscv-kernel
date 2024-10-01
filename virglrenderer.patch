@@ -1,6 +1,6 @@
-From 0e17c083ce125740949bd64ec7ee81afdb105c98 Mon Sep 17 00:00:00 2001
+From 0fee9528db3fcb82ee9b97e99183d111812085a2 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 10:19:27 +0000
+Date: Tue, 1 Oct 2024 10:54:43 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -14,7 +14,7 @@ Subject: [PATCH 1/1] c
  libepoxy/.github/workflows/msvc-env.yml       |    23 +
  libepoxy/.github/workflows/msys2.yml          |    27 +
  libepoxy/.gitignore                           |    79 +
- libepoxy/CMakeLists.txt                       |    41 +
+ libepoxy/CMakeLists.txt                       |    44 +
  libepoxy/COPYING                              |    50 +
  libepoxy/README.md                            |   126 +
  libepoxy/cross/fedora-mingw64.txt             |    18 +
@@ -72,7 +72,7 @@ Subject: [PATCH 1/1] c
  libepoxy/test/wgl_core_and_exts.c             |    80 +
  libepoxy/test/wgl_per_context_funcptrs.c      |   165 +
  libepoxy/test/wgl_usefontbitmaps.c            |    74 +
- 68 files changed, 66224 insertions(+)
+ 68 files changed, 66227 insertions(+)
  create mode 100644 CMakeLists.txt
  create mode 100644 libepoxy/.dir-locals.el
  create mode 100644 libepoxy/.editorconfig
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..0cefa66c
+index 00000000..db41deec
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,44 @@
@@ -163,7 +163,7 @@ index 00000000..0cefa66c
 +# Android doesn't come with a pkg-config, but we need one for Meson to be happy not
 +# finding all the optional deps it looks for.  Use system pkg-config pointing at a
 +# directory we get to populate with any .pc files we want to add for Android
-+pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/pkgconfig', '/usr/bin/pkg-config']
++pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
 +
 +# Use ndk cmake
 +cmake = ['${CMAKE_COMMAND}']
@@ -528,10 +528,10 @@ index 00000000..fb054cbf
 +# 
 diff --git a/libepoxy/CMakeLists.txt b/libepoxy/CMakeLists.txt
 new file mode 100644
-index 00000000..695b3c98
+index 00000000..2b56bb76
 --- /dev/null
 +++ b/libepoxy/CMakeLists.txt
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,44 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build "
@@ -545,10 +545,13 @@ index 00000000..695b3c98
 +# Android doesn't come with a pkg-config, but we need one for Meson to be happy not
 +# finding all the optional deps it looks for.  Use system pkg-config pointing at a
 +# directory we get to populate with any .pc files we want to add for Android
-+pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/pkgconfig', '/usr/bin/pkg-config']
++pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
 +
 +# Use ndk cmake
 +cmake = ['${CMAKE_COMMAND}']
++
++[properties]
++sys_root = '${CMAKE_ANDROID_NDK}/sysroot'
 +
 +[host_machine]
 +system = 'android'
