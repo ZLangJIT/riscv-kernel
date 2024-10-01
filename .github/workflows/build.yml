@@ -43,7 +43,7 @@ jobs:
     - name: install important packages
       run: |
         pacman -S --noconfirm ccache zip unzip
-        pacman -S --noconfirm meson ninja pkg-config cmake
+        pacman -S --noconfirm meson ninja pkg-config cmake libepoxy libdrm mesa
 
     - name: Initialize ccache
       uses: hendrikmuhs/ccache-action@v1.2
