@@ -1,6 +1,6 @@
-From 0fee9528db3fcb82ee9b97e99183d111812085a2 Mon Sep 17 00:00:00 2001
+From 311a45680573195f4bd85a98dcc7c1f973e64489 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 10:54:43 +0000
+Date: Tue, 1 Oct 2024 11:21:26 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -14,7 +14,7 @@ Subject: [PATCH 1/1] c
  libepoxy/.github/workflows/msvc-env.yml       |    23 +
  libepoxy/.github/workflows/msys2.yml          |    27 +
  libepoxy/.gitignore                           |    79 +
- libepoxy/CMakeLists.txt                       |    44 +
+ libepoxy/CMakeLists.txt                       |    41 +
  libepoxy/COPYING                              |    50 +
  libepoxy/README.md                            |   126 +
  libepoxy/cross/fedora-mingw64.txt             |    18 +
@@ -72,7 +72,7 @@ Subject: [PATCH 1/1] c
  libepoxy/test/wgl_core_and_exts.c             |    80 +
  libepoxy/test/wgl_per_context_funcptrs.c      |   165 +
  libepoxy/test/wgl_usefontbitmaps.c            |    74 +
- 68 files changed, 66227 insertions(+)
+ 68 files changed, 66224 insertions(+)
  create mode 100644 CMakeLists.txt
  create mode 100644 libepoxy/.dir-locals.el
  create mode 100644 libepoxy/.editorconfig
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..db41deec
+index 00000000..3e86c2d3
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,44 @@
@@ -160,13 +160,13 @@ index 00000000..db41deec
 +c_ld = 'lld'
 +cpp_ld = 'lld'
 +strip = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
-+# Android doesn't come with a pkg-config, but we need one for Meson to be happy not
-+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
-+# directory we get to populate with any .pc files we want to add for Android
++
 +pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
 +
-+# Use ndk cmake
 +cmake = ['${CMAKE_COMMAND}']
++
++[properties]
++sys_root = '${CMAKE_ANDROID_NDK}/sysroot'
 +
 +[host_machine]
 +system = 'android'
@@ -528,10 +528,10 @@ index 00000000..fb054cbf
 +# 
 diff --git a/libepoxy/CMakeLists.txt b/libepoxy/CMakeLists.txt
 new file mode 100644
-index 00000000..2b56bb76
+index 00000000..7d657492
 --- /dev/null
 +++ b/libepoxy/CMakeLists.txt
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,41 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build "
@@ -542,12 +542,9 @@ index 00000000..2b56bb76
 +c_ld = 'lld'
 +cpp_ld = 'lld'
 +strip = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
-+# Android doesn't come with a pkg-config, but we need one for Meson to be happy not
-+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
-+# directory we get to populate with any .pc files we want to add for Android
-+pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
 +
-+# Use ndk cmake
++pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
++
 +cmake = ['${CMAKE_COMMAND}']
 +
 +[properties]
@@ -566,16 +563,16 @@ index 00000000..2b56bb76
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/libepoxy.a
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/lib/libepoxy.a
 +)
 +
 +add_library(libepoxy INTERFACE)
 +add_dependencies(libepoxy proj_libepoxy)
-+target_include_directories(libepoxy INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/include)
-+target_link_libraries(libepoxy INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/libepoxy.a)
++target_include_directories(libepoxy INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/include)
++target_link_libraries(libepoxy INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/lib/libepoxy.a)
 diff --git a/libepoxy/COPYING b/libepoxy/COPYING
 new file mode 100644
 index 00000000..8dd167cf
