@@ -1,6 +1,6 @@
-From e26706b829e5386fc514f71e064f53620c9adff5 Mon Sep 17 00:00:00 2001
+From b30909cc47d7288c8c7e695c20eb3d1443a27c85 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 08:06:36 +0000
+Date: Tue, 1 Oct 2024 08:11:20 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -10,7 +10,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..b6f9543c
+index 00000000..b5875050
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,101 @@
@@ -67,7 +67,7 @@ index 00000000..b6f9543c
 +
 +file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build "
 +[binaries]
-+cc = '${CMAKE_C_COMPILER}'
++c = '${CMAKE_C_COMPILER}'
 +cpp = '${CMAKE_CXX_COMPILER}'
 +ar = '${ar_path}'
 +as = '${as_path}'
@@ -76,13 +76,13 @@ index 00000000..b6f9543c
 +strip = '${srtip_path}'
 +
 +[built-in options]
-+cc_args = [${MESON_C_FLAGS}]
++c_args = [${MESON_C_FLAGS}]
 +cpp_args = [${MESON_CXX_FLAGS}]
 +")
 +
 +if(NOT MESON_LINKER_FLAGS STREQUAL "''")
 +    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.ini "
-+cc_link_args = [${MESON_LINKER_FLAGS}]
++c_link_args = [${MESON_LINKER_FLAGS}]
 +cpp_link_args = [${MESON_LINKER_FLAGS}]
 +")
 +endif()
