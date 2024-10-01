@@ -43,6 +43,7 @@ jobs:
     - name: install important packages
       run: |
         pacman -S --noconfirm ccache zip unzip
+        pacman -S --noconfirm meson ninja
 
     - name: Initialize ccache
       uses: hendrikmuhs/ccache-action@v1.2
@@ -53,12 +54,6 @@ jobs:
     - name: Prepare source code
       shell: bash
       run: |
-        #export VERSION_BRANCH=v6.11
-        #git clone https://github.com/torvalds/linux -b $VERSION_BRANCH --depth 1 linux
-        #cd linux && ../config.sh
-        #scripts/config -d riscv # avoid override warning for duplicate arch flags 
-        #scripts/config -e ${{ matrix.arch }}
-
         # Load version info into env
         export CURRENT_VERSION=$(grep 'LOCALVERSION=' ./riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
         # must query with a token, or will fail with ai rate limit on public runners
@@ -89,8 +84,7 @@ jobs:
       if: ${{ env.REBUILD_FLAG }}
       id: dep
       run: |
-        pacman -S --noconfirm meson ninja
-        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld zip unzip
+        pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld
         pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
         pacman -S --noconfirm riscv64-unknown-elf-gcc
         ln -s /usr/riscv64-linux-gnu/include/linux /usr/riscv64-linux-gnu/usr/include/linux || true
