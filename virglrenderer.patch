@@ -1,19 +1,19 @@
-From ba28bbbece93d9a75f8fbc0f80cab2f217b38e18 Mon Sep 17 00:00:00 2001
+From 47d23e5e706dfed3c14d636afdd369b3874d2410 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 07:30:01 +0000
+Date: Tue, 1 Oct 2024 07:32:55 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 99 insertions(+)
+ CMakeLists.txt | 100 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 100 insertions(+)
  create mode 100644 CMakeLists.txt
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..7fd896b4
+index 00000000..25d988e1
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,99 @@
+@@ -0,0 +1,100 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +if(NOT CMAKE_CXX_FLAGS STREQUAL "")
@@ -111,6 +111,7 @@ index 00000000..7fd896b4
 +)
 +
 +add_library(virglrenderer INTERFACE)
++add_dependencies(virglrenderer proj_virglrenderer)
 +target_include_directories(virglrenderer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 +target_link_libraries(virglrenderer INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a)
 -- 
