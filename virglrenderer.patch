@@ -1,10 +1,9 @@
-From c38a4d4f83c6dd2bf2f3da405007e1a0375c2a3b Mon Sep 17 00:00:00 2001
+From 2a9314b08f9e41be8a923509538bba511e6f4029 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 22:31:33 +0000
+Date: Tue, 1 Oct 2024 22:32:17 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt                                |    68 +
  libepoxy/.dir-locals.el                       |     6 +
  libepoxy/.editorconfig                        |    22 +
  libepoxy/.github/scripts/epoxy-ci-linux.sh    |    32 +
@@ -71,8 +70,7 @@ Subject: [PATCH 1/1] c
  libepoxy/test/wgl_core_and_exts.c             |    80 +
  libepoxy/test/wgl_per_context_funcptrs.c      |   165 +
  libepoxy/test/wgl_usefontbitmaps.c            |    74 +
- 67 files changed, 66207 insertions(+)
- create mode 100644 CMakeLists.txt
+ 66 files changed, 66139 insertions(+)
  create mode 100644 libepoxy/.dir-locals.el
  create mode 100644 libepoxy/.editorconfig
  create mode 100755 libepoxy/.github/scripts/epoxy-ci-linux.sh
@@ -140,80 +138,6 @@ Subject: [PATCH 1/1] c
  create mode 100644 libepoxy/test/wgl_per_context_funcptrs.c
  create mode 100644 libepoxy/test/wgl_usefontbitmaps.c
 
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-new file mode 100644
-index 00000000..1464867d
---- /dev/null
-+++ b/CMakeLists.txt
-@@ -0,0 +1,68 @@
-+cmake_minimum_required(VERSION 3.4.1)
-+
-+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cross.build "
-+[binaries]
-+ar = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar'
-+c = ['${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang']
-+cpp = ['${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
-+c_ld = 'lld'
-+cpp_ld = 'lld'
-+strip = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
-+
-+pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
-+
-+cmake = ['${CMAKE_COMMAND}']
-+
-+[host_machine]
-+system = 'android'
-+cpu_family = 'aarch64'
-+cpu = 'armv8'
-+endian = 'little'
-+")
-+
-+include(ExternalProject)
-+
-+ExternalProject_Add(proj_epoxy
-+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
-+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libepoxy
-+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/virgl-install
-+    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
-+    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
-+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libepoxy.so ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libepoxy.so
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libepoxy.so
-+)
-+
-+ExternalProject_Add(proj_virglrenderer
-+    DEPENDS proj_epoxy
-+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/virgl-install
-+    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/virglrenderer.so ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/virglrenderer.so
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libvirglrenderer.so
-+)
-+
-+add_library(epoxy SHARED IMPORTED)
-+add_dependencies(epoxy proj_epoxy)
-+set_target_properties(
-+        epoxy
-+          PROPERTIES
-+            IMPORTED_LOCATION
-+              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libepoxy.so
-+            INTERFACE_INCLUDE_DIRECTORIES
-+              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/include
-+)
-+
-+add_library(virglrenderer SHARED IMPORTED)
-+add_dependencies(virglrenderer proj_virglrenderer)
-+set_target_properties(
-+        virglrenderer
-+          PROPERTIES
-+            IMPORTED_LOCATION
-+              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libvirglrenderer.so
-+            INTERFACE_INCLUDE_DIRECTORIES
-+              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/include
-+)
 diff --git a/libepoxy/.dir-locals.el b/libepoxy/.dir-locals.el
 new file mode 100644
 index 00000000..7f3eee2d
