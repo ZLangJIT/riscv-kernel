@@ -1,19 +1,19 @@
-From d3d225cfff9efabb61ff983ab15fa13906851a8f Mon Sep 17 00:00:00 2001
+From ba28bbbece93d9a75f8fbc0f80cab2f217b38e18 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 06:42:45 +0000
+Date: Tue, 1 Oct 2024 07:30:01 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt | 95 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 95 insertions(+)
+ CMakeLists.txt | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 99 insertions(+)
  create mode 100644 CMakeLists.txt
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..691bf455
+index 00000000..7fd896b4
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,99 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +if(NOT CMAKE_CXX_FLAGS STREQUAL "")
@@ -97,7 +97,7 @@ index 00000000..691bf455
 +
 +include(ExternalProject)
 +
-+ExternalProject_Add(virglrenderer
++ExternalProject_Add(proj_virglrenderer
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
@@ -109,6 +109,10 @@ index 00000000..691bf455
 +    INSTALL_COMMAND ""
 +    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a
 +)
++
++add_library(virglrenderer INTERFACE)
++target_include_directories(virglrenderer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
++target_link_libraries(virglrenderer INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a)
 -- 
 2.46.0
 
