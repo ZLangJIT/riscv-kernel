@@ -89,7 +89,7 @@ jobs:
       if: ${{ env.REBUILD_FLAG }}
       id: dep
       run: |
-        pacman -Ss riscv
+        pacman -S --noconfirm meson ninja
         pacman -S --noconfirm pahole xmlto inetutils bc cpio jq llvm llvm-libs clang lld zip unzip
         pacman -S --noconfirm riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc riscv64-linux-gnu-linux-api-headers
         pacman -S --noconfirm riscv64-unknown-elf-gcc
