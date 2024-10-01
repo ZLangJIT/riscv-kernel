@@ -1,91 +1,39 @@
-From 7fe02b4681cb037e0633bb2b423b8cc91f980f88 Mon Sep 17 00:00:00 2001
+From 31a89866703a782bb3f55c01b72d2af8058b7a7e Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 09:23:28 +0000
+Date: Tue, 1 Oct 2024 09:39:35 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 90 insertions(+)
+ CMakeLists.txt | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
  create mode 100644 CMakeLists.txt
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..525ff14a
+index 00000000..772f4671
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,90 @@
+@@ -0,0 +1,38 @@
 +cmake_minimum_required(VERSION 3.4.1)
-+
-+if(NOT CMAKE_CXX_FLAGS STREQUAL "")
-+    string(REGEX MATCHALL "-[^ ]+" match_list "${CMAKE_CXX_FLAGS}")
-+    set(MESON_CXX_FLAGS "")
-+
-+    list(LENGTH match_list match_list_length)
-+    math(EXPR last_index "${match_list_length}-1")
-+
-+    foreach(index RANGE ${last_index})
-+        list(GET match_list ${index} match)
-+        string(APPEND MESON_CXX_FLAGS "'${match}'")
-+        if(NOT ${index} EQUAL ${last_index})
-+            string(APPEND MESON_CXX_FLAGS ", ")
-+        endif()
-+    endforeach()
-+else()
-+    string(APPEND MESON_CXX_FLAGS "''")
-+endif()
-+
-+if(NOT CMAKE_EXE_LINKER_FLAGS STREQUAL "")
-+    string(REGEX MATCHALL "-[^ ]+" match_list "${CMAKE_EXE_LINKER_FLAGS}")
-+    set(MESON_LINKER_FLAGS "")
-+
-+    list(LENGTH match_list match_list_length)
-+    math(EXPR last_index "${match_list_length}-1")
-+
-+    foreach(index RANGE ${last_index})
-+        list(GET match_list ${index} match)
-+        string(APPEND MESON_LINKER_FLAGS "'${match}'")
-+        if(NOT ${index} EQUAL ${last_index})
-+            string(APPEND MESON_LINKER_FLAGS ", ")
-+        endif()
-+    endforeach()
-+else()
-+    string(APPEND MESON_LINKER_FLAGS "''")
-+endif()
-+
-+function(replace_tool_name last_name output_variable)
-+    set(old_string "${_CMAKE_TOOLCHAIN_PREFIX}g++")
-+    set(new_string "${_CMAKE_TOOLCHAIN_PREFIX}${last_name}")
-+    string(REPLACE "${old_string}" "${new_string}" ${output_variable} "${CMAKE_CXX_COMPILER}")
-+    set(${output_variable} "${${output_variable}}" PARENT_SCOPE)
-+endfunction()
-+
-+replace_tool_name("ar" ar_path)
-+replace_tool_name("as" as_path)
-+replace_tool_name("ranlib" ranlib_path)
-+replace_tool_name("ld" ld_path)
-+replace_tool_name("strip" srtip_path)
 +
 +file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build "
 +[binaries]
-+c = '${CMAKE_C_COMPILER}'
-+cpp = '${CMAKE_CXX_COMPILER}'
-+ar = '${ar_path}'
-+as = '${as_path}'
-+ranlib = '${ranlib_path}'
-+ld = '${ld_path}'
-+strip = '${srtip_path}'
++ar = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar'
++c = ['${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang']
++cpp = ['${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
++c_ld = 'lld'
++cpp_ld = 'lld'
++strip = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
++# Android doesn't come with a pkg-config, but we need one for Meson to be happy not
++# finding all the optional deps it looks for.  Use system pkg-config pointing at a
++# directory we get to populate with any .pc files we want to add for Android
++pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_ANDROID_NDK}/pkgconfig', '/usr/bin/pkg-config']
 +
 +[host_machine]
-+system = 'linux'
-+cpu_family = 'x86_64'
-+cpu = 'x86_64'
++system = 'android'
++cpu_family = 'aarch64'
++cpu = 'armv8'
 +endian = 'little'
-+
-+[built-in options]
-+c_args = [${MESON_C_FLAGS}]
-+cpp_args = [${MESON_CXX_FLAGS}]
-+c_link_args = [${MESON_LINKER_FLAGS}]
-+cpp_link_args = [${MESON_LINKER_FLAGS}]
 +")
 +
 +include(ExternalProject)
@@ -94,7 +42,7 @@ index 00000000..525ff14a
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build -Ddefault_library=static -Db_staticpic=false --prefix ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install -Dplatform=android -Dplatform-sdk-version=29 -Dandroid-stub=true
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install/lib/libvirglrenderer.a
