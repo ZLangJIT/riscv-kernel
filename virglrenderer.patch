@@ -1,10 +1,10 @@
-From ca5e6039d783fb55e66d8a4f03c00cd2654b6fb1 Mon Sep 17 00:00:00 2001
+From e9e8d4f5e60926fb33602c4832b461ffdccaa90f Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 10:05:30 +0000
+Date: Tue, 1 Oct 2024 10:11:30 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt                                |    41 +
+ CMakeLists.txt                                |    44 +
  libepoxy/.dir-locals.el                       |     6 +
  libepoxy/.editorconfig                        |    22 +
  libepoxy/.github/scripts/epoxy-ci-linux.sh    |    32 +
@@ -14,7 +14,7 @@ Subject: [PATCH 1/1] c
  libepoxy/.github/workflows/msvc-env.yml       |    23 +
  libepoxy/.github/workflows/msys2.yml          |    27 +
  libepoxy/.gitignore                           |    79 +
- libepoxy/CMakeLists.txt                       |    38 +
+ libepoxy/CMakeLists.txt                       |    41 +
  libepoxy/COPYING                              |    50 +
  libepoxy/README.md                            |   126 +
  libepoxy/cross/fedora-mingw64.txt             |    18 +
@@ -72,7 +72,7 @@ Subject: [PATCH 1/1] c
  libepoxy/test/wgl_core_and_exts.c             |    80 +
  libepoxy/test/wgl_per_context_funcptrs.c      |   165 +
  libepoxy/test/wgl_usefontbitmaps.c            |    74 +
- 68 files changed, 66218 insertions(+)
+ 68 files changed, 66224 insertions(+)
  create mode 100644 CMakeLists.txt
  create mode 100644 libepoxy/.dir-locals.el
  create mode 100644 libepoxy/.editorconfig
@@ -144,10 +144,10 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..24329b54
+index 00000000..77f1163e
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,44 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +add_subdirectory(libepoxy)
@@ -164,6 +164,9 @@ index 00000000..24329b54
 +# finding all the optional deps it looks for.  Use system pkg-config pointing at a
 +# directory we get to populate with any .pc files we want to add for Android
 +pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/pkgconfig', '/usr/bin/pkg-config']
++
++# Use ndk cmake
++cmake = ['${CMAKE_COMMAND}']
 +
 +[host_machine]
 +system = 'android'
@@ -525,10 +528,10 @@ index 00000000..fb054cbf
 +# 
 diff --git a/libepoxy/CMakeLists.txt b/libepoxy/CMakeLists.txt
 new file mode 100644
-index 00000000..792a3aa4
+index 00000000..695b3c98
 --- /dev/null
 +++ b/libepoxy/CMakeLists.txt
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,41 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build "
@@ -543,6 +546,9 @@ index 00000000..792a3aa4
 +# finding all the optional deps it looks for.  Use system pkg-config pointing at a
 +# directory we get to populate with any .pc files we want to add for Android
 +pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/pkgconfig', '/usr/bin/pkg-config']
++
++# Use ndk cmake
++cmake = ['${CMAKE_COMMAND}']
 +
 +[host_machine]
 +system = 'android'
