@@ -1,6 +1,6 @@
-From 3773b02621043e05b8cc67dfecadc6e629a00d87 Mon Sep 17 00:00:00 2001
+From 54d4601d474afcbf20e9d9e0428419ed4353ca73 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 14:49:15 +0000
+Date: Tue, 1 Oct 2024 15:06:57 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..8d18d97c
+index 00000000..3180a033
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,41 @@
@@ -181,7 +181,7 @@ index 00000000..8d18d97c
 +    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build --prefix ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libvirglrenderer.a
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libvirglrenderer.so
 +)
 +
 +add_library(virglrenderer INTERFACE)
@@ -525,7 +525,7 @@ index 00000000..fb054cbf
 +# 
 diff --git a/libepoxy/CMakeLists.txt b/libepoxy/CMakeLists.txt
 new file mode 100644
-index 00000000..5430b9a4
+index 00000000..06a61916
 --- /dev/null
 +++ b/libepoxy/CMakeLists.txt
 @@ -0,0 +1,38 @@
@@ -560,7 +560,7 @@ index 00000000..5430b9a4
 +    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build --prefix ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/lib/libepoxy.a
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/lib/libepoxy.so
 +)
 +
 +add_library(libepoxy INTERFACE)
