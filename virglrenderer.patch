@@ -1,6 +1,6 @@
-From 15e3b2ffc03a7e2142d767dd7ec0ba16326bc1ce Mon Sep 17 00:00:00 2001
+From a351e5be9f1291ddc29d97b61c198bf4f4460713 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 17:09:15 +0000
+Date: Tue, 1 Oct 2024 17:23:20 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..a26dff4b
+index 00000000..25fa4873
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,47 @@
@@ -185,7 +185,7 @@ index 00000000..a26dff4b
 +)
 +
 +add_library(virglrenderer SHARED IMPORTED)
-+add_dependencies(proj_virglrenderer epoxy)
++add_dependencies(proj_virglrenderer proj_epoxy)
 +add_dependencies(virglrenderer proj_virglrenderer)
 +set_target_properties(
 +        virglrenderer
