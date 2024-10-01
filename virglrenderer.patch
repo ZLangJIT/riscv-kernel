@@ -1,6 +1,6 @@
-From 8fbdb8b93324c5f51df337ba85ce02d587d82008 Mon Sep 17 00:00:00 2001
+From 15e3b2ffc03a7e2142d767dd7ec0ba16326bc1ce Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 16:53:52 +0000
+Date: Tue, 1 Oct 2024 17:09:15 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..80fc93ab
+index 00000000..a26dff4b
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,47 @@
@@ -185,7 +185,7 @@ index 00000000..80fc93ab
 +)
 +
 +add_library(virglrenderer SHARED IMPORTED)
-+add_dependencies(proj_virglrenderer eproxy)
++add_dependencies(proj_virglrenderer epoxy)
 +add_dependencies(virglrenderer proj_virglrenderer)
 +set_target_properties(
 +        virglrenderer
@@ -531,13 +531,13 @@ index 00000000..fb054cbf
 +# 
 diff --git a/libepoxy/CMakeLists.txt b/libepoxy/CMakeLists.txt
 new file mode 100644
-index 00000000..3883eea0
+index 00000000..25968f6f
 --- /dev/null
 +++ b/libepoxy/CMakeLists.txt
 @@ -0,0 +1,44 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
-+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/eproxy.cross.build "
++file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/epoxy.cross.build "
 +[binaries]
 +ar = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar'
 +c = ['${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang']
@@ -559,23 +559,23 @@ index 00000000..3883eea0
 +
 +include(ExternalProject)
 +
-+ExternalProject_Add(proj_eproxy
-+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/eproxy-build
++ExternalProject_Add(proj_epoxy
++    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/eproxy-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/eproxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/eproxy.cross.build --prefix ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr
-+    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/eproxy-build
-+    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/eproxy-build
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/lib/libeproxy.so
++    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/epoxy.cross.build --prefix ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr
++    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
++    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/epoxy-build
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/lib/libepoxy.so
 +)
 +
-+add_library(eproxy SHARED IMPORTED)
-+add_dependencies(eproxy proj_eproxy)
++add_library(epoxy SHARED IMPORTED)
++add_dependencies(epoxy proj_epoxy)
 +set_target_properties(
-+        eproxy
++        epoxy
 +          PROPERTIES
 +            IMPORTED_LOCATION
-+              ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/lib/libeproxy.so
++              ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/lib/libepoxy.so
 +            INTERFACE_INCLUDE_DIRECTORIES
 +              ${CMAKE_CURRENT_SOURCE_DIR}/../../../../assets/usr/include
 +)
