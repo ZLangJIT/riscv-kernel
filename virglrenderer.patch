@@ -1,10 +1,10 @@
-From 04bdcdfd3549c69e52c5a71c49519a7f452e9d2e Mon Sep 17 00:00:00 2001
+From a3011aee092ddcc5e37e7164f4f048c07c09cbc3 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 17:47:26 +0000
+Date: Tue, 1 Oct 2024 18:00:45 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt                                |    66 +
+ CMakeLists.txt                                |    75 +
  libepoxy/.dir-locals.el                       |     6 +
  libepoxy/.editorconfig                        |    22 +
  libepoxy/.github/scripts/epoxy-ci-linux.sh    |    32 +
@@ -72,7 +72,7 @@ Subject: [PATCH 1/1] c
  libepoxy/test/wgl_core_and_exts.c             |    80 +
  libepoxy/test/wgl_per_context_funcptrs.c      |   165 +
  libepoxy/test/wgl_usefontbitmaps.c            |    74 +
- 68 files changed, 66249 insertions(+)
+ 68 files changed, 66258 insertions(+)
  create mode 100644 CMakeLists.txt
  create mode 100644 libepoxy/.dir-locals.el
  create mode 100644 libepoxy/.editorconfig
@@ -144,10 +144,10 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..4603d859
+index 00000000..86e3f2d4
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,75 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cross.build "
@@ -204,6 +204,11 @@ index 00000000..4603d859
 +              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/include
 +)
 +
++add_custom_command(TARGET epoxy
++    POST_BUILD
++    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libepoxy.so ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libepoxy.so
++)
++
 +add_library(virglrenderer SHARED IMPORTED)
 +add_dependencies(virglrenderer proj_virglrenderer)
 +set_target_properties(
@@ -213,6 +218,10 @@ index 00000000..4603d859
 +              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libvirglrenderer.so
 +            INTERFACE_INCLUDE_DIRECTORIES
 +              ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/include
++)
++add_custom_command(TARGET virglrenderer
++    POST_BUILD
++    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/virgl-install/lib/libvirglrenderer.so ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libvirglrenderer.so
 +)
 diff --git a/libepoxy/.dir-locals.el b/libepoxy/.dir-locals.el
 new file mode 100644
