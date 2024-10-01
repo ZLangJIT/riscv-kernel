@@ -1,6 +1,6 @@
-From 31a89866703a782bb3f55c01b72d2af8058b7a7e Mon Sep 17 00:00:00 2001
+From dda357ad379a897bba6523fe68af2b3fc860fdcd Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 09:39:35 +0000
+Date: Tue, 1 Oct 2024 09:45:06 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -10,7 +10,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..772f4671
+index 00000000..d1690a62
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,38 @@
@@ -42,7 +42,7 @@ index 00000000..772f4671
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install -Dplatform=android -Dplatform-sdk-version=29 -Dandroid-stub=true
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install/lib/libvirglrenderer.a
