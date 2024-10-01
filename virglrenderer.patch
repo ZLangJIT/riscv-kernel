@@ -1,0 +1,115 @@
+From 2cf50054cde362cd571838301597d0802950e108 Mon Sep 17 00:00:00 2001
+From: root <root@localhost.localdomain>
+Date: Tue, 1 Oct 2024 06:02:17 +0000
+Subject: [PATCH 1/1] c
+
+---
+ CMakeLists.txt | 96 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 96 insertions(+)
+ create mode 100644 CMakeLists.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 00000000..4b347e59
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,96 @@
++cmake_minimum_required(VERSION 3.4.1)
++
++if(NOT CMAKE_CXX_FLAGS STREQUAL "")
++    string(REGEX MATCHALL "-[^ ]+" match_list "${CMAKE_CXX_FLAGS}")
++    set(MESON_CXX_FLAGS "")
++
++    list(LENGTH match_list match_list_length)
++    math(EXPR last_index "${match_list_length}-1")
++
++    foreach(index RANGE ${last_index})
++        list(GET match_list ${index} match)
++        string(APPEND MESON_CXX_FLAGS "'${match}'")
++        if(NOT ${index} EQUAL ${last_index})
++            string(APPEND MESON_CXX_FLAGS ", ")
++        endif()
++    endforeach()
++else()
++    string(APPEND MESON_CXX_FLAGS "''")
++endif()
++
++if(NOT CMAKE_EXE_LINKER_FLAGS STREQUAL "")
++    string(REGEX MATCHALL "-[^ ]+" match_list "${CMAKE_EXE_LINKER_FLAGS}")
++    set(MESON_LINKER_FLAGS "")
++
++    list(LENGTH match_list match_list_length)
++    math(EXPR last_index "${match_list_length}-1")
++
++    foreach(index RANGE ${last_index})
++        list(GET match_list ${index} match)
++        string(APPEND MESON_LINKER_FLAGS "'${match}'")
++        if(NOT ${index} EQUAL ${last_index})
++            string(APPEND MESON_LINKER_FLAGS ", ")
++        endif()
++    endforeach()
++else()
++    string(APPEND MESON_LINKER_FLAGS "''")
++endif()
++
++function(replace_tool_name last_name output_variable)
++    set(old_string "${_CMAKE_TOOLCHAIN_PREFIX}g++")
++    set(new_string "${_CMAKE_TOOLCHAIN_PREFIX}${last_name}")
++    string(REPLACE "${old_string}" "${new_string}" ${output_variable} "${CMAKE_CXX_COMPILER}")
++    set(${output_variable} "${${output_variable}}" PARENT_SCOPE)
++endfunction()
++
++replace_tool_name("ar" ar_path)
++replace_tool_name("as" as_path)
++replace_tool_name("ranlib" ranlib_path)
++replace_tool_name("ld" ld_path)
++replace_tool_name("strip" srtip_path)
++
++file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build "
++[binaries]
++cc = '${CMAKE_C_COMPILER}'
++cpp = '${CMAKE_CXX_COMPILER}'
++ar = '${ar_path}'
++as = '${as_path}'
++ranlib = '${ranlib_path}'
++ld = '${ld_path}'
++strip = '${srtip_path}'
++
++[built-in options]
++cc_args = [${MESON_C_FLAGS}]
++cpp_args = [${MESON_CXX_FLAGS}]
++")
++
++if(NOT MESON_LINKER_FLAGS STREQUAL "''")
++    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.ini "
++cc_link_args = [${MESON_LINKER_FLAGS}]
++cpp_link_args = [${MESON_LINKER_FLAGS}]
++")
++endif()
++
++file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.ini "
++[host_machine]
++system = 'android'
++cpu_family = '${CMAKE_SYSTEM}'
++cpu = 'esp'
++endian = 'little'
++")
++
++ExternalProject_Add(virglrenderer
++    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
++    SOURCE_DIR $(CMAKE_CURRENT_SOURCE_DIR}
++    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build $(CMAKE_CURRENT_SOURCE_DIR}
++    --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.ini
++    -Ddefault_library=static # build static library
++    -Db_staticpic=false # no -fPIC
++    BUILD_COMMAND ninja -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
++    INSTALL_COMMAND ""
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a
++)
++
++add_library(virglrenderer IMPORT)
++set_properties(virglrenderer IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a)
+-- 
+2.46.0
+
