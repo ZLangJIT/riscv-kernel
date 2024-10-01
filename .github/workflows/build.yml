@@ -289,7 +289,7 @@ jobs:
         git apply --allow-empty ../../../../../../../rvvm.patch
         cd ../virglrenderer
         mv .git0 .git
-        git apply --allow-empty ../../../../../../../virgl.patch
+        git apply --allow-empty ../../../../../../../virglrenderer.patch
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
       run: |
