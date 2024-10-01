@@ -1,19 +1,19 @@
-From d0cb195c62b3c5a04216910e65111f1f5b04c224 Mon Sep 17 00:00:00 2001
+From ee094d6353bb50596082d995c0a4d6c16492e0e3 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 08:40:58 +0000
+Date: Tue, 1 Oct 2024 09:12:51 +0000
 Subject: [PATCH 1/1] c
 
 ---
- CMakeLists.txt | 97 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 97 insertions(+)
+ CMakeLists.txt | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 90 insertions(+)
  create mode 100644 CMakeLists.txt
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..9c641f31
+index 00000000..525ff14a
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,97 @@
+@@ -0,0 +1,90 @@
 +cmake_minimum_required(VERSION 3.4.1)
 +
 +if(NOT CMAKE_CXX_FLAGS STREQUAL "")
@@ -75,24 +75,17 @@ index 00000000..9c641f31
 +ld = '${ld_path}'
 +strip = '${srtip_path}'
 +
++[host_machine]
++system = 'linux'
++cpu_family = 'x86_64'
++cpu = 'x86_64'
++endian = 'little'
++
 +[built-in options]
 +c_args = [${MESON_C_FLAGS}]
 +cpp_args = [${MESON_CXX_FLAGS}]
-+")
-+
-+if(NOT MESON_LINKER_FLAGS STREQUAL "''")
-+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build "
 +c_link_args = [${MESON_LINKER_FLAGS}]
 +cpp_link_args = [${MESON_LINKER_FLAGS}]
-+")
-+endif()
-+
-+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build "
-+[host_machine]
-+system = 'android'
-+cpu_family = '${CMAKE_SYSTEM}'
-+cpu = 'esp'
-+endian = 'little'
 +")
 +
 +include(ExternalProject)
@@ -101,16 +94,16 @@ index 00000000..9c641f31
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build -Ddefault_library=static -Db_staticpic=false
-+    BUILD_COMMAND ninja -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    INSTALL_COMMAND ""
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build -Ddefault_library=static -Db_staticpic=false --prefix ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install
++    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
++    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-install/lib/libvirglrenderer.a
 +)
 +
 +add_library(virglrenderer INTERFACE)
 +add_dependencies(virglrenderer proj_virglrenderer)
-+target_include_directories(virglrenderer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-+target_link_libraries(virglrenderer INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build/src/virglrenderer.a)
++target_include_directories(virglrenderer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/virglrenderer-install/include)
++target_link_libraries(virglrenderer INTERFACE virglrenderer-install/lib/libvirglrenderer.a)
 -- 
 2.46.0
 
