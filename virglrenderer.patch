@@ -1,6 +1,6 @@
-From d88b817468a799e47b38c25f398e14b7b48f82e1 Mon Sep 17 00:00:00 2001
+From ddcf0f50e1b05d54a50c1581cff717ce35535d78 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Tue, 1 Oct 2024 11:56:30 +0000
+Date: Tue, 1 Oct 2024 12:07:48 +0000
 Subject: [PATCH 1/1] c
 
 ---
@@ -144,7 +144,7 @@ Subject: [PATCH 1/1] c
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 00000000..e7faa06a
+index 00000000..cecb9fb9
 --- /dev/null
 +++ b/CMakeLists.txt
 @@ -0,0 +1,41 @@
@@ -161,7 +161,7 @@ index 00000000..e7faa06a
 +cpp_ld = 'lld'
 +strip = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
 +
-+pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
++pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_SOURCE_DIR}/../../assets/usr/lib/pkgconfig', '/usr/bin/pkg-config']
 +
 +cmake = ['${CMAKE_COMMAND}']
 +
@@ -178,17 +178,17 @@ index 00000000..e7faa06a
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer.cross.build --prefix ${CMAKE_CURRENT_SOURCE_DIR}/../../assets/usr
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/virglrenderer-build
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/libvirglrenderer.a
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../assets/usr/lib/libvirglrenderer.a
 +)
 +
 +add_library(virglrenderer INTERFACE)
 +add_dependencies(proj_virglrenderer libepoxy)
 +add_dependencies(virglrenderer proj_virglrenderer)
-+target_include_directories(virglrenderer INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/include)
-+target_link_libraries(virglrenderer INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/libvirgl-install/lib/libvirglrenderer.a)
++target_include_directories(virglrenderer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../assets/usr/include)
++target_link_libraries(virglrenderer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../assets/usr/lib/libvirglrenderer.a)
 diff --git a/libepoxy/.dir-locals.el b/libepoxy/.dir-locals.el
 new file mode 100644
 index 00000000..7f3eee2d
@@ -525,7 +525,7 @@ index 00000000..fb054cbf
 +# 
 diff --git a/libepoxy/CMakeLists.txt b/libepoxy/CMakeLists.txt
 new file mode 100644
-index 00000000..8729146b
+index 00000000..03172d14
 --- /dev/null
 +++ b/libepoxy/CMakeLists.txt
 @@ -0,0 +1,38 @@
@@ -540,7 +540,7 @@ index 00000000..8729146b
 +cpp_ld = 'lld'
 +strip = '${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
 +
-+pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/lib/pkgconfig', '/usr/bin/pkg-config']
++pkg-config = ['env', 'PKG_CONFIG_LIBDIR=${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/pkgconfig', '/usr/bin/pkg-config']
 +
 +cmake = ['${CMAKE_COMMAND}']
 +
@@ -557,16 +557,16 @@ index 00000000..8729146b
 +    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
 +    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 +    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
-+    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build --prefix ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install
++    CONFIGURE_COMMAND meson setup ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build ${CMAKE_CURRENT_SOURCE_DIR} --cross-file ${CMAKE_CURRENT_BINARY_DIR}/libepoxy.cross.build --prefix ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr
 +    BUILD_COMMAND meson compile -C ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
 +    INSTALL_COMMAND meson install -C ${CMAKE_CURRENT_BINARY_DIR}/libepoxy-build
-+    BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/lib/libepoxy.a
++    BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libepoxy.a
 +)
 +
 +add_library(libepoxy INTERFACE)
 +add_dependencies(libepoxy proj_libepoxy)
-+target_include_directories(libepoxy INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/include)
-+target_link_libraries(libepoxy INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../libvirgl-install/lib/libepoxy.a)
++target_include_directories(libepoxy INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/include)
++target_link_libraries(libepoxy INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../../assets/usr/lib/libepoxy.a)
 diff --git a/libepoxy/COPYING b/libepoxy/COPYING
 new file mode 100644
 index 00000000..8dd167cf
