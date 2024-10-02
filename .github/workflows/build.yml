@@ -293,7 +293,7 @@ jobs:
         cp ../build_dir/Image.gz app/src/main/assets/Image.gz
 
     - name: Download prebuilt kernel [linux.kernel.rvvm]
-      if: ! ${{ env.REBUILD_FLAG }}
+      if: ${{ env.REBUILD_FLAG == '' }}
       shell: bash
       run: |
         cd linux.kernel.rvvm
@@ -379,7 +379,7 @@ jobs:
         mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release-unsigned.apk linux.kernel.rvvm.release.unsigned.apk
 
     - name: Download kernel if needed
-      if: ! ${{ env.REBUILD_FLAG }}
+      if: ${{ env.REBUILD_FLAG == '' }}
       run: |
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
