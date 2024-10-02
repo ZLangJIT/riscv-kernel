@@ -315,6 +315,13 @@ jobs:
         cd linux.kernel.rvvm
         ./gradlew assembleDebug --stacktrace
 
+    - name: Build release APK [linux.kernel.rvvm]
+      shell: bash
+      run: |
+        . ~/.bashrc
+        cd linux.kernel.rvvm
+        ./gradlew assembleRelease --stacktrace
+
     - name: Clone libmedia
       if: false
       run: |
