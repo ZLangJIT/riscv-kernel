@@ -65,13 +65,9 @@ jobs:
         echo "CURRENT_VERSION=$CURRENT_VERSION" | tee -a $GITHUB_ENV
         echo "RELEASED_VERSION=$RELEASED_VERSION" | tee -a $GITHUB_ENV
 
-        if [[ $CURRENT_VERSION != $RELEASED_VERSION || \
-              ($CURRENT_VERSION = $RELEASED_VERSION && 1 -gt "$RELEASED_MINOR") || \
-              "${{ github.event_name }}" = 'pull_request' ]]; then
-          echo "REBUILD_FLAG=" | tee -a $GITHUB_ENV # set to 1 to enable building, set to '' to skip building
-        else
-          echo "REBUILD_FLAG=" | tee -a $GITHUB_ENV
-        fi
+        # set to 1 to enable building, set to '' to skip building
+        echo "REBUILD_FLAG=1" | tee -a $GITHUB_ENV
+
         cp monitor_memory.sh /tmp/monitor_memory.sh ; chmod +x /tmp/monitor_memory.sh
         pacman -S --noconfirm rsync wget
         useradd -m build
@@ -289,14 +285,27 @@ jobs:
       run: |
         chmod +x linux.kernel.rvvm/gradlew
 
+    - name: copy built kernel [linux.kernel.rvvm]
+      if: ${{ env.REBUILD_FLAG }}
+      shell: bash
+      run: |
+        cd linux.kernel.rvvm
+        cp ../build_dir/Image.gz app/src/main/assets/Image.gz
+
+    - name: Download prebuilt kernel [linux.kernel.rvvm]
+      if: ! ${{ env.REBUILD_FLAG }}
+      shell: bash
+      run: |
+        cd linux.kernel.rvvm
+        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.26/Image.gz
+        mv Image.gz app/src/main/assets/Image.gz
+
     - name: Build with Gradle [linux.kernel.rvvm]
       shell: bash
       run: |
         . ~/.bashrc
         archlinux-java set java-8-openjdk
         cd linux.kernel.rvvm
-        wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.26/Image.gz
-        mv Image.gz app/src/main/assets/Image.gz
         ./gradlew build
 
     - name: Build debug APK [linux.kernel.rvvm]
@@ -363,16 +372,15 @@ jobs:
         cd android
         ./gradlew assembleDebug --stacktrace
 
-    - name: Check files
+    - name: move apk
       run: |
-        #ls -al android/app/build/outputs/apk/debug
-        #ls -al libmedia/app/build/outputs/apk/debug
-        #mv android/app/build/outputs/apk/debug/app-debug.apk apk-debug.apk
-        #mv libmedia/app/build/outputs/apk/debug/app-debug.apk libmedia.apk
         ls -alh linux.kernel.rvvm/app/build/outputs/apk/*
         mv linux.kernel.rvvm/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.debug.apk
         mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release-unsigned.apk linux.kernel.rvvm.release.unsigned.apk
-        #mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release.apk linux.kernel.rvvm.release.apk
+
+    - name: Download kernel if needed
+      if: ! ${{ env.REBUILD_FLAG }}
+      run: |
         TAG=6.11.26 # use kernel from 6.11.26
         mkdir build_dir || true
         cd build_dir
