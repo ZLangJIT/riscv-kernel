@@ -376,7 +376,7 @@ jobs:
       run: |
         ls -alh linux.kernel.rvvm/app/build/outputs/apk/*
         mv linux.kernel.rvvm/app/build/outputs/apk/debug/app-debug.apk linux.kernel.rvvm.debug.apk
-        mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release-unsigned.apk linux.kernel.rvvm.release.unsigned.apk
+        mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release.apk linux.kernel.rvvm.release.apk
 
     - name: Download kernel if needed
       if: ${{ env.REBUILD_FLAG == '' }}
@@ -420,7 +420,7 @@ jobs:
 
         files: |
           linux.kernel.rvvm.debug.apk
-          linux.kernel.rvvm.release.unsigned.apk
+          linux.kernel.rvvm.release.apk
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
           build_dir/Image
