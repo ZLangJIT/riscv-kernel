@@ -296,9 +296,41 @@ jobs:
       if: ${{ env.REBUILD_FLAG == '' }}
       shell: bash
       run: |
-        cd linux.kernel.rvvm
+        cd linux.kernel.rvvm/app/src/main/assets
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.37/Image.gz
-        mv Image.gz app/src/main/assets/Image.gz
+
+    - name: Check keystore [linux.kernel.rvvm]
+      shell: bash
+      run: |
+        cd linux.kernel.rvvm
+        if $(wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/keystore/keystore)
+          then
+            echo "HAVE_KEYSTORE=1" | tee -a $GITHUB_ENV
+          else
+            echo "HAVE_KEYSTORE=" | tee -a $GITHUB_ENV
+        fi
+
+    - name: Create keystore [linux.kernel.rvvm]
+      if: ${{ env.HAVE_KEYSTORE == '' }}
+      shell: bash
+      run: |
+        . ~/.bashrc
+        archlinux-java set java-8-openjdk
+        cd linux.kernel.rvvm
+        printf "123456\n123456\nUnknown1\nUnknown2\nUnknown3\nUnknown4\nUnknown5\nUnknown6\nyes\n123456\n123456" | keytool -genkey -v -keystore keystore -alias keystore -keyalg RSA -keysize 2048 -validity 10000
+
+    - name: Release keystore [linux.kernel.rvvm]
+      if: ${{ env.HAVE_KEYSTORE == '' }}
+      uses: softprops/action-gh-release@master
+      with:
+        name:  keystore
+        tag_name:  keystore
+        body: |
+          keystore
+        files: |
+          linux.kernel.rvvm/app/keystore
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fail_on_unmatched_files: true
 
     - name: Build with Gradle [linux.kernel.rvvm]
       shell: bash
