@@ -1,0 +1,295 @@
+From 951f9cfad877c6f68d720b2e0ed98fba9823d273 Mon Sep 17 00:00:00 2001
+From: root <root@localhost.localdomain>
+Date: Wed, 2 Oct 2024 12:35:11 +0000
+Subject: [PATCH 1/1] c
+
+---
+ src/blk_io.c               | 52 +++++++++++++++++++++++++-------------
+ src/devices/chardev_term.c | 15 ++++++-----
+ src/rvjit/rvjit_riscv.h    |  1 -
+ src/rvjit/rvjit_x86.h      |  3 ++-
+ src/stacktrace.c           | 50 +++++++++++++++++-------------------
+ 5 files changed, 68 insertions(+), 53 deletions(-)
+
+diff --git a/src/blk_io.c b/src/blk_io.c
+index c8a67cf..eda4866 100644
+--- a/src/blk_io.c
++++ b/src/blk_io.c
+@@ -233,6 +233,7 @@ rvfile_t* rvopen(const char* filepath, uint8_t filemode)
+ void rvclose(rvfile_t* file)
+ {
+     if (!file) return;
++    rvfsync(file);
+ #if defined(POSIX_FILE_IMPL)
+     close(file->fd);
+ #elif defined(WIN32_FILE_IMPL)
+@@ -405,33 +406,52 @@ bool rvfsync(rvfile_t* file)
+ #endif
+ }
+ 
++static bool rvfile_grow_generic(rvfile_t* file, uint64_t length)
++{
++    bool ret = true;
++    if (length && length > rvfilesize(file)) {
++        // Grow the file by re-writing one byte at the new end
++        char tmp = 0;
++#if defined(POSIX_FILE_IMPL) || defined(WIN32_FILE_IMPL)
++        if (!rvread(file, &tmp, 1, length - 1)) {
++            // NOTE: This is not perfectly thread safe if there
++            // are writers currently extending the end of file.
++            ret = !!rvwrite(file, &tmp, 1, length - 1);
++        }
++#else
++        spin_lock_slow(&file->lock);
++        fseek(file->fp, length - 1, SEEK_SET);
++        if (!fread(&tmp, 1, 1, file->fp)) {
++            fseek(file->fp, length - 1, SEEK_SET);
++            ret = !!fwrite(&tmp, 1, 1, file->fp);
++            fflush(file->fp);
++        }
++        file->pos_state = RVFILE_POS_INVALID;
++        spin_unlock(&file->lock);
++#endif
++        if (ret) rvfile_grow_internal(file, length);
++    }
++    return ret;
++}
++
+ bool rvtruncate(rvfile_t* file, uint64_t length)
+ {
+     if (!file) return false;
+ #if defined(POSIX_FILE_IMPL)
+     if (ftruncate(file->fd, length)) return false;
++    atomic_store_uint64(&file->size, length);
+ #elif defined(WIN32_FILE_IMPL)
+     LONG high_len = length >> 32;
+     SetFilePointer(file->handle, (uint32_t)length, &high_len, FILE_BEGIN);
+     if (!SetEndOfFile(file->handle)) return false;
++    atomic_store_uint64(&file->size, length);
+ #else
+-    if (length < atomic_load_uint64(&file->size)) {
+-        // Can't shrink the file on stdio
++    if (length < rvfilesize(file)) {
++        // Generic implementation can't shrink the file
+         return false;
+-    } else if (length) {
+-        // Grow the file by re-writing one byte at the new end
+-        char tmp = 0;
+-        spin_lock_slow(&file->lock);
+-        fseek(file->fp, length - 1, SEEK_SET);
+-        fread(&tmp, 1, 1, file->fp);
+-        fseek(file->fp, length - 1, SEEK_SET);
+-        fwrite(&tmp, 1, 1, file->fp);
+-        fflush(file->fp);
+-        file->pos_state = RVFILE_POS_INVALID;
+-        spin_unlock(&file->lock);
+     }
++    if (!rvfile_grow_generic(file, length)) return false;
+ #endif
+-    atomic_store_uint64(&file->size, length);
+     return true;
+ }
+ 
+@@ -445,9 +465,7 @@ bool rvfallocate(rvfile_t* file, uint64_t length)
+             return true;
+         }
+ #endif
+-        // NOTE: This is not perfectly thread safe if there
+-        // are writers currently extending the end of file.
+-        if (!rvtruncate(file, length)) return false;
++        return rvfile_grow_generic(file, length);
+     }
+     return true;
+ }
+diff --git a/src/devices/chardev_term.c b/src/devices/chardev_term.c
+index 2731f16..9e26d3d 100644
+--- a/src/devices/chardev_term.c
++++ b/src/devices/chardev_term.c
+@@ -29,6 +29,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ #ifndef O_CLOEXEC
+ #define O_CLOEXEC 0
+ #endif
++#ifndef O_NOCTTY
++#define O_NOCTTY
++#endif
+ 
+ #define POSIX_TERM_IMPL
+ 
+@@ -61,7 +64,7 @@ static DWORD orig_output_mode = 0;
+ static void term_origmode(void)
+ {
+ #if defined(POSIX_TERM_IMPL)
+-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_term_opts);
++    tcsetattr(0, TCSAFLUSH, &orig_term_opts);
+ #elif defined(WIN32_TERM_IMPL)
+     SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), orig_input_mode);
+     SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), orig_output_mode);
+@@ -72,14 +75,12 @@ static void term_rawmode(void)
+ {
+ #if defined(POSIX_TERM_IMPL)
+     struct termios term_opts = {
+-        .c_iflag = ICRNL,
+         .c_oflag = OPOST | ONLCR,
+-        .c_cflag = orig_term_opts.c_cflag,
+-        .c_lflag = 0,
++        .c_cflag = CLOCAL | CREAD | CS8,
+         .c_cc[VMIN] = 1,
+     };
+-    tcgetattr(STDIN_FILENO, &orig_term_opts);
+-    tcsetattr(STDIN_FILENO, TCSANOW, &term_opts);
++    tcgetattr(0, &orig_term_opts);
++    tcsetattr(0, TCSANOW, &term_opts);
+ #elif defined(WIN32_TERM_IMPL)
+     SetConsoleOutputCP(CP_UTF8);
+     GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &orig_input_mode);
+@@ -296,7 +297,7 @@ PUBLIC chardev_t* chardev_pty_create(const char* path)
+     if (rvvm_strcmp(path, "stdout")) return chardev_term_create();
+     if (rvvm_strcmp(path, "null")) return NULL; // NULL chardev
+ #ifdef POSIX_TERM_IMPL
+-    int fd = open(path, O_RDWR | O_CLOEXEC);
++    int fd = open(path, O_RDWR | O_NOCTTY | O_CLOEXEC);
+     if (fd >= 0) return chardev_fd_create(fd, fd);
+     rvvm_error("Could not open PTY %s", path);
+ #else
+diff --git a/src/rvjit/rvjit_riscv.h b/src/rvjit/rvjit_riscv.h
+index ac87b4a..fe51276 100644
+--- a/src/rvjit/rvjit_riscv.h
++++ b/src/rvjit/rvjit_riscv.h
+@@ -524,7 +524,6 @@ static inline void rvjit_patch_ret(void* addr)
+ static inline bool rvjit_patch_jmp(void* addr, int32_t offset)
+ {
+     if (rvjit_is_valid_jal_imm(offset)) {
+-        write_uint32_le_m(addr, 0);
+         rvjit_riscv_jal_patch(addr, offset);
+         return true;
+     } else {
+diff --git a/src/rvjit/rvjit_x86.h b/src/rvjit/rvjit_x86.h
+index 65749fc..e1c5e79 100644
+--- a/src/rvjit/rvjit_x86.h
++++ b/src/rvjit/rvjit_x86.h
+@@ -1066,8 +1066,9 @@ static inline void rvjit_patch_ret(void* addr)
+ static inline bool rvjit_patch_jmp(void* addr, int32_t offset)
+ {
+     uint8_t* code = (uint8_t*)addr;
+-    code[0] = 0xE9;
+     write_uint32_le_m(code + 1, ((uint32_t)offset) - 5);
++    atomic_fence();
++    code[0] = 0xE9;
+     return true;
+ }
+ 
+diff --git a/src/stacktrace.c b/src/stacktrace.c
+index 7b579a8..9bd3e0e 100644
+--- a/src/stacktrace.c
++++ b/src/stacktrace.c
+@@ -20,14 +20,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ #include <stdint.h>
+ #include <stdio.h>
+ 
+-#if (defined(__unix__) || defined(__APPLE__) || defined(__MINGW32__)) \
+- && !defined(NO_STACKTRACE) && !defined(UNDER_CE) && !defined(__SANITIZE_ADDRESS__)
+-#define SIGNAL_IMPL
++#if (defined(__unix__) || defined(__APPLE__)) && !defined(NO_STACKTRACE) && !defined(__SANITIZE_ADDRESS__)
+ #include <stdlib.h>
+ #include <signal.h>
+ #ifndef SIGBUS
+ #define SIGBUS 10
+ #endif
++#ifdef SA_SIGINFO
++#define STACKTRACE_SIGACTION_IMPL
++#endif
+ #endif
+ 
+ // RVVM internal headers come after system headers because of safe_free()
+@@ -67,7 +68,7 @@ static int backtrace_dummy_callback(void* data, uintptr_t pc, const char* filena
+  * Fatal signal stacktraces
+  */
+ 
+-#ifdef SIGNAL_IMPL
++#ifdef STACKTRACE_SIGACTION_IMPL
+ 
+ static void signal_handler(int sig)
+ {
+@@ -76,7 +77,7 @@ static void signal_handler(int sig)
+             rvvm_warn("Fatal signal: Segmentation fault!");
+             break;
+         case SIGBUS:
+-            rvvm_warn("Fatal signal: Bus fault - Address is non-canonic or misaligned!");
++            rvvm_warn("Fatal signal: Bus fault - Misaligned access or mapped IO error!");
+             break;
+         case SIGILL:
+             rvvm_warn("Fatal signal: Illegal instruction!");
+@@ -88,31 +89,27 @@ static void signal_handler(int sig)
+             rvvm_warn("Fatal signal %d", sig);
+             break;
+     }
+-    rvvm_warn("Stacktrace:");
+-    stacktrace_print();
+-    _Exit(-sig);
++    if (backtrace_full && bt_state) {
++        rvvm_warn("Stacktrace:");
++        stacktrace_print();
++    }
++    exit(-sig);
+ }
+ 
+ static void set_signal_handler(int sig)
+ {
+-#ifdef SA_SIGINFO
+     struct sigaction sa_old = {0};
+     struct sigaction sa = {
+         .sa_handler = signal_handler,
+-        .sa_flags = SA_RESTART,
+     };
+     sigaction(sig, NULL, &sa_old);
+-    if (!(sa_old.sa_flags & SA_SIGINFO) && (sa_old.sa_handler == NULL || sa_old.sa_handler == (void*)SIG_IGN || sa_old.sa_handler != (void*)SIG_DFL)) {
+-        // Signal not used
+-        sigaction(sig, &sa, NULL);
++    if (!(sa_old.sa_flags & SA_SIGINFO)) {
++        void* prev = sa_old.sa_handler;
++        if (prev == NULL || prev == (void*)SIG_IGN || prev == (void*)SIG_DFL) {
++            // Signal not used
++            sigaction(sig, &sa, NULL);
++        }
+     }
+-#else
+-    void* prev = signal(sig, signal_handler);
+-    if (prev != NULL && prev != (void*)SIG_IGN && prev != (void*)SIG_DFL) {
+-        // Signal already used
+-        signal(sig, prev);
+-    }
+-#endif
+ }
+ 
+ #endif
+@@ -137,14 +134,14 @@ static void backtrace_init_once(void)
+     if (backtrace_full && bt_state) {
+         // Preload backtracing data, isolation is enabled later on
+         backtrace_full(bt_state, 0, backtrace_dummy_callback, backtrace_dummy_error, NULL);
++    }
+ 
+-#ifdef SIGNAL_IMPL
+-        set_signal_handler(SIGSEGV);
+-        set_signal_handler(SIGBUS);
+-        set_signal_handler(SIGILL);
+-        set_signal_handler(SIGFPE);
++#ifdef STACKTRACE_SIGACTION_IMPL
++    set_signal_handler(SIGSEGV);
++    set_signal_handler(SIGBUS);
++    set_signal_handler(SIGILL);
++    set_signal_handler(SIGFPE);
+ #endif
+-    }
+ }
+ 
+ void stacktrace_init(void)
+@@ -157,6 +154,5 @@ void stacktrace_print(void)
+     stacktrace_init();
+     if (backtrace_print && bt_state) {
+         backtrace_print(bt_state, 0, stderr);
+-
+     }
+ }
+-- 
+2.46.0
+

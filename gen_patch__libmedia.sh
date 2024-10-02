@@ -1,5 +1,5 @@
-./gen_patch__rvvm.sh
-./gen_patch__virglrenderer.sh
+./i_gen_patch__rvvm.sh
+./i_gen_patch__virglrenderer.sh
 set -x
 if [[ -f libmedia.patch ]]
 	then
