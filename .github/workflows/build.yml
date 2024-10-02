@@ -316,7 +316,7 @@ jobs:
       run: |
         . ~/.bashrc
         archlinux-java set java-8-openjdk
-        cd linux.kernel.rvvm
+        cd linux.kernel.rvvm/app
         printf "123456\n123456\nUnknown1\nUnknown2\nUnknown3\nUnknown4\nUnknown5\nUnknown6\nyes\n123456\n123456" | keytool -genkey -v -keystore keystore -alias keystore -keyalg RSA -keysize 2048 -validity 10000
 
     - name: Release keystore [linux.kernel.rvvm]
