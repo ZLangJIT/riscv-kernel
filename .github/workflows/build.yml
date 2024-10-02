@@ -66,7 +66,7 @@ jobs:
         echo "RELEASED_VERSION=$RELEASED_VERSION" | tee -a $GITHUB_ENV
 
         # set to 1 to enable building the kernel + rootfs, set to '' to skip building
-        echo "REBUILD_FLAG=" | tee -a $GITHUB_ENV
+        echo "REBUILD_FLAG=1" | tee -a $GITHUB_ENV
 
         cp monitor_memory.sh /tmp/monitor_memory.sh ; chmod +x /tmp/monitor_memory.sh
         pacman -S --noconfirm rsync wget
@@ -381,7 +381,7 @@ jobs:
     - name: Download kernel if needed
       if: ${{ env.REBUILD_FLAG == '' }}
       run: |
-        TAG=6.11.26 # use kernel from 6.11.26
+        TAG=6.11.37 # use kernel from 6.11.37
         mkdir build_dir || true
         cd build_dir
         wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/rootfs.cpio

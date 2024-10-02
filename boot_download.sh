@@ -4,4 +4,9 @@ if [[ -f Image.gz ]]
 	then
 		rm -v Image.gz
 fi
-wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz && gunzip -f -d Image.gz
+if [[ -f Image ]]
+	then
+		rm -v Image
+fi
+echo "downloading version $TAG ..."
+wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz && ls -lh Image.gz && gunzip -f Image.gz && ls -lh Image
