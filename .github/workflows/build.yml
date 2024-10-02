@@ -302,7 +302,7 @@ jobs:
     - name: Check keystore [linux.kernel.rvvm]
       shell: bash
       run: |
-        cd linux.kernel.rvvm
+        cd linux.kernel.rvvm/app
         if $(wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/keystore/keystore)
           then
             echo "HAVE_KEYSTORE=1" | tee -a $GITHUB_ENV
