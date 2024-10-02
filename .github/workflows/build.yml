@@ -66,7 +66,7 @@ jobs:
         echo "RELEASED_VERSION=$RELEASED_VERSION" | tee -a $GITHUB_ENV
 
         # set to 1 to enable building the kernel + rootfs, set to '' to skip building
-        echo "REBUILD_FLAG=" | tee -a $GITHUB_ENV
+        echo "REBUILD_FLAG=1" | tee -a $GITHUB_ENV
 
         cp monitor_memory.sh /tmp/monitor_memory.sh ; chmod +x /tmp/monitor_memory.sh
         pacman -S --noconfirm rsync wget
