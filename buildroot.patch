@@ -1,63 +1,23 @@
-From 596fceb729215b0980d3d279f78b06aaa805f551 Mon Sep 17 00:00:00 2001
+From 56cd198743db7d3c6e40caa95938f4da96b7fbd6 Mon Sep 17 00:00:00 2001
 From: root <root@localhost.localdomain>
-Date: Wed, 2 Oct 2024 06:43:33 +0000
+Date: Wed, 2 Oct 2024 08:42:22 +0000
 Subject: [PATCH 1/1] c
 
 ---
- fs/cpio/init                                                 | 3 +++
- toolchain/Config.in                                          | 5 +++++
- .../toolchain-external-custom/Config.in.options              | 5 +++++
- 3 files changed, 13 insertions(+)
+ fs/cpio/init | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/fs/cpio/init b/fs/cpio/init
-index f74ef7e15f..3a858b0d23 100755
+index f74ef7e15f..df2ba4d75d 100755
 --- a/fs/cpio/init
 +++ b/fs/cpio/init
 @@ -13,3 +13,6 @@ if (exec 0</dev/console) 2>/dev/null; then
  fi
  
  exec /sbin/init "$@"
-+/bin/busybox echo "fell off end of /init"
++/bin/busybox echo "fell off end of /sbin/init"
 +/bin/busybox echo "powering off..."
 +/bin/busybox poweroff -f
-diff --git a/toolchain/Config.in b/toolchain/Config.in
-index e8b3db64fb..87a83e6b25 100644
---- a/toolchain/Config.in
-+++ b/toolchain/Config.in
-@@ -801,10 +801,15 @@ config BR2_TOOLCHAIN_GCC_AT_LEAST_13
- 	bool
- 	select BR2_TOOLCHAIN_GCC_AT_LEAST_12
- 
-+config BR2_TOOLCHAIN_GCC_AT_LEAST_14
-+	bool
-+	select BR2_TOOLCHAIN_GCC_AT_LEAST_13
-+
- # This order guarantees that the highest version is set, as kconfig
- # stops affecting a value on the first matching default.
- config BR2_TOOLCHAIN_GCC_AT_LEAST
- 	string
-+	default "14"	if BR2_TOOLCHAIN_GCC_AT_LEAST_14
- 	default "13"	if BR2_TOOLCHAIN_GCC_AT_LEAST_13
- 	default "12"	if BR2_TOOLCHAIN_GCC_AT_LEAST_12
- 	default "11"	if BR2_TOOLCHAIN_GCC_AT_LEAST_11
-diff --git a/toolchain/toolchain-external/toolchain-external-custom/Config.in.options b/toolchain/toolchain-external/toolchain-external-custom/Config.in.options
-index f7825cb88e..252b7196fa 100644
---- a/toolchain/toolchain-external/toolchain-external-custom/Config.in.options
-+++ b/toolchain/toolchain-external/toolchain-external-custom/Config.in.options
-@@ -46,8 +46,13 @@ choice
- 	  Set to the gcc version that is used by your external
- 	  toolchain.
- 
-+config BR2_TOOLCHAIN_EXTERNAL_GCC_14
-+	bool "14.x"
-+	select BR2_TOOLCHAIN_GCC_AT_LEAST_14
-+
- config BR2_TOOLCHAIN_EXTERNAL_GCC_13
- 	bool "13.x"
-+	depends on !BR2_ARCH_NEEDS_GCC_AT_LEAST_14
- 	select BR2_TOOLCHAIN_GCC_AT_LEAST_13
- 
- config BR2_TOOLCHAIN_EXTERNAL_GCC_12
 -- 
 2.46.0
 

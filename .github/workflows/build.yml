@@ -89,7 +89,7 @@ jobs:
     - name: Clone buildroot
       if: ${{ env.REBUILD_FLAG }}
       run: |
-        su --command="cd build_dir ; git clone https://github.com/ATS-INTC/buildroot.git --depth=1 buildroot" build
+        su --command="cd build_dir ; git clone https://gitlab.com/buildroot.org/buildroot buildroot ; cd buildroot ; git reset --hard 8d835ffc524e2dab66ce1421240b9eb93c8f8f6a" build
 
     - name: Patch buildroot [buildroot]
       if: ${{ env.REBUILD_FLAG }}
