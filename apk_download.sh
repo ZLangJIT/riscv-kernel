@@ -1,4 +1,5 @@
-TAG=$(grep 'LOCALVERSION=' riscv_defconfig | sed 's/^.*[^0-9]\([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/')
+. ./compute_libmedia_version.sh
+TAG=$LIBMEDIA_GRADLE_VERSION_CODE
 
 if $(am --help 2>&1 | grep -q -i "to-intent-uri")
   then
