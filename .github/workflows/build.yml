@@ -65,7 +65,7 @@ jobs:
     - name: Prepare patches
       shell: bash
       run: |
-        ./compute_version_information.sh | tee -a $GITHUB_ENV
+        bash -c "./compute_libmedia_version.sh" | tee -a $GITHUB_ENV
 
     - name: Install dependencies
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' }}
