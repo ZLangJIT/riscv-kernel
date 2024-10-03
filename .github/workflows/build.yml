@@ -117,6 +117,9 @@ jobs:
           buildroot
         files: |
           buildroot.patch
+          buildroot.patch.latest.minor
+          buildroot.patch.latest.major
+          buildroot.patch.latest.version_code
           build_dir/rootfs.cpio
           build_dir/rootfs.cpio.sha256
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -167,6 +170,9 @@ jobs:
           kernel
         files: |
           kernel.patch
+          kernel.patch.latest.minor
+          kernel.patch.latest.major
+          kernel.patch.latest.version_code
           build_dir/Image
           build_dir/Image.sha256
           build_dir/Image.gz
@@ -479,6 +485,9 @@ jobs:
           rvvm
         files: |
           rvvm.patch
+          rvvm.patch.latest.minor
+          rvvm.patch.latest.major
+          rvvm.patch.latest.version_code
         token: ${{ secrets.GITHUB_TOKEN }}
         # generate_release_notes: true
         fail_on_unmatched_files: true
@@ -494,6 +503,9 @@ jobs:
           virgl
         files: |
           virglrenderer.patch
+          virglrenderer.patch.latest.minor
+          virglrenderer.patch.latest.major
+          virglrenderer.patch.latest.version_code
         token: ${{ secrets.GITHUB_TOKEN }}
         # generate_release_notes: true
         fail_on_unmatched_files: true
@@ -509,6 +521,9 @@ jobs:
           libmedia
         files: |
           libmedia.patch
+          libmedia.patch.latest.minor
+          libmedia.patch.latest.major
+          libmedia.patch.latest.version_code
           linux.kernel.rvvm.debug.apk
           linux.kernel.rvvm.debug.apk.sha256
           linux.kernel.rvvm.release.apk
