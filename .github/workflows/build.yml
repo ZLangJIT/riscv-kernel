@@ -102,7 +102,7 @@ jobs:
         export BR2_CCACHE_DIR="$CCACHE_DIR"
         su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/buildroot ; cp ../../.buildrootconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES" build
 
-    - name: download rootfs [buildroot]
+    - name: Download rootfs [buildroot]
       if: ${{ env.REBUILD_BUILDROOT_FLAG == '' }}
       run: |
         su --command="cd build_dir ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-buildroot/rootfs.cpio ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-buildroot/rootfs.cpio.sha256" build
@@ -145,7 +145,7 @@ jobs:
       run: |
         su --command="set -v ; cd build_dir/linux-xlnx ; git apply --allow-empty ../../kernel.patch" build
 
-    - name: build kernel [linux 6.11]
+    - name: Build kernel [linux 6.11]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' }}
       run: |
         if [ "$(cat /sys/devices/system/cpu/smt/active)" = "1" ]; then
@@ -155,7 +155,7 @@ jobs:
         fi
         su --command="echo building with $LOGICAL_CORES logical cores ; cd build_dir/linux-xlnx ; ls -lhap .. ; cp ../../.linuxconfig .config ; /tmp/monitor_memory.sh & make CC='ccache clang -Qunused-arguments -fcolor-diagnostics' ARCH=riscv LLVM=1 LLVM_IAS=1 -j$LOGICAL_CORES V=2" build
 
-    - name: download kernel [linux 6.11]
+    - name: Download kernel [linux 6.11]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' }}
       run: |
         su --command="cd build_dir ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz.sha256" build
@@ -342,7 +342,7 @@ jobs:
       run: |
         chmod +x linux.kernel.rvvm/gradlew
 
-    - name: copy built kernel [linux.kernel.rvvm]
+    - name: Copy built kernel [linux.kernel.rvvm]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
       shell: bash
       run: |
