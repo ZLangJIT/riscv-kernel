@@ -386,6 +386,8 @@ jobs:
         . ~/.bashrc
         archlinux-java set java-8-openjdk
         cd linux.kernel.rvvm
+        printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
+        printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
         ./gradlew build
 
     - name: Build debug APK [linux.kernel.rvvm]
