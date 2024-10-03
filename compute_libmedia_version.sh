@@ -22,9 +22,9 @@ function check_patch() {
             echo "0" > $1.patch.latest.minor
             echo "1" > $1.patch.latest.version_code
         else
-            wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.latest.major -O $1.patch.latest.major
-            wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.latest.minor -O $1.patch.latest.minor
-            wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.latest.version_code -O $1.patch.latest.version_code
+            wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.major
+            wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.minor
+            wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.version_code
             if ! git diff --no-index $1.patch.latest $1.patch
                 then
                     echo "REBUILD_${2}_FLAG=1"

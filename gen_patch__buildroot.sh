@@ -4,8 +4,8 @@ if [[ -f buildroot.patch ]]
 		rm -v buildroot.patch
 fi
 R=$(cat git_reset_buildroot)
-touch buildroot.patch
+echo "patch file" > buildroot.patch
 cd buildroot
 git reset $R
 git add -AN
-git diff --binary > ../buildroot.patch
+git diff --binary >> ../buildroot.patch

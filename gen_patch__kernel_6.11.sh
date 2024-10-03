@@ -4,8 +4,8 @@ if [[ -f kernel.patch ]]
 		rm -v kernel.patch
 fi
 R=$(cat git_reset_kernel)
-touch kernel.patch
+echo "patch file" > kernel.patch
 cd linux-6.11
 git reset $R
 git add -AN
-git diff --binary > ../kernel.patch
+git diff --binary >>  ../kernel.patch

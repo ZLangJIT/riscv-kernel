@@ -4,8 +4,8 @@ if [[ -f rvvm.patch ]]
 		rm -v rvvm.patch
 fi
 R=$(cat git_reset_rvvm)
-touch rvvm.patch
+echo "patch file" > rvvm.patch
 cd libmedia/app/src/main/java/libengine/RVVM
 git reset $R
 git add -AN
-git diff --binary > ../../../../../../../rvvm.patch
+git diff --binary >> ../../../../../../../rvvm.patch

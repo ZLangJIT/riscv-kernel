@@ -6,7 +6,7 @@ if [[ -f libmedia.patch ]]
 		rm -v libmedia.patch
 fi
 R=$(cat git_reset_libmedia)
-touch libmedia.patch
+echo "patch file" > libmedia.patch
 cd libmedia
 git reset $R
 
@@ -21,7 +21,7 @@ mv app/src/main/java/libengine/virglrenderer ../virglrenderer.current
 mv app/src/main/java/libengine/virglrenderer.reset app/src/main/java/libengine/virglrenderer
 
 git add -AN
-git diff --binary > ../libmedia.patch
+git diff --binary >> ../libmedia.patch
 
 mv app/src/main/java/libengine/RVVM app/src/main/java/libengine/RVVM.reset
 mv ../RVVM.current app/src/main/java/libengine/RVVM

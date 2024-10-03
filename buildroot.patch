@@ -1,3 +1,4 @@
+patch file
 diff --git a/fs/cpio/init b/fs/cpio/init
 index f74ef7e15f..df2ba4d75d 100755
 --- a/fs/cpio/init
