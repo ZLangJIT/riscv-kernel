@@ -36,10 +36,11 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
-    - name: Update pacman repository
+    - name: Update pacman repository + keyring
       run: |
-        pacman -Sy
-
+        pacman -Sy --noconfirm archlinux-keyring
+        pacman -Su --noconfirm
+        
     - name: install important packages
       run: |
         pacman -S --noconfirm ccache zip unzip
