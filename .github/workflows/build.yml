@@ -543,8 +543,7 @@ jobs:
         # generate_release_notes: true
         fail_on_unmatched_files: true
         
-    - name: fetch_commit_sha
-      if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
+    - name: Fetch commit sha
       id: fetch_commit_sha
       run: |
         if [ ${{ github.event_name }} = 'pull_request' ]; then
@@ -556,7 +555,6 @@ jobs:
         fi
 
     - name: Release
-      if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
       uses: softprops/action-gh-release@master
       with:
         name:  ${{ env.RELEASE_TAG }}
@@ -564,11 +562,12 @@ jobs:
         draft: ${{ github.event_name == 'pull_request' }}
         target_commitish: ${{ steps.fetch_commit_sha.outputs.sha }}
         body: |
-          RISC-V linux kernel, built with Clang ${{ needs.build.outputs.clang_version }}
+          RISC-V linux kernel
 
           * `vmlinux` for riscv ( built-in busybox ramdisk )
           * `Image` for riscv ( built-in busybox ramdisk )
           * `Image.gz` for riscv ( built-in busybox ramdisk )
+          * aarch64 apk files (debug+release)
         files: |
           linux.kernel.rvvm.debug.apk
           linux.kernel.rvvm.debug.apk.sha256
