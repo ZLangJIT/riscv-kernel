@@ -6,3 +6,5 @@
 /RVVM_CURRENT
 /disk.img
 /rvvm
+/tmp
+/*.patch.latest*

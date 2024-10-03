@@ -5,9 +5,10 @@ if [[ -f libmedia.patch ]]
 	then
 		rm -v libmedia.patch
 fi
+R=$(cat git_reset_libmedia)
 touch libmedia.patch
 cd libmedia
-git reset 0f06c20bf1341da28213178545ba056f1791896f
+git reset $R
 
 mv app/src/main/java/libengine/RVVM/.git app/src/main/java/libengine/RVVM/.git0
 mv app/src/main/java/libengine/RVVM.reset/.git app/src/main/java/libengine/RVVM.reset/.git0
@@ -19,7 +20,8 @@ mv app/src/main/java/libengine/virglrenderer.reset/.git app/src/main/java/libeng
 mv app/src/main/java/libengine/virglrenderer ../virglrenderer.current
 mv app/src/main/java/libengine/virglrenderer.reset app/src/main/java/libengine/virglrenderer
 
-git add -Av && git commit -m "c" && git format-patch --progress --stdout -n1 > ../libmedia.patch
+git add -AN
+git diff --binary > ../libmedia.patch
 
 mv app/src/main/java/libengine/RVVM app/src/main/java/libengine/RVVM.reset
 mv ../RVVM.current app/src/main/java/libengine/RVVM
