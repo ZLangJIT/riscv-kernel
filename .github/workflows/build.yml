@@ -157,7 +157,7 @@ jobs:
     - name: Download kernel [linux 6.11]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' }}
       run: |
-        su --command="cd build_dir ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz.sha256" build
+        su --command="cd build_dir ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/vmlinux ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/vmlinux.sha256" build
 
     - name: Copy kernel [linux 6.11]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' }}
