@@ -20,7 +20,7 @@ mv app/src/main/java/libengine/virglrenderer.reset/.git app/src/main/java/libeng
 mv app/src/main/java/libengine/virglrenderer ../virglrenderer.current
 mv app/src/main/java/libengine/virglrenderer.reset app/src/main/java/libengine/virglrenderer
 
-git diff --binary $R >> ../libmedia.patch
+#git diff --binary --staged $R >> ../libmedia.patch
 git add -AN
 git diff --binary $R >> ../libmedia.patch
 
