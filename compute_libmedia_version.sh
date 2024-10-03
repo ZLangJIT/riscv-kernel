@@ -25,7 +25,7 @@ function check_patch() {
             wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.major
             wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.minor
             wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.version_code
-            if ! git diff --no-index $1.patch.latest $1.patch
+            if ! git diff --quiet --no-index $1.patch.latest $1.patch
                 then
                     echo "REBUILD_${2}_FLAG=1"
                     if [[ $(eval "echo \$${2}_VERSION") != $(cat $1.patch.latest.major) ]]

@@ -471,7 +471,7 @@ jobs:
     - name: Download apk [buildroot]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' && env.REBUILD_RVVM_FLAG == '' && env.REBUILD_VIRGL_FLAG == '' && env.REBUILD_LIBMEDIA_FLAG == '' }}
       run: |
-        su --command="wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk.256" build
+        su --command="wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk.sha256" build
 
     - name: Move apk
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
