@@ -7,5 +7,5 @@ R=$(cat git_reset_rvvm)
 echo "patch file" > rvvm.patch
 cd libmedia/app/src/main/java/libengine/RVVM
 git reset $R
-git add -AN
-git diff --binary >> ../../../../../../../rvvm.patch
+#git add -AN
+git diff --binary $R >> ../../../../../../../rvvm.patch

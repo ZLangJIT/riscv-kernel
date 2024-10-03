@@ -7,5 +7,5 @@ R=$(cat git_reset_buildroot)
 echo "patch file" > buildroot.patch
 cd buildroot
 git reset $R
-git add -AN
-git diff --binary >> ../buildroot.patch
+#git add -AN
+git diff --binary $R >> ../buildroot.patch
