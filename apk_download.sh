@@ -8,7 +8,7 @@ if $(am --help 2>&1 | grep -q -i "to-intent-uri")
     if $(pm list packages -3 2>&1 | grep -q "idm.internet.download.manager.plus")
       then
         echo "1DM+ detected"
-        am start --user 0 -n "idm.internet.download.manager.plus/idm.internet.download.manager.UrlHandlerDownloader" -d "https://github.com/ZLangJIT/riscv-kernel/releases/download/6.11.39/linux.kernel.rvvm.release.apk"
+        am start --user 0 -n "idm.internet.download.manager.plus/idm.internet.download.manager.UrlHandlerDownloader" -d https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/linux.kernel.rvvm.release.apk
         exit
     fi
     if [[ -d /data/data/com.termux/files/usr ]]
