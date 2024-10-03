@@ -19,7 +19,7 @@ if $(am --help 2>&1 | grep -q -i "to-intent-uri")
         	then
         		rm -v linux.kernel.rvvm.release.apk
         fi
-        wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/linux.kernel.rvvm.release.apk &&
+        wget --no-verbose --show-progress https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/linux.kernel.rvvm.release.apk &&
         set +x &&
         echo &&
         echo 'please install the following apk ...' &&

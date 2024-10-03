@@ -104,7 +104,7 @@ jobs:
     - name: Download rootfs [buildroot]
       if: ${{ env.REBUILD_BUILDROOT_FLAG == '' }}
       run: |
-        su --command="cd build_dir ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-buildroot/rootfs.cpio ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-buildroot/rootfs.cpio.sha256" build
+        su --command="cd build_dir ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-buildroot/rootfs.cpio ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-buildroot/rootfs.cpio.sha256" build
 
     - name: Copy rootfs [buildroot]
       if: ${{ env.REBUILD_BUILDROOT_FLAG != '' }}
@@ -157,7 +157,7 @@ jobs:
     - name: Download kernel [linux 6.11]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' }}
       run: |
-        su --command="cd build_dir ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/vmlinux ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/vmlinux.sha256" build
+        su --command="cd build_dir ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.sha256 ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/Image.gz.sha256 ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/vmlinux ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-kernel/vmlinux.sha256" build
 
     - name: Copy kernel [linux 6.11]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' }}
@@ -196,7 +196,7 @@ jobs:
       run: |
         TOOLS_URL=$(wget -qO- http://developer.android.com/sdk/index.html | grep latest.zip | grep linux | grep href | grep -o https.*zip)
         TOOLS_FILE=$(echo $TOOLS_URL | grep -o command.*zip)
-        cd / ; echo "downloading $TOOLS_FILE ..." ; wget -q $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE ; bash -c "rm $TOOLS_FILE || true"
+        cd / ; echo "downloading $TOOLS_FILE ..." ; wget --no-verbose $TOOLS_URL -O $TOOLS_FILE ; unzip $TOOLS_FILE ; bash -c "rm $TOOLS_FILE || true"
         pacman -S --noconfirm jdk17-openjdk jdk8-openjdk
         archlinux-java status
         archlinux-java set java-17-openjdk
@@ -355,7 +355,7 @@ jobs:
       shell: bash
       run: |
         cd linux.kernel.rvvm/app
-        if $(wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/keystore/keystore)
+        if wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/keystore/keystore
           then
             echo "HAVE_KEYSTORE=1" | tee -a $GITHUB_ENV
           else
@@ -471,7 +471,7 @@ jobs:
     - name: Download apk [buildroot]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' && env.REBUILD_RVVM_FLAG == '' && env.REBUILD_VIRGL_FLAG == '' && env.REBUILD_LIBMEDIA_FLAG == '' }}
       run: |
-        su --command="wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk.sha256 ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk ; wget -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk.sha256" build
+        su --command="wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.debug.apk.sha256 ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk ; wget --no-verbose https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-libmedia/linux.kernel.rvvm.release.apk.sha256" build
 
     - name: Move apk
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}

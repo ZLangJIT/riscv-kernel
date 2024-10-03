@@ -10,4 +10,4 @@ if [[ -f Image ]]
 		rm -v Image
 fi
 echo "downloading version $TAG ..."
-wget https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz && ls -lh Image.gz && gunzip -f Image.gz && ls -lh Image
+wget --no-verbose --show-progress https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/Image.gz && ls -lh Image.gz && gunzip -f Image.gz && ls -lh Image
