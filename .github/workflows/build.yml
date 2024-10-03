@@ -27,7 +27,6 @@ jobs:
       matrix:
         include:
           - arch: riscv
-            image-name: vmlinux-riscv64
 
     steps:
 
@@ -182,6 +181,8 @@ jobs:
           build_dir/Image.sha256
           build_dir/Image.gz
           build_dir/Image.gz.sha256
+          build_dir/vmlinux
+          build_dir/vmlinux.sha256
         token: ${{ secrets.GITHUB_TOKEN }}
         fail_on_unmatched_files: true
 
