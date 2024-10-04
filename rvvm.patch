@@ -586,7 +586,7 @@ index 0000000..783f220
 +}
 diff --git a/src/devices/virtio-gpu.c b/src/devices/virtio-gpu.c
 new file mode 100644
-index 0000000..552003c
+index 0000000..7c3d992
 --- /dev/null
 +++ b/src/devices/virtio-gpu.c
 @@ -0,0 +1,1441 @@
@@ -601,7 +601,7 @@ index 0000000..552003c
 +#include <sys/stat.h>
 +#include <sys/uio.h>
 +#include <unistd.h>
-+#include <virglrenderer.h>
++#include <virgl/virglrenderer.h>
 +
 +#include "virtio_common.h"
 +#include "virtio_device.h"
