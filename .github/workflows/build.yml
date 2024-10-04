@@ -39,7 +39,7 @@ jobs:
       run: |
         pacman -Sy --noconfirm archlinux-keyring
         pacman -Su --noconfirm
-        
+
     - name: install important packages
       run: |
         pacman -S --noconfirm ccache zip unzip
@@ -330,12 +330,20 @@ jobs:
         rm -rf app/src/main/assets/FUNKY_HOUSE.raw
         rm -rf app/src/main/assets/Rhythm8
         rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
+        git add -A ; git commit -m "reset point"
+        git log --pretty=format:'%H' -n 1 > ../git_reset_libmedia
         git apply --allow-empty ../libmedia.patch
         cd app/src/main/java/libengine/RVVM
         mv .git0 .git
+        git commit --allow-empty -m "reset point" ; git log -n 1
+        git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_rvvm
+        cp -R ../RVVM ../RVVM.reset
         git apply --allow-empty ../../../../../../../rvvm.patch
         cd ../virglrenderer
         mv .git0 .git
+        git commit --allow-empty -m "reset point" ; git log -n 1
+        git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_virglrenderer
+        cp -R ../virglrenderer ../virglrenderer.reset
         git apply --allow-empty ../../../../../../../virglrenderer.patch
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
@@ -542,7 +550,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         # generate_release_notes: true
         fail_on_unmatched_files: true
-        
+
     - name: Fetch commit sha
       id: fetch_commit_sha
       run: |
