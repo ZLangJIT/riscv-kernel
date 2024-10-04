@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..04369ef 100644
+index db82e07..1f4f00f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -18,6 +18,7 @@ option(RVVM_USE_NET "Use networking" ON)
@@ -44,7 +44,7 @@ index db82e07..04369ef 100644
 +  )
 +else()
 +  target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
-+endif
++endif()
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
  	target_compile_definitions(rvvm_common INTERFACE USE_GUI)
