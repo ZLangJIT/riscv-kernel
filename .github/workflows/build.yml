@@ -317,8 +317,8 @@ jobs:
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
       run: |
         set -v
-        git config --global user.email "smallville7123@gmail.com"
-        git config --global user.email "mgood7123"
+        git config --global user.name "ZLangJIT"
+        git config --global user.email "root@no.email.yet.com"
         cd linux.kernel.rvvm
         git apply --allow-empty ../libmedia_build.patch
         rm -rf ffmpeg
