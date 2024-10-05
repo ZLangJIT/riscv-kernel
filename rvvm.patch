@@ -119,10 +119,10 @@ index 2366413..e514d84 100644
  endif
 diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
 new file mode 100644
-index 0000000..4b37a07
+index 0000000..b3066aa
 --- /dev/null
 +++ b/cmake/packages/FindEPOXY.cmake
-@@ -0,0 +1,78 @@
+@@ -0,0 +1,72 @@
 +# Try to find the EPOXY library
 +#
 +# If successful, the following variables will be defined:
@@ -163,14 +163,7 @@ index 0000000..4b37a07
 +
 +include(CheckIncludeFile)
 +if(EPOXY_INCLUDE_DIRS AND EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/gl.h")
-+  include(CMakePushCheckState)
-+  cmake_push_check_state()
-+  set(CMAKE_REQUIRED_QUIET ${EPOXY_FIND_QUIETLY})
-+  set(CMAKE_REQUIRED_INCLUDES ${EPOXY_INCLUDE_DIRS})
-+  set(CMAKE_REQUIRED_LIBRARIES ${EPOXY_LIBRARIES})
-+  check_include_file(epoxy/gl.h HAVE_EPOXY_H)
-+  cmake_pop_check_state()
-+  if (HAVE_EPOXY_H)
++  if (EXISTS ${EPOXY_INCLUDE_DIRS}/epoxy/gl.h)
 +    set(EPOXY_VERSION_STRING "1.0")
 +  else()
 +    set(EPOXY_INCLUDE_DIRS "")
@@ -198,15 +191,16 @@ index 0000000..4b37a07
 +  add_library(epoxy UNKNOWN IMPORTED)
 +  set_target_properties(epoxy PROPERTIES
 +                        IMPORTED_LOCATION ${EPOXY_LIBRARIES}
-+                        INTERFACE_INCLUDE_DIRECTORIES ${EPOXY_INCLUDE_DIRS})
++                        INTERFACE_INCLUDE_DIRECTORIES ${EPOXY_INCLUDE_DIRS
++  )
 +  set(EPOXY_TARGET epoxy)
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..6a83bab
+index 0000000..db547ef
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,84 @@
 +# Try to find the VIRGLRENDERER library
 +#
 +# If successful, the following variables will be defined:
@@ -249,15 +243,7 @@ index 0000000..6a83bab
 +
 +include(CheckIncludeFile)
 +if(VIRGLRENDERER_INCLUDE_DIRS AND EXISTS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h")
-+  include(CMakePushCheckState)
-+  cmake_push_check_state()
-+  set(CMAKE_REQUIRED_QUIET ${VIRGLRENDERER_FIND_QUIETLY})
-+  set(CMAKE_REQUIRED_INCLUDES ${VIRGLRENDERER_INCLUDE_DIRS})
-+  set(CMAKE_REQUIRED_LIBRARIES ${VIRGLRENDERER_LIBRARIES})
-+  check_include_file(virgl/virgl-version.h HAVE_VIRGL_VERSION_H)
-+  check_include_file(virgl/virglrenderer.h HAVE_VIRGLRENDERER_H)
-+  cmake_pop_check_state()
-+  if (HAVE_VIRGLRENDERER_H AND HAVE_VIRGL_VERSION_H)
++  if (EXISTS ${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h && EXISTS ${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virglrenderer.h)
 +    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_major_str REGEX "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\(.+\)")
 +    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_minor_str REGEX "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\(.+\)")
 +    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_micro_str REGEX "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\(.+\)")
@@ -293,7 +279,10 @@ index 0000000..6a83bab
 +  add_library(virglrenderer UNKNOWN IMPORTED)
 +  set_target_properties(virglrenderer PROPERTIES
 +                        IMPORTED_LOCATION ${VIRGLRENDERER_LIBRARIES}
-+                        INTERFACE_INCLUDE_DIRECTORIES ${VIRGLRENDERER_INCLUDE_DIRS})
++                        INTERFACE_INCLUDE_DIRECTORIES ${VIRGLRENDERER_INCLUDE_DIRS}
++                        INTERFACE_COMPILE_DEFINITIONS HAVE_VIRGL_VERSION_H HAVE_VIRGLRENDERER_H
++                        INTERFACE_LINK_LIBRARIES epoxy
++  )
 +  set(VIRGLRENDERER_TARGET virglrenderer)
 +endif()
 diff --git a/src/devices/virtio-blk.c b/src/devices/virtio-blk.c
