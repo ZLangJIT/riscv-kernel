@@ -119,10 +119,10 @@ index 2366413..e514d84 100644
  endif
 diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
 new file mode 100644
-index 0000000..de3bebc
+index 0000000..b97188c
 --- /dev/null
 +++ b/cmake/packages/FindEPOXY.cmake
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,69 @@
 +# Try to find the EPOXY library
 +#
 +# If successful, the following variables will be defined:
@@ -138,7 +138,7 @@ index 0000000..de3bebc
 +
 +set(CMAKE_FIND_DEBUG_MODE TRUE)
 +
-+find_path(EPOXY_INCLUDE_DIRS NAMES epoxy/gl.h
++find_path(EPOXY_INCLUDE_DIRS NAMES epoxy/gl.h epoxy/egl.h
 +  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
 +  NO_DEFAULT_PATH
 +  NO_PACKAGE_ROOT_PATH
@@ -161,14 +161,11 @@ index 0000000..de3bebc
 +
 +set(CMAKE_FIND_DEBUG_MODE FALSE)
 +
-+include(CheckIncludeFile)
-+if(EPOXY_INCLUDE_DIRS AND EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/gl.h")
-+  if (EXISTS ${EPOXY_INCLUDE_DIRS}/epoxy/gl.h)
-+    set(EPOXY_VERSION_STRING "1.0")
-+  else()
-+    set(EPOXY_INCLUDE_DIRS "")
-+    set(EPOXY_LIBRARIES "")
-+  endif()
++if(EPOXY_INCLUDE_DIRS AND (EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/gl.h" OR EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/egl.h"))
++  set(EPOXY_VERSION_STRING "1.0")
++else()
++  set(EPOXY_INCLUDE_DIRS "")
++  set(EPOXY_LIBRARIES "")
 +endif()
 +
 +include(FindPackageHandleStandardArgs)
@@ -197,10 +194,10 @@ index 0000000..de3bebc
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..db547ef
+index 0000000..6e2eb6a
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
-@@ -0,0 +1,84 @@
+@@ -0,0 +1,81 @@
 +# Try to find the VIRGLRENDERER library
 +#
 +# If successful, the following variables will be defined:
@@ -241,22 +238,19 @@ index 0000000..db547ef
 +
 +set(CMAKE_FIND_DEBUG_MODE FALSE)
 +
-+include(CheckIncludeFile)
-+if(VIRGLRENDERER_INCLUDE_DIRS AND EXISTS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h")
-+  if (EXISTS ${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h && EXISTS ${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virglrenderer.h)
-+    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_major_str REGEX "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\(.+\)")
-+    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_minor_str REGEX "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\(.+\)")
-+    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_micro_str REGEX "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\(.+\)")
++if(VIRGLRENDERER_INCLUDE_DIRS AND EXISTS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" AND EXISTS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virglrenderer.h")
++  FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_major_str REGEX "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\(.+\)")
++  FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_minor_str REGEX "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\(.+\)")
++  FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_micro_str REGEX "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\(.+\)")
++
++  STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MAJOR_VERSION "${VIRGLRENDERER_version_major_str}")
++  STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MINOR_VERSION "${VIRGLRENDERER_version_minor_str}")
++  STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MICRO_VERSION "${VIRGLRENDERER_version_micro_str}")
 +  
-+    STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MAJOR_VERSION "${VIRGLRENDERER_version_major_str}")
-+    STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MINOR_VERSION "${VIRGLRENDERER_version_minor_str}")
-+    STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MICRO_VERSION "${VIRGLRENDERER_version_micro_str}")
-+    
-+    STRING(CONCAT VIRGLRENDERER_VERSION_STRING ${VIRGL_MAJOR_VERSION} "." ${VIRGL_MINOR_VERSION} "." ${VIRGL_MICRO_VERSION})
-+  else()
-+    set(VIRGLRENDERER_INCLUDE_DIRS "")
-+    set(VIRGLRENDERER_LIBRARIES "")
-+  endif()
++  STRING(CONCAT VIRGLRENDERER_VERSION_STRING ${VIRGL_MAJOR_VERSION} "." ${VIRGL_MINOR_VERSION} "." ${VIRGL_MICRO_VERSION})
++else()
++  set(VIRGLRENDERER_INCLUDE_DIRS "")
++  set(VIRGLRENDERER_LIBRARIES "")
 +endif()
 +
 +include(FindPackageHandleStandardArgs)
