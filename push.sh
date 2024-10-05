@@ -1,6 +1,6 @@
 IS_VERBOSE="-q"
-if [[ $# -gt '0' ]]
-  then
+while [[ $# -gt '0' ]]
+  do
     if [[ "$1" == '-v' ]]
       then
         IS_VERBOSE="--show-progress -q"
@@ -13,9 +13,19 @@ if [[ $# -gt '0' ]]
                 shift
             fi
         fi
-    fi
+    else
+      if [[ "$1" == '--version-code' ]]
+        then
+          LIBMEDIA_GRADLE_VERSION_CODE="$2"
+          shift
+        else
+          shift
+      fi
+  fi
+done
+if [[ -z $LIBMEDIA_GRADLE_VERSION_CODE ]]
+  then
+    . ./compute_libmedia_version.sh
 fi
-
-. ./compute_libmedia_version.sh
 
 git add -Av ; git commit -m "update to riscv-kernel-6.11.0 v$LIBMEDIA_GRADLE_VERSION_CODE" ; git log -n 1 ; git push
