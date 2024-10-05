@@ -410,7 +410,7 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        ./gradlew build
+        ./gradlew build || bash -c "find -name *.txt ; false"
 
     - name: Build debug APK [linux.kernel.rvvm]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
@@ -427,63 +427,6 @@ jobs:
         . ~/.bashrc
         cd linux.kernel.rvvm
         ./gradlew assembleRelease --stacktrace
-
-    - name: Clone libmedia
-      if: false
-      run: |
-        git clone https://github.com/mgood7123/libmedia --depth=1
-
-    - name: Patch [libmedia]
-      if: false
-      shell: bash
-      run: |
-        set -v
-        cd libmedia
-        git apply --allow-empty ../libmedia_build.patch
-
-    - name: Grant execute permission for gradlew [libmedia]
-      if: false
-      run: |
-        chmod +x libmedia/gradlew
-
-    - name: Build with Gradle [libmedia]
-      if: false
-      shell: bash
-      run: |
-        . ~/.bashrc
-        archlinux-java set java-8-openjdk
-        cd libmedia
-        ./gradlew build
-
-    - name: Build debug APK [libmedia]
-      if: false
-      shell: bash
-      run: |
-        . ~/.bashrc
-        cd libmedia
-        ./gradlew assembleDebug --stacktrace
-
-    - name: Grant execute permission for gradlew [android]
-      if: false
-      run: |
-        chmod +x android/gradlew
-
-    - name: Build with Gradle [android]
-      if: false
-      shell: bash
-      run: |
-        . ~/.bashrc
-        archlinux-java set java-17-openjdk
-        cd android
-        ./gradlew build --stacktrace
-
-    - name: Build debug APK [android]
-      if: false
-      shell: bash
-      run: |
-        . ~/.bashrc
-        cd android
-        ./gradlew assembleDebug --stacktrace
 
     - name: Download apk [buildroot]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' && env.REBUILD_RVVM_FLAG == '' && env.REBUILD_EPOXY_FLAG == '' || env.REBUILD_VIRGL_FLAG == '' && env.REBUILD_LIBMEDIA_FLAG == '' }}
