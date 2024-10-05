@@ -119,7 +119,7 @@ index 2366413..e514d84 100644
  endif
 diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
 new file mode 100644
-index 0000000..b3066aa
+index 0000000..de3bebc
 --- /dev/null
 +++ b/cmake/packages/FindEPOXY.cmake
 @@ -0,0 +1,72 @@
@@ -191,7 +191,7 @@ index 0000000..b3066aa
 +  add_library(epoxy UNKNOWN IMPORTED)
 +  set_target_properties(epoxy PROPERTIES
 +                        IMPORTED_LOCATION ${EPOXY_LIBRARIES}
-+                        INTERFACE_INCLUDE_DIRECTORIES ${EPOXY_INCLUDE_DIRS
++                        INTERFACE_INCLUDE_DIRECTORIES ${EPOXY_INCLUDE_DIRS}
 +  )
 +  set(EPOXY_TARGET epoxy)
 +endif()
