@@ -15,16 +15,16 @@ function check_patch() {
         then
             rm $1.patch.latest.version_code
     fi
-    if ! wget ${IS_VERBOSE} -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch -O $1.patch.latest
+    if ! wget ${IS_VERBOSE} https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch -O $1.patch.latest
         then
             echo "REBUILD_${2}_FLAG=1"
             echo "$(eval "echo \$${2}_VERSION")" > $1.patch.latest.major
             echo "0" > $1.patch.latest.minor
             echo "1" > $1.patch.latest.version_code
         else
-            wget ${IS_VERBOSE} -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.major
-            wget ${IS_VERBOSE} -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.minor
-            wget ${IS_VERBOSE} -q https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.version_code
+            wget ${IS_VERBOSE} https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.major
+            wget ${IS_VERBOSE} https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.minor
+            wget ${IS_VERBOSE} https://github.com/ZLangJIT/riscv-kernel/releases/download/patches-$1/$1.patch.latest.version_code
             if ! git diff --quiet --no-index $1.patch.latest $1.patch
                 then
                     echo "REBUILD_${2}_FLAG=1"
