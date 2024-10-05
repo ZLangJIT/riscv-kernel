@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..28fb8ac 100644
+index db82e07..65abf8a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,21 @@
@@ -69,7 +69,7 @@ index db82e07..28fb8ac 100644
 +  )
 +else()
 +  target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
-+  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/packages" )
++  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/packages" )
 +  find_package(VIRGLRENDERER REQUIRED)
 +  target_link_libraries(rvvm_common INTERFACE epoxy)
 +  target_link_libraries(rvvm_common INTERFACE virglrenderer)
