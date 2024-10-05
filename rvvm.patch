@@ -118,10 +118,10 @@ index 2366413..e514d84 100644
  endif
 diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
 new file mode 100644
-index 0000000..b97188c
+index 0000000..b8bc151
 --- /dev/null
 +++ b/cmake/packages/FindEPOXY.cmake
-@@ -0,0 +1,69 @@
+@@ -0,0 +1,73 @@
 +# Try to find the EPOXY library
 +#
 +# If successful, the following variables will be defined:
@@ -185,18 +185,22 @@ index 0000000..b97188c
 +
 +if (EPOXY_FOUND AND NOT TARGET epoxy)
 +  add_library(epoxy UNKNOWN IMPORTED)
-+  set_target_properties(epoxy PROPERTIES
-+                        IMPORTED_LOCATION ${EPOXY_LIBRARIES}
-+                        INTERFACE_INCLUDE_DIRECTORIES ${EPOXY_INCLUDE_DIRS}
-+  )
++  set_target_properties(epoxy PROPERTIES IMPORTED_LOCATION ${EPOXY_LIBRARIES})
++  target_include_directories(epoxy INTERFACE ${EPOXY_INCLUDE_DIRS})
++  if (EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/gl.h")
++    target_compile_definitions(epoxy INTERFACE HAVE_EPOXY_GL_H)
++  endif()
++  if (EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/egl.h")
++    target_compile_definitions(epoxy INTERFACE HAVE_EPOXY_EGL_H)
++  endif()
 +  set(EPOXY_TARGET epoxy)
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..1c7c164
+index 0000000..0aa07c7
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,80 @@
 +# Try to find the VIRGLRENDERER library
 +#
 +# If successful, the following variables will be defined:
@@ -270,12 +274,11 @@ index 0000000..1c7c164
 +
 +if (VIRGLRENDERER_FOUND AND NOT TARGET virglrenderer)
 +  add_library(virglrenderer UNKNOWN IMPORTED)
-+  set_target_properties(virglrenderer PROPERTIES
-+                        IMPORTED_LOCATION ${VIRGLRENDERER_LIBRARIES}
-+                        INTERFACE_INCLUDE_DIRECTORIES ${VIRGLRENDERER_INCLUDE_DIRS}
-+                        INTERFACE_COMPILE_DEFINITIONS HAVE_VIRGL_VERSION_H;HAVE_VIRGLRENDERER_H
-+                        INTERFACE_LINK_LIBRARIES epoxy
-+  )
++  set_target_properties(virglrenderer PROPERTIES IMPORTED_LOCATION ${VIRGLRENDERER_LIBRARIES})
++  target_include_directories(virglrenderer INTERFACE ${VIRGLRENDERER_INCLUDE_DIRS})
++  target_compile_definitions(virglrenderer INTERFACE HAVE_VIRGL_VERSION_H)
++  target_compile_definitions(virglrenderer INTERFACE HAVE_VIRGLRENDERER_H)
++  target_link_libraries(virglrenderer INTERFACE epoxy)
 +  set(VIRGLRENDERER_TARGET virglrenderer)
 +endif()
 diff --git a/src/devices/virtio-blk.c b/src/devices/virtio-blk.c
