@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..65abf8a 100644
+index db82e07..0759e49 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,21 @@
@@ -47,7 +47,7 @@ index db82e07..65abf8a 100644
  set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
  set(RVVM_XLIB_SRC "${RVVM_SRC_DIR}/devices/x11window_xlib.c")
  set(RVVM_WIN32_SRC "${RVVM_SRC_DIR}/devices/win32window.c")
-@@ -190,13 +203,28 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
+@@ -190,13 +203,27 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
  set(RVVM_SDL_SRC "${RVVM_SRC_DIR}/devices/sdl_window.c")
  set(RVVM_TAP_LINUX_SRC "${RVVM_SRC_DIR}/devices/tap_linux.c")
  set(RVVM_TAP_USER_SRC "${RVVM_SRC_DIR}/devices/tap_user.c")
@@ -71,7 +71,6 @@ index db82e07..65abf8a 100644
 +  target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
 +  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/packages" )
 +  find_package(VIRGLRENDERER REQUIRED)
-+  target_link_libraries(rvvm_common INTERFACE epoxy)
 +  target_link_libraries(rvvm_common INTERFACE virglrenderer)
 +endif()
  
@@ -194,7 +193,7 @@ index 0000000..b97188c
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..dc4da01
+index 0000000..1c7c164
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
 @@ -0,0 +1,81 @@
@@ -274,9 +273,9 @@ index 0000000..dc4da01
 +  set_target_properties(virglrenderer PROPERTIES
 +                        IMPORTED_LOCATION ${VIRGLRENDERER_LIBRARIES}
 +                        INTERFACE_INCLUDE_DIRECTORIES ${VIRGLRENDERER_INCLUDE_DIRS}
-+                        INTERFACE_COMPILE_DEFINITIONS HAVE_VIRGL_VERSION_H HAVE_VIRGLRENDERER_H
++                        INTERFACE_COMPILE_DEFINITIONS HAVE_VIRGL_VERSION_H;HAVE_VIRGLRENDERER_H
++                        INTERFACE_LINK_LIBRARIES epoxy
 +  )
-+  target_link_libraries(virglrenderer epoxy)
 +  set(VIRGLRENDERER_TARGET virglrenderer)
 +endif()
 diff --git a/src/devices/virtio-blk.c b/src/devices/virtio-blk.c
