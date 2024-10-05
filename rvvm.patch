@@ -1,9 +1,34 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..1f4f00f 100644
+index db82e07..28fb8ac 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -18,6 +18,7 @@ option(RVVM_USE_NET "Use networking" ON)
+@@ -1,13 +1,21 @@
+ # CMake configuration file for those who don't like Make (like I do)
+ # Prev-maintainer: cerg2010cerg2010
+ 
+-cmake_minimum_required(VERSION 3.9)
++cmake_minimum_required(VERSION 3.12)
+ 
+ set(RVVM_VERSION 0.7)
+-project(RVVM VERSION ${RVVM_VERSION}
++
++project(
++  RVVM VERSION ${RVVM_VERSION}
+ 	DESCRIPTION "RISC-V Virtual Machine"
+ 	HOMEPAGE_URL "https://github.com/LekKit/RVVM"
+-	LANGUAGES C CXX)
++	LANGUAGES C CXX
++)
++
++if (NOT RVVM__ROOTFS)
++  # the default root path ('/') for finding virtio dependencies
++  set(RVVM__ROOTFS "/")
++endif()
+ 
+ option(RVVM_USE_RV64 "Use RV64 CPU" ON)
+ option(RVVM_USE_FPU "Use floating-point instructions" ON)
+@@ -18,6 +26,7 @@ option(RVVM_USE_NET "Use networking" ON)
  option(RVVM_USE_TAP_LINUX "Use Linux TAP (deprecated)" OFF)
  option(RVVM_USE_FDT "Use Flattened Device Tree generation" ON)
  option(RVVM_USE_PCI "Use ATA over PCI, PIO mode is used otherwise" ON)
@@ -11,7 +36,7 @@ index db82e07..1f4f00f 100644
  option(RVVM_USE_SPINLOCK_DEBUG "Use spinlock debugging" ON)
  option(RVVM_USE_PRECISE_FS "Use precise FPU status tracking" OFF)
  option(RVVM_USE_LIB "Build shared librvvm library" ON)
-@@ -183,6 +184,10 @@ file(GLOB RVVM_DEVICES_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
+@@ -183,6 +192,10 @@ file(GLOB RVVM_DEVICES_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
  	"${RVVM_SRC_DIR}/devices/*.h"
  	"${RVVM_SRC_DIR}/devices/*.c"
  )
@@ -22,7 +47,7 @@ index db82e07..1f4f00f 100644
  set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
  set(RVVM_XLIB_SRC "${RVVM_SRC_DIR}/devices/x11window_xlib.c")
  set(RVVM_WIN32_SRC "${RVVM_SRC_DIR}/devices/win32window.c")
-@@ -190,13 +195,24 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
+@@ -190,13 +203,28 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
  set(RVVM_SDL_SRC "${RVVM_SRC_DIR}/devices/sdl_window.c")
  set(RVVM_TAP_LINUX_SRC "${RVVM_SRC_DIR}/devices/tap_linux.c")
  set(RVVM_TAP_USER_SRC "${RVVM_SRC_DIR}/devices/tap_user.c")
@@ -44,6 +69,10 @@ index db82e07..1f4f00f 100644
 +  )
 +else()
 +  target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
++  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/packages" )
++  find_package(VIRGLRENDERER REQUIRED)
++  target_link_libraries(rvvm_common INTERFACE epoxy)
++  target_link_libraries(rvvm_common INTERFACE virglrenderer)
 +endif()
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
@@ -88,6 +117,185 @@ index 2366413..e514d84 100644
  ifeq ($(USE_SPINLOCK_DEBUG),1)
  override CFLAGS += -DUSE_SPINLOCK_DEBUG
  endif
+diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
+new file mode 100644
+index 0000000..a6b71a9
+--- /dev/null
++++ b/cmake/packages/FindEPOXY.cmake
+@@ -0,0 +1,78 @@
++# Try to find the EPOXY library
++#
++# If successful, the following variables will be defined:
++# EPOXY_INCLUDE_DIR
++# EPOXY_LIBRARIES
++# EPOXY_FOUND
++#
++# additionally exposes the following target:
++# epoxy
++
++find_package(PkgConfig QUIET)
++pkg_check_modules(PC_GLOB QUIET epoxy)
++
++set(CMAKE_FIND_DEBUG_MODE FALSE) # TRUE)
++
++find_path(EPOXY_INCLUDE_DIRS NAMES epoxy/gl.h
++  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
++  NO_DEFAULT_PATH
++  NO_PACKAGE_ROOT_PATH
++  NO_CMAKE_PATH
++  NO_CMAKE_ENVIRONMENT_PATH
++  NO_SYSTEM_ENVIRONMENT_PATH
++  NO_CMAKE_SYSTEM_PATH
++  NO_CMAKE_FIND_ROOT_PATH
++)
++find_library(EPOXY_LIBRARIES NAMES libepoxy.so
++  PATHS ${RVVM__ROOTFS}lib ${RVVM__ROOTFS}usr/lib
++  NO_DEFAULT_PATH
++  NO_PACKAGE_ROOT_PATH
++  NO_CMAKE_PATH
++  NO_CMAKE_ENVIRONMENT_PATH
++  NO_SYSTEM_ENVIRONMENT_PATH
++  NO_CMAKE_SYSTEM_PATH
++  NO_CMAKE_FIND_ROOT_PATH
++)
++
++set(CMAKE_FIND_DEBUG_MODE FALSE)
++
++include(CheckIncludeFile)
++if(EPOXY_INCLUDE_DIRS AND EXISTS "${EPOXY_INCLUDE_DIRS}/epoxy/gl.h")
++  include(CMakePushCheckState)
++  cmake_push_check_state()
++  set(CMAKE_REQUIRED_QUIET ${EPOXY_FIND_QUIETLY})
++  set(CMAKE_REQUIRED_INCLUDES ${EPOXY_INCLUDE_DIRS})
++  set(CMAKE_REQUIRED_LIBRARIES ${EPOXY_LIBRARIES})
++  check_include_file(${EPOXY_INCLUDE_DIRS}/epoxy/gl.h HAVE_EPOXY_H)
++  cmake_pop_check_state()
++  if (HAVE_EPOXY_H)
++    set(EPOXY_VERSION_STRING "1.0")
++  else()
++    set(EPOXY_INCLUDE_DIRS "")
++    set(EPOXY_LIBRARIES "")
++  endif()
++endif()
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(EPOXY
++                                  FOUND_VAR
++                                    EPOXY_FOUND
++                                  REQUIRED_VARS
++                                    EPOXY_INCLUDE_DIRS
++                                    EPOXY_LIBRARIES
++                                  VERSION_VAR
++                                    EPOXY_VERSION_STRING)
++mark_as_advanced(EPOXY_INCLUDE_DIRS EPOXY_LIBRARIES)
++
++message(STATUS "EPOXY: found :        ${EPOXY_FOUND}")
++message(STATUS "EPOXY: include_dirs : ${EPOXY_INCLUDE_DIRS}")
++message(STATUS "EPOXY: lib :          ${EPOXY_LIBRARIES}")
++message(STATUS "EPOXY: version :      ${EPOXY_VERSION_STRING}")
++
++if (EPOXY_FOUND AND NOT TARGET epoxy)
++  add_library(epoxy UNKNOWN IMPORTED)
++  set_target_properties(epoxy PROPERTIES
++                        IMPORTED_LOCATION ${EPOXY_LIBRARIES}
++                        INTERFACE_INCLUDE_DIRECTORIES ${EPOXY_INCLUDE_DIRS})
++  set(EPOXY_TARGET epoxy)
++endif()
+diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
+new file mode 100644
+index 0000000..16d88dc
+--- /dev/null
++++ b/cmake/packages/FindVIRGLRENDERER.cmake
+@@ -0,0 +1,89 @@
++# Try to find the VIRGLRENDERER library
++#
++# If successful, the following variables will be defined:
++# VIRGLRENDERER_INCLUDE_DIR
++# VIRGLRENDERER_LIBRARIES
++# VIRGLRENDERER_FOUND
++#
++# additionally exposes the following target:
++# virglrenderer
++
++find_package(EPOXY REQUIRED)
++
++find_package(PkgConfig QUIET)
++pkg_check_modules(PC_GLOB QUIET VIRGLRENDERER)
++
++set(CMAKE_FIND_DEBUG_MODE FALSE) # TRUE)
++
++find_path(VIRGLRENDERER_INCLUDE_DIRS NAMES virgl/virgl-version.h
++  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
++  NO_DEFAULT_PATH
++  NO_PACKAGE_ROOT_PATH
++  NO_CMAKE_PATH
++  NO_CMAKE_ENVIRONMENT_PATH
++  NO_SYSTEM_ENVIRONMENT_PATH
++  NO_CMAKE_SYSTEM_PATH
++  NO_CMAKE_FIND_ROOT_PATH
++)
++find_library(VIRGLRENDERER_LIBRARIES NAMES libvirglrenderer.so
++  PATHS ${RVVM__ROOTFS}lib ${RVVM__ROOTFS}usr/lib
++  NO_DEFAULT_PATH
++  NO_PACKAGE_ROOT_PATH
++  NO_CMAKE_PATH
++  NO_CMAKE_ENVIRONMENT_PATH
++  NO_SYSTEM_ENVIRONMENT_PATH
++  NO_CMAKE_SYSTEM_PATH
++  NO_CMAKE_FIND_ROOT_PATH
++)
++
++set(CMAKE_FIND_DEBUG_MODE FALSE)
++
++include(CheckIncludeFile)
++if(VIRGLRENDERER_INCLUDE_DIRS AND EXISTS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h")
++  include(CMakePushCheckState)
++  cmake_push_check_state()
++  set(CMAKE_REQUIRED_QUIET ${VIRGLRENDERER_FIND_QUIETLY})
++  set(CMAKE_REQUIRED_INCLUDES ${VIRGLRENDERER_INCLUDE_DIRS})
++  set(CMAKE_REQUIRED_LIBRARIES ${VIRGLRENDERER_LIBRARIES})
++  check_include_file(${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h HAVE_VIRGL_VERSION_H)
++  check_include_file(${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virglrenderer.h HAVE_VIRGLRENDERER_H)
++  cmake_pop_check_state()
++  if (HAVE_VIRGLRENDERER_H AND HAVE_VIRGL_VERSION_H)
++    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_major_str REGEX "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\(.+\)")
++    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_minor_str REGEX "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\(.+\)")
++    FILE(STRINGS "${VIRGLRENDERER_INCLUDE_DIRS}/virgl/virgl-version.h" VIRGLRENDERER_version_micro_str REGEX "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\(.+\)")
++  
++    STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MAJOR_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MAJOR_VERSION "${VIRGLRENDERER_version_major_str}")
++    STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MINOR_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MINOR_VERSION "${VIRGLRENDERER_version_minor_str}")
++    STRING(REGEX REPLACE "^#define[ \t]+VIRGL_MICRO_VERSION[ \t]+\\\(([^\)]+)\\\).*" "\\1" VIRGL_MICRO_VERSION "${VIRGLRENDERER_version_micro_str}")
++    
++    STRING(CONCAT VIRGLRENDERER_VERSION_STRING ${VIRGL_MAJOR_VERSION} "." ${VIRGL_MINOR_VERSION} "." ${VIRGL_MICRO_VERSION})
++  else()
++    set(VIRGLRENDERER_INCLUDE_DIRS "")
++    set(VIRGLRENDERER_LIBRARIES "")
++  endif()
++endif()
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(VIRGLRENDERER
++                                  FOUND_VAR
++                                    VIRGLRENDERER_FOUND
++                                  REQUIRED_VARS
++                                    VIRGLRENDERER_INCLUDE_DIRS
++                                    VIRGLRENDERER_LIBRARIES
++                                  VERSION_VAR
++                                    VIRGLRENDERER_VERSION_STRING)
++mark_as_advanced(VIRGLRENDERER_INCLUDE_DIRS VIRGLRENDERER_LIBRARIES)
++
++message(STATUS "VIRGLRENDERER: found :        ${VIRGLRENDERER_FOUND}")
++message(STATUS "VIRGLRENDERER: include_dirs : ${VIRGLRENDERER_INCLUDE_DIRS}")
++message(STATUS "VIRGLRENDERER: lib :          ${VIRGLRENDERER_LIBRARIES}")
++message(STATUS "VIRGLRENDERER: version :      ${VIRGLRENDERER_VERSION_STRING}")
++
++if (VIRGLRENDERER_FOUND AND NOT TARGET virglrenderer)
++  add_library(virglrenderer UNKNOWN IMPORTED)
++  set_target_properties(virglrenderer PROPERTIES
++                        IMPORTED_LOCATION ${VIRGLRENDERER_LIBRARIES}
++                        INTERFACE_INCLUDE_DIRECTORIES ${VIRGLRENDERER_INCLUDE_DIRS})
++  set(VIRGLRENDERER_TARGET virglrenderer)
++endif()
 diff --git a/src/devices/virtio-blk.c b/src/devices/virtio-blk.c
 new file mode 100644
 index 0000000..783f220
