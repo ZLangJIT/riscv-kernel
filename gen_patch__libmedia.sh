@@ -1,5 +1,6 @@
-./i_gen_patch__rvvm.sh
+./i_gen_patch__epoxy.sh
 ./i_gen_patch__virglrenderer.sh
+./i_gen_patch__rvvm.sh
 set -x
 if [[ -f libmedia.patch ]]
 	then
@@ -10,25 +11,28 @@ echo "patch file" > libmedia.patch
 cd libmedia
 git reset $R
 
-mv app/src/main/java/libengine/RVVM/.git app/src/main/java/libengine/RVVM/.git0
-mv app/src/main/java/libengine/RVVM.reset/.git app/src/main/java/libengine/RVVM.reset/.git0
-mv app/src/main/java/libengine/RVVM ../RVVM.current
-mv app/src/main/java/libengine/RVVM.reset app/src/main/java/libengine/RVVM
+function save() {
+mv app/src/main/java/libengine/$1/.git app/src/main/java/libengine/$1/.git0
+mv app/src/main/java/libengine/$1.reset/.git app/src/main/java/libengine/$1.reset/.git0
+mv app/src/main/java/libengine/$1 ../$1.current
+mv app/src/main/java/libengine/$1.reset app/src/main/java/libengine/$1
+}
 
-mv app/src/main/java/libengine/virglrenderer/.git app/src/main/java/libengine/virglrenderer/.git0
-mv app/src/main/java/libengine/virglrenderer.reset/.git app/src/main/java/libengine/virglrenderer.reset/.git0
-mv app/src/main/java/libengine/virglrenderer ../virglrenderer.current
-mv app/src/main/java/libengine/virglrenderer.reset app/src/main/java/libengine/virglrenderer
+function load() {
+mv app/src/main/java/libengine/$1 app/src/main/java/libengine/$1.reset
+mv ../$1.current app/src/main/java/libengine/$1
+mv app/src/main/java/libengine/$1.reset/.git0 app/src/main/java/libengine/$1.reset/.git
+mv app/src/main/java/libengine/$1/.git0 app/src/main/java/libengine/$1/.git
+}
+
+save epoxy
+save virglrenderer
+save RVVM
 
 git add -AN
 git diff --binary $R >> ../libmedia.patch
 
-mv app/src/main/java/libengine/RVVM app/src/main/java/libengine/RVVM.reset
-mv ../RVVM.current app/src/main/java/libengine/RVVM
-mv app/src/main/java/libengine/RVVM.reset/.git0 app/src/main/java/libengine/RVVM.reset/.git
-mv app/src/main/java/libengine/RVVM/.git0 app/src/main/java/libengine/RVVM/.git
+load epoxy
+load virglrenderer
+load RVVM
 
-mv app/src/main/java/libengine/virglrenderer app/src/main/java/libengine/virglrenderer.reset
-mv ../virglrenderer.current app/src/main/java/libengine/virglrenderer
-mv app/src/main/java/libengine/virglrenderer.reset/.git0 app/src/main/java/libengine/virglrenderer.reset/.git
-mv app/src/main/java/libengine/virglrenderer/.git0 app/src/main/java/libengine/virglrenderer/.git
