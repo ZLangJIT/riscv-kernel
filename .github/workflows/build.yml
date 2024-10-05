@@ -348,7 +348,7 @@ jobs:
         git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_virglrenderer
         #cp -R ../virglrenderer ../virglrenderer.reset
         git apply --allow-empty ../../../../../../../virglrenderer.patch
-        cd ../rvvm
+        cd ../RVVM
         mv .git0 .git
         git commit --allow-empty -m "reset point" ; git log -n 1
         git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_rvvm
