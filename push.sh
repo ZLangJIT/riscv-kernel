@@ -14,9 +14,10 @@ while [[ $# -gt '0' ]]
             fi
         fi
     else
-      if [[ "$1" == '--version-code' ]]
+      if [[ "$1" == '--version_code' ]]
         then
           LIBMEDIA_GRADLE_VERSION_CODE="$2"
+          shift
           shift
         else
           shift
