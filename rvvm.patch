@@ -194,7 +194,7 @@ index 0000000..b97188c
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..6e2eb6a
+index 0000000..dc4da01
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
 @@ -0,0 +1,81 @@
@@ -275,8 +275,8 @@ index 0000000..6e2eb6a
 +                        IMPORTED_LOCATION ${VIRGLRENDERER_LIBRARIES}
 +                        INTERFACE_INCLUDE_DIRECTORIES ${VIRGLRENDERER_INCLUDE_DIRS}
 +                        INTERFACE_COMPILE_DEFINITIONS HAVE_VIRGL_VERSION_H HAVE_VIRGLRENDERER_H
-+                        INTERFACE_LINK_LIBRARIES epoxy
 +  )
++  target_link_libraries(virglrenderer epoxy)
 +  set(VIRGLRENDERER_TARGET virglrenderer)
 +endif()
 diff --git a/src/devices/virtio-blk.c b/src/devices/virtio-blk.c
