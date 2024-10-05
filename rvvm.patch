@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..0759e49 100644
+index db82e07..9e2dc6c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,21 @@
@@ -36,18 +36,59 @@ index db82e07..0759e49 100644
  option(RVVM_USE_SPINLOCK_DEBUG "Use spinlock debugging" ON)
  option(RVVM_USE_PRECISE_FS "Use precise FPU status tracking" OFF)
  option(RVVM_USE_LIB "Build shared librvvm library" ON)
-@@ -183,6 +192,10 @@ file(GLOB RVVM_DEVICES_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
- 	"${RVVM_SRC_DIR}/devices/*.h"
+@@ -129,13 +138,18 @@ endif()
+ 
+ # General sources
+ file(GLOB RVVM_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
+-	"${RVVM_SRC_DIR}/*.h"
+ 	"${RVVM_SRC_DIR}/*.c"
+ 	"${RVVM_SRC_DIR}/cpu/riscv_*.c"
+ )
++file(GLOB RVVM_SRC_H LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
++	"${RVVM_SRC_DIR}/*.h"
++	"${RVVM_SRC_DIR}/cpu/*.h"
++)
+ set(RVVM_MAIN_SRC "${RVVM_SRC_DIR}/main.c")
+ set(RVVM_NETWORKING_SRC "${RVVM_SRC_DIR}/networking.c")
++set(RVVM_NETWORKING_SRC_H "${RVVM_SRC_DIR}/networking.h")
+ list(REMOVE_ITEM RVVM_SRC ${RVVM_MAIN_SRC} ${RVVM_NETWORKING_SRC})
++list(REMOVE_ITEM RVVM_SRC_H ${RVVM_NETWORKING_SRC_H})
+ 
+ if (RVVM_USE_RV64)
+ 	file(GLOB RVVM_RV64_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
+@@ -171,18 +185,29 @@ endif()
+ # RVJIT sources
+ if (RVVM_USE_JIT)
+ 	file(GLOB RVVM_RVJIT_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
+-		"${RVVM_SRC_DIR}/rvjit/*.h"
+ 		"${RVVM_SRC_DIR}/rvjit/*.c"
+ 	)
++	file(GLOB RVVM_RVJIT_SRC_H LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
++		"${RVVM_SRC_DIR}/rvjit/*.h"
++	)
+ 	list(APPEND RVVM_SRC ${RVVM_RVJIT_SRC})
++	list(APPEND RVVM_SRC_H ${RVVM_RVJIT_SRC_H})
+ 	target_compile_definitions(rvvm_common INTERFACE USE_JIT)
+ endif()
+ 
+ # Device sources
+ file(GLOB RVVM_DEVICES_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
+-	"${RVVM_SRC_DIR}/devices/*.h"
  	"${RVVM_SRC_DIR}/devices/*.c"
  )
++file(GLOB RVVM_DEVICES_SRC_H LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
++	"${RVVM_SRC_DIR}/devices/*.h"
++)
 +file(GLOB RVVM_DEVICES_VIRTIO_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
-+	"${RVVM_SRC_DIR}/devices/virtio*.h"
 +	"${RVVM_SRC_DIR}/devices/virtio*.c"
++)
++file(GLOB RVVM_DEVICES_VIRTIO_SRC_H LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
++	"${RVVM_SRC_DIR}/devices/virtio*.h"
 +)
  set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
  set(RVVM_XLIB_SRC "${RVVM_SRC_DIR}/devices/x11window_xlib.c")
  set(RVVM_WIN32_SRC "${RVVM_SRC_DIR}/devices/win32window.c")
-@@ -190,13 +203,27 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
+@@ -190,13 +215,26 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
  set(RVVM_SDL_SRC "${RVVM_SRC_DIR}/devices/sdl_window.c")
  set(RVVM_TAP_LINUX_SRC "${RVVM_SRC_DIR}/devices/tap_linux.c")
  set(RVVM_TAP_USER_SRC "${RVVM_SRC_DIR}/devices/tap_user.c")
@@ -64,9 +105,8 @@ index db82e07..0759e49 100644
 +)
 +
 +if (NOT RVVM_USE_VIRTIO)
-+  list(REMOVE_ITEM RVVM_DEVICES_SRC
-+    ${RVVM_DEVICES_VIRTIO_SRC}
-+  )
++  list(REMOVE_ITEM RVVM_DEVICES_SRC ${RVVM_DEVICES_VIRTIO_SRC})
++  list(REMOVE_ITEM RVVM_DEVICES_SRC_H ${RVVM_DEVICES_VIRTIO_SRC_H})
 +else()
 +  target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
 +  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/packages" )
@@ -76,6 +116,45 @@ index db82e07..0759e49 100644
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
  	target_compile_definitions(rvvm_common INTERFACE USE_GUI)
+@@ -320,3 +358,38 @@ endif()
+ if (RVVM_LTO)
+ 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${RVVM_OLD_IPO})
+ endif()
++
++set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
++set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
++set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
++
++if (BUILD_LIBRETRO)
++    install(
++        TARGETS rvvm_static rvvm_libretro
++        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
++        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++        LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    )
++elseif (RVVM_USE_LIB)
++    install(
++        TARGETS rvvm_static rvvm rvvm_cli
++        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
++        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++        LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    )
++else()
++    install(
++        TARGETS rvvm_static rvvm_cli
++        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
++        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++        LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    )
++endif()
++
++install(
++    FILES
++      ${CMAKE_CURRENT_SOURCE_DIR}/src/librvvm.h
++      ${CMAKE_CURRENT_SOURCE_DIR}/src/fdtlib.h
++      ${RVVM_DEVICES_SRC_H}
++    DESTINATION "${INSTALL_INC_DIR}"
++)
 diff --git a/Makefile b/Makefile
 index 2366413..e514d84 100644
 --- a/Makefile
@@ -118,7 +197,7 @@ index 2366413..e514d84 100644
  endif
 diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
 new file mode 100644
-index 0000000..b8bc151
+index 0000000..bd1be91
 --- /dev/null
 +++ b/cmake/packages/FindEPOXY.cmake
 @@ -0,0 +1,73 @@
@@ -135,7 +214,7 @@ index 0000000..b8bc151
 +find_package(PkgConfig QUIET)
 +pkg_check_modules(PC_GLOB QUIET epoxy)
 +
-+set(CMAKE_FIND_DEBUG_MODE TRUE)
++set(CMAKE_FIND_DEBUG_MODE FALSE)
 +
 +find_path(EPOXY_INCLUDE_DIRS NAMES epoxy/gl.h epoxy/egl.h
 +  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
@@ -197,7 +276,7 @@ index 0000000..b8bc151
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..0aa07c7
+index 0000000..9ced2aa
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
 @@ -0,0 +1,80 @@
@@ -216,7 +295,7 @@ index 0000000..0aa07c7
 +find_package(PkgConfig QUIET)
 +pkg_check_modules(PC_GLOB QUIET VIRGLRENDERER)
 +
-+set(CMAKE_FIND_DEBUG_MODE TRUE)
++set(CMAKE_FIND_DEBUG_MODE FALSE)
 +
 +find_path(VIRGLRENDERER_INCLUDE_DIRS NAMES virgl/virgl-version.h
 +  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
