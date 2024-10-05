@@ -339,13 +339,13 @@ jobs:
         mv .git0 .git
         git commit --allow-empty -m "reset point" ; git log -n 1
         git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_rvvm
-        cp -R ../RVVM ../RVVM.reset
+        #cp -R ../RVVM ../RVVM.reset
         git apply --allow-empty ../../../../../../../rvvm.patch
         cd ../virglrenderer
         mv .git0 .git
         git commit --allow-empty -m "reset point" ; git log -n 1
         git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_virglrenderer
-        cp -R ../virglrenderer ../virglrenderer.reset
+        #cp -R ../virglrenderer ../virglrenderer.reset
         git apply --allow-empty ../../../../../../../virglrenderer.patch
 
     - name: Grant execute permission for gradlew [linux.kernel.rvvm]
