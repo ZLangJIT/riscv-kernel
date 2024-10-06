@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..fb5c805 100644
+index db82e07..4798678 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,21 @@
@@ -14,7 +14,7 @@ index db82e07..fb5c805 100644
 -project(RVVM VERSION ${RVVM_VERSION}
 +
 +project(
-+  RVVM VERSION ${RVVM_VERSION}
++	RVVM VERSION ${RVVM_VERSION}
  	DESCRIPTION "RISC-V Virtual Machine"
  	HOMEPAGE_URL "https://github.com/LekKit/RVVM"
 -	LANGUAGES C CXX)
@@ -22,8 +22,8 @@ index db82e07..fb5c805 100644
 +)
 +
 +if (NOT RVVM__ROOTFS)
-+  # the default root path ('/') for finding virtio dependencies
-+  set(RVVM__ROOTFS "/")
++	# the default root path ('/') for finding virtio dependencies
++	set(RVVM__ROOTFS "/")
 +endif()
  
  option(RVVM_USE_RV64 "Use RV64 CPU" ON)
@@ -36,7 +36,25 @@ index db82e07..fb5c805 100644
  option(RVVM_USE_SPINLOCK_DEBUG "Use spinlock debugging" ON)
  option(RVVM_USE_PRECISE_FS "Use precise FPU status tracking" OFF)
  option(RVVM_USE_LIB "Build shared librvvm library" ON)
-@@ -114,28 +123,48 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+@@ -52,11 +61,12 @@ set(RVVM_SRC_DIR "${RVVM_SOURCE_DIR}/src")
+ # Get commit id
+ find_package(Git)
+ execute_process(COMMAND
+-  "${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh_TaG --always --dirty
+-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+-  RESULT_VARIABLE RESULT
+-  OUTPUT_VARIABLE RVVM_COMMIT
+-  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
++	 "${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh_TaG --always --dirty
++	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
++	RESULT_VARIABLE RESULT
++	OUTPUT_VARIABLE RVVM_COMMIT
++	ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
++)
+ if (RESULT)
+ 	message(WARNING "Couldn't determine upstream git commit!")
+ 	set(RVVM_COMMIT "unknown")
+@@ -114,28 +124,48 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
  endif()
  
  if (UNIX)
@@ -50,31 +68,31 @@ index db82e07..fb5c805 100644
 -	find_library(RVVM_ATOMIC_LIB atomic)
 -	if (RVVM_ATOMIC_LIB)
 -		target_link_libraries(rvvm_common INTERFACE ${RVVM_ATOMIC_LIB})
-+  if (ANDROID)
-+    #
-+    # android bionic c has built-in support for pthread HOWEVER it is not full posix
-+    #
-+    # - android pthread is a more limited version of posix pthread
-+    # - see https://stackoverflow.com/a/64432754
-+    #
-+    #
-+    # android ndk does not contain librt
-+    #
-+    # android ndk has libatomic
-+    #
-+  	target_link_libraries(rvvm_common INTERFACE atomic)
++	if (ANDROID)
++		#
++		# android bionic c has built-in support for pthread HOWEVER it is not full posix
++		#
++		# - android pthread is a more limited version of posix pthread
++		# - see https://stackoverflow.com/a/64432754
++		#
++		#
++		# android ndk does not contain librt
++		#
++		# android ndk has libatomic
++		#
++		target_link_libraries(rvvm_common INTERFACE atomic)
 +	else()
-+  	find_package(Threads REQUIRED)
-+  	target_link_libraries(rvvm_common INTERFACE Threads::Threads)
-+  	# Link librt, libatomic if we have them
-+  	find_library(RVVM_RT_LIB rt)
-+  	if (RVVM_RT_LIB)
-+  		target_link_libraries(rvvm_common INTERFACE rt)
-+  	endif()
-+  	find_library(RVVM_ATOMIC_LIB atomic)
-+  	if (RVVM_ATOMIC_LIB)
-+  		target_link_libraries(rvvm_common INTERFACE ${RVVM_ATOMIC_LIB})
-+  	endif()
++		find_package(Threads REQUIRED)
++		target_link_libraries(rvvm_common INTERFACE Threads::Threads)
++		# Link librt, libatomic if we have them
++		find_library(RVVM_RT_LIB rt)
++		if (RVVM_RT_LIB)
++			target_link_libraries(rvvm_common INTERFACE rt)
++		endif()
++		find_library(RVVM_ATOMIC_LIB atomic)
++		if (RVVM_ATOMIC_LIB)
++			target_link_libraries(rvvm_common INTERFACE ${RVVM_ATOMIC_LIB})
++		endif()
  	endif()
  endif()
  
@@ -96,7 +114,7 @@ index db82e07..fb5c805 100644
  
  if (RVVM_USE_RV64)
  	file(GLOB RVVM_RV64_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
-@@ -171,18 +200,29 @@ endif()
+@@ -171,18 +201,29 @@ endif()
  # RVJIT sources
  if (RVVM_USE_JIT)
  	file(GLOB RVVM_RVJIT_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
@@ -128,7 +146,7 @@ index db82e07..fb5c805 100644
  set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
  set(RVVM_XLIB_SRC "${RVVM_SRC_DIR}/devices/x11window_xlib.c")
  set(RVVM_WIN32_SRC "${RVVM_SRC_DIR}/devices/win32window.c")
-@@ -190,13 +230,26 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
+@@ -190,13 +231,26 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
  set(RVVM_SDL_SRC "${RVVM_SRC_DIR}/devices/sdl_window.c")
  set(RVVM_TAP_LINUX_SRC "${RVVM_SRC_DIR}/devices/tap_linux.c")
  set(RVVM_TAP_USER_SRC "${RVVM_SRC_DIR}/devices/tap_user.c")
@@ -145,18 +163,26 @@ index db82e07..fb5c805 100644
 +)
 +
 +if (NOT RVVM_USE_VIRTIO)
-+  list(REMOVE_ITEM RVVM_DEVICES_SRC ${RVVM_DEVICES_VIRTIO_SRC})
-+  list(REMOVE_ITEM RVVM_DEVICES_SRC_H ${RVVM_DEVICES_VIRTIO_SRC_H})
++	list(REMOVE_ITEM RVVM_DEVICES_SRC ${RVVM_DEVICES_VIRTIO_SRC})
++	list(REMOVE_ITEM RVVM_DEVICES_SRC_H ${RVVM_DEVICES_VIRTIO_SRC_H})
 +else()
-+  target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
-+  set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/packages" )
-+  find_package(VIRGLRENDERER REQUIRED)
-+  target_link_libraries(rvvm_common INTERFACE virglrenderer)
++	target_compile_definitions(rvvm_common INTERFACE USE_VIRTIO=1)
++	set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/packages" )
++	find_package(VIRGLRENDERER REQUIRED)
++	target_link_libraries(rvvm_common INTERFACE virglrenderer)
 +endif()
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
  	target_compile_definitions(rvvm_common INTERFACE USE_GUI)
-@@ -320,3 +373,38 @@ endif()
+@@ -313,10 +367,45 @@ else()
+ 		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.bc")
+ 	elseif (LIBRETRO_STATIC)
+ 		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.a")
+-	endif ()
++	endif()
+ endif()
+ 
+ # Restore IPO setting
  if (RVVM_LTO)
  	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${RVVM_OLD_IPO})
  endif()
@@ -166,34 +192,34 @@ index db82e07..fb5c805 100644
 +set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
 +
 +if (BUILD_LIBRETRO)
-+    install(
-+        TARGETS rvvm_static rvvm_libretro
-+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
-+    )
++	install(
++		TARGETS rvvm_static rvvm_libretro
++		RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
++		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++		LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++	)
 +elseif (RVVM_USE_LIB)
-+    install(
-+        TARGETS rvvm_static rvvm rvvm_cli
-+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
-+    )
++	install(
++		TARGETS rvvm_static rvvm rvvm_cli
++		RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
++		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++		LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++	)
 +else()
-+    install(
-+        TARGETS rvvm_static rvvm_cli
-+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
-+    )
++	install(
++		TARGETS rvvm_static rvvm_cli
++		RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
++		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++		LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++	)
 +endif()
 +
 +install(
-+    FILES
-+      ${CMAKE_CURRENT_SOURCE_DIR}/src/librvvm.h
-+      ${CMAKE_CURRENT_SOURCE_DIR}/src/fdtlib.h
-+      ${RVVM_DEVICES_SRC_H}
-+    DESTINATION "${INSTALL_INC_DIR}"
++	FILES
++		${CMAKE_CURRENT_SOURCE_DIR}/src/librvvm.h
++		${CMAKE_CURRENT_SOURCE_DIR}/src/fdtlib.h
++		${RVVM_DEVICES_SRC_H}
++	DESTINATION "${INSTALL_INC_DIR}"
 +)
 diff --git a/Makefile b/Makefile
 index 2366413..e514d84 100644
