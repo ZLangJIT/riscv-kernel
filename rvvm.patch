@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..8378514 100644
+index db82e07..1e24bb5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,25 @@
@@ -220,7 +220,7 @@ index db82e07..8378514 100644
 +
 +install(
 +	FILES
-+		${CMAKE_CURRENT_SOURCE_DIR}/src/librvvm.h
++		${CMAKE_CURRENT_SOURCE_DIR}/src/rvvmlib.h
 +		${CMAKE_CURRENT_SOURCE_DIR}/src/fdtlib.h
 +		${RVVM_DEVICES_SRC_H}
 +	DESTINATION "${INSTALL_INC_DIR}"
