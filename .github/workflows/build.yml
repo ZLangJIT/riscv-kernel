@@ -41,12 +41,13 @@ jobs:
         pacman -Sy --noconfirm archlinux-keyring
         pacman -Su --noconfirm
 
-    - name: Install mosh (remote terminal))
+    - name: Install mosh server (remote terminal)
       run: pacman -S --noconfirm mosh
 
-    - name: Setup mosh server
+    - name: Setup telnet server
       run: |
         mosh-server
+        ip addr
 
     - name: install important packages
       run: |
