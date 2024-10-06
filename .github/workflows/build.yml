@@ -39,7 +39,7 @@ jobs:
       uses: tmshkr/ngrok-ssh@latest
       with:
         NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
-      - run: npm start
+      run: npm start
       
     - name: Update pacman repository + keyring
       run: |
