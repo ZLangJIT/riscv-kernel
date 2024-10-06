@@ -426,7 +426,7 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        ./gradlew build || bash -c "pacman -S --noconfirm openssh ; wget https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Scripts/SSH/Pacman/sshd_config --no-check-certificate -P /etc/ssh ; echo 'An error has occured, starting ssh server at 127.0.0.1:22' ; /etc/rc.d/sshd start"
+        ./gradlew build || bash -c "pacman -S --noconfirm openssh ; wget https://raw.githubusercontent.com/EXALAB/AnLinux-Resources/master/Scripts/SSH/Pacman/sshd_config --no-check-certificate -O /etc/ssh/sshd_config ; echo 'An error has occured, starting ssh server at 127.0.0.1:22' ; sshd start"
 
     - name: Build debug APK [linux.kernel.rvvm]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
