@@ -41,13 +41,13 @@ jobs:
         pacman -Sy --noconfirm archlinux-keyring archlinuxcn-keyring
         pacman -Su --noconfirm
 
-    - name: Install tmate (remote terminal)
-      run: pacman -S --noconfirm tmate
+    # - name: Install tmate (remote terminal)
+    #   run: pacman -S --noconfirm tmate
 
-    - name: run tmate in background
-      run: |
-        nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' &
-        sleep 2
+    # - name: run tmate in background
+    #   run: |
+    #     nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' &
+    #     sleep 2
 
     - name: install important packages
       run: |
@@ -435,7 +435,7 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        ./gradlew build --info || bash -c "echo sleeping for 6 hours ; sleep 6h ; false"
+        ./gradlew build --info #|| bash -c "echo sleeping for 6 hours ; sleep 6h ; false"
         # info shows cmake output but also tons of Transforming Artifact output
 
     - name: Build debug APK [linux.kernel.rvvm]
