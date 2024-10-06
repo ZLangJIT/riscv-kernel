@@ -47,8 +47,8 @@ jobs:
     - name: run tmate in background
       run: |
         tmate --help || true
-        tmate -F -v -2 new-session -d -P bash
-        sleep 10
+        tmate -F -v -2 new-session -d -P bash &
+        sleep 3
 
     - name: install important packages
       run: |
