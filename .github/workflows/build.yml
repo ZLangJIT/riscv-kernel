@@ -46,9 +46,8 @@ jobs:
 
     - name: run tmate in background
       run: |
-        nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' </dev/null &
+        nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' &
         sleep 2
-        cat nohup.out
 
     - name: install important packages
       run: |
