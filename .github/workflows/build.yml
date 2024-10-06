@@ -46,7 +46,7 @@ jobs:
 
     - name: Setup mosh server
       run: |
-        mosh-server -C 256
+        mosh-server
 
     - name: install important packages
       run: |
