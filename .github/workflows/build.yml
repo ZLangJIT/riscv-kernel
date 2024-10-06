@@ -41,16 +41,12 @@ jobs:
         pacman -Sy --noconfirm archlinux-keyring
         pacman -Su --noconfirm
 
-    - name: Install ngrok deps
-      run: pacman -S --noconfirm openssh jq tmux
+    - name: Install mosh (remote terminal))
+      run: pacman -S --noconfirm mosh
 
-    - name: Setup ngrok ssh
-      uses: tmshkr/ngrok-ssh@latest
-      with:
-        NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
-
-    - name: Start ngrok ssh
-      run: npm start
+    - name: Setup mosh server
+      run: |
+        mosh-server -C 256
 
     - name: install important packages
       run: |
