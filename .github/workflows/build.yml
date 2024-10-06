@@ -35,8 +35,13 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
+    - name: Update pacman repository + keyring
+      run: |
+        pacman -Sy --noconfirm archlinux-keyring
+        pacman -Su --noconfirm
+
     - name: install ngrok deps
-      run: pacman -Sy openssh jq tmux
+      run: pacman -S --noconfirm openssh jq tmux
 
     - name: Setup ngrok ssh
       uses: tmshkr/ngrok-ssh@latest
@@ -45,11 +50,6 @@ jobs:
 
     - name: Start ngrok ssh
       run: npm start
-      
-    - name: Update pacman repository + keyring
-      run: |
-        pacman -Sy --noconfirm archlinux-keyring
-        pacman -Su --noconfirm
 
     - name: install important packages
       run: |
