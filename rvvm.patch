@@ -197,7 +197,7 @@ index 2366413..e514d84 100644
  endif
 diff --git a/cmake/packages/FindEPOXY.cmake b/cmake/packages/FindEPOXY.cmake
 new file mode 100644
-index 0000000..bd1be91
+index 0000000..b8bc151
 --- /dev/null
 +++ b/cmake/packages/FindEPOXY.cmake
 @@ -0,0 +1,73 @@
@@ -214,7 +214,7 @@ index 0000000..bd1be91
 +find_package(PkgConfig QUIET)
 +pkg_check_modules(PC_GLOB QUIET epoxy)
 +
-+set(CMAKE_FIND_DEBUG_MODE FALSE)
++set(CMAKE_FIND_DEBUG_MODE TRUE)
 +
 +find_path(EPOXY_INCLUDE_DIRS NAMES epoxy/gl.h epoxy/egl.h
 +  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
@@ -276,7 +276,7 @@ index 0000000..bd1be91
 +endif()
 diff --git a/cmake/packages/FindVIRGLRENDERER.cmake b/cmake/packages/FindVIRGLRENDERER.cmake
 new file mode 100644
-index 0000000..9ced2aa
+index 0000000..0aa07c7
 --- /dev/null
 +++ b/cmake/packages/FindVIRGLRENDERER.cmake
 @@ -0,0 +1,80 @@
@@ -295,7 +295,7 @@ index 0000000..9ced2aa
 +find_package(PkgConfig QUIET)
 +pkg_check_modules(PC_GLOB QUIET VIRGLRENDERER)
 +
-+set(CMAKE_FIND_DEBUG_MODE FALSE)
++set(CMAKE_FIND_DEBUG_MODE TRUE)
 +
 +find_path(VIRGLRENDERER_INCLUDE_DIRS NAMES virgl/virgl-version.h
 +  PATHS ${RVVM__ROOTFS}include ${RVVM__ROOTFS}usr/include
