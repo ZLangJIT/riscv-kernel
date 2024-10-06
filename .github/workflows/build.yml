@@ -17,6 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: locietta/loia-dev-base:latest
+    environment: env
     outputs:
       current_version: ${{ steps.out.outputs.current_version }}
       release_version: ${{ steps.out.outputs.release_version }}
@@ -40,7 +41,7 @@ jobs:
         pacman -Sy --noconfirm archlinux-keyring
         pacman -Su --noconfirm
 
-    - name: install ngrok deps
+    - name: Install ngrok deps
       run: pacman -S --noconfirm openssh jq tmux
 
     - name: Setup ngrok ssh
