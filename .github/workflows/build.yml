@@ -35,10 +35,12 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
-    - name: Start ngrok ssh
+    - name: Setup ngrok ssh
       uses: tmshkr/ngrok-ssh@latest
       with:
         NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+
+    - name: Start ngrok ssh
       run: npm start
       
     - name: Update pacman repository + keyring
