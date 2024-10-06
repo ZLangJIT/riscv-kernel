@@ -39,7 +39,7 @@ jobs:
     - name: Update pacman repository + keyring
       run: |
         pacman -Sy --noconfirm archlinux-keyring
-        pacman -S --noconfirm gnupg pacman pacman-mirrorlist archlinuxcn-keyring
+        pacman -Su --noconfirm
 
     - name: Install tmate (remote terminal)
       run: pacman -S --noconfirm tmate
