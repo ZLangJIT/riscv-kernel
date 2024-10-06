@@ -33,9 +33,11 @@ function check_patch() {
                             echo "$(eval "echo \$${2}_VERSION")" > $1.patch.latest.major
                             echo "0" > $1.patch.latest.minor
                         else
-                            echo "$(($(cat $1.patch.latest.minor)+1))" > $1.patch.latest.minor
+                            echo "$(($(cat $1.patch.latest.minor)+1))" > $1.patch.latest.minor.tmp
+                            mv $1.patch.latest.minor.tmp $1.patch.latest.minor
                     fi
-                    echo "$(($(cat $1.patch.latest.version_code)+1))" > $1.patch.latest.version_code
+                    echo "$(($(cat $1.patch.latest.version_code)+1))" > $1.patch.latest.version_code.tmp
+                    mv $1.patch.latest.version_code.tmp $1.patch.latest.version_code
                 else
                     echo "REBUILD_${2}_FLAG="
             fi
