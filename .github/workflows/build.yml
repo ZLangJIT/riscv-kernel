@@ -47,7 +47,7 @@ jobs:
     - name: run tmate in background
       run: |
         tmate --help || true
-        tmate -F -v bash &
+        tmate -v -2 default-terminal tmux \; new-session -P &
         sleep 10
 
     - name: install important packages
