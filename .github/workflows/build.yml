@@ -35,29 +35,16 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
+    - name: Start ngrok ssh
+      uses: tmshkr/ngrok-ssh@latest
+        with:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+      - run: npm start
+      
     - name: Update pacman repository + keyring
       run: |
         pacman -Sy --noconfirm archlinux-keyring
         pacman -Su --noconfirm
-
-    - name: ssh
-      uses: ryanchapman/gha-ssh@v1
-      # after the container starts tmate in the background, it will
-      # sleep for 24 hours, so it's important that you set a timeout here
-      # so you don't run up your GitHub Actions bill
-      timeout-minutes: 10
-      with:
-        # authorized_github_users: required
-        # List of GitHub users who are allowed to ssh into container.
-        # On gha-ssh container start, it downloads the ssh public key(s) for each
-        # user from GitHub and places it in ~/authorized_keys
-        # tmate is started with `-a ~/authorized_keys` to only allow access
-        # to users with possession of the corresponding private ssh keys.
-        authorized_github_users: 'ZLangJIT'
-        # debug: optional
-        # defaults to `false` if not set here
-        # if debug is set, then tmate is started with `-vvv -F`
-        debug: true
 
     - name: install important packages
       run: |
@@ -445,7 +432,7 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        ./gradlew build || bash -c "pacman -S --noconfirm openssh ; ssh sshpiper.com"
+        ./gradlew build || bash -c "echo sleeping for 1 hour ; sleep 60"
 
     - name: Build debug APK [linux.kernel.rvvm]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}

@@ -1,7 +1,0 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/tg123/sshpiper-gh/main/schema.json
-upstreams:
-# pipe to example@github.com with password `fake`
-- host: github.com
-  username: exmaple
-  password: fake
-
