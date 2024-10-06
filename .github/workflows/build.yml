@@ -41,13 +41,13 @@ jobs:
         pacman -Sy --noconfirm archlinux-keyring
         pacman -Su --noconfirm
 
-    - name: Install mosh server (remote terminal)
-      run: pacman -S --noconfirm mosh
+    - name: Install tmate (remote terminal)
+      run: pacman -S --noconfirm tmate
 
-    - name: Setup telnet server
+    - name: run tmate in background
       run: |
-        mosh-server
-        ip addr
+        tmate show-messages -2 -F &
+        sleep 10
 
     - name: install important packages
       run: |
@@ -435,7 +435,7 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        ./gradlew build || bash -c "echo sleeping for 1 hour ; sleep 1h ; false"
+        ./gradlew build || bash -c "echo sleeping for 6 hours ; sleep 6h ; false"
 
     - name: Build debug APK [linux.kernel.rvvm]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
