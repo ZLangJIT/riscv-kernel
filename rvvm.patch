@@ -1,9 +1,9 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..4798678 100644
+index db82e07..f80a31b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,13 +1,21 @@
+@@ -1,13 +1,22 @@
  # CMake configuration file for those who don't like Make (like I do)
  # Prev-maintainer: cerg2010cerg2010
  
@@ -22,13 +22,14 @@ index db82e07..4798678 100644
 +)
 +
 +if (NOT RVVM__ROOTFS)
++    message(FATAL_ERROR "RVVM_ROOTFS must be set")
 +	# the default root path ('/') for finding virtio dependencies
 +	set(RVVM__ROOTFS "/")
 +endif()
  
  option(RVVM_USE_RV64 "Use RV64 CPU" ON)
  option(RVVM_USE_FPU "Use floating-point instructions" ON)
-@@ -18,6 +26,7 @@ option(RVVM_USE_NET "Use networking" ON)
+@@ -18,6 +27,7 @@ option(RVVM_USE_NET "Use networking" ON)
  option(RVVM_USE_TAP_LINUX "Use Linux TAP (deprecated)" OFF)
  option(RVVM_USE_FDT "Use Flattened Device Tree generation" ON)
  option(RVVM_USE_PCI "Use ATA over PCI, PIO mode is used otherwise" ON)
@@ -36,7 +37,7 @@ index db82e07..4798678 100644
  option(RVVM_USE_SPINLOCK_DEBUG "Use spinlock debugging" ON)
  option(RVVM_USE_PRECISE_FS "Use precise FPU status tracking" OFF)
  option(RVVM_USE_LIB "Build shared librvvm library" ON)
-@@ -52,11 +61,12 @@ set(RVVM_SRC_DIR "${RVVM_SOURCE_DIR}/src")
+@@ -52,11 +62,12 @@ set(RVVM_SRC_DIR "${RVVM_SOURCE_DIR}/src")
  # Get commit id
  find_package(Git)
  execute_process(COMMAND
@@ -54,7 +55,7 @@ index db82e07..4798678 100644
  if (RESULT)
  	message(WARNING "Couldn't determine upstream git commit!")
  	set(RVVM_COMMIT "unknown")
-@@ -114,28 +124,48 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+@@ -114,28 +125,48 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
  endif()
  
  if (UNIX)
@@ -114,7 +115,7 @@ index db82e07..4798678 100644
  
  if (RVVM_USE_RV64)
  	file(GLOB RVVM_RV64_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
-@@ -171,18 +201,29 @@ endif()
+@@ -171,18 +202,29 @@ endif()
  # RVJIT sources
  if (RVVM_USE_JIT)
  	file(GLOB RVVM_RVJIT_SRC LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS
@@ -146,7 +147,7 @@ index db82e07..4798678 100644
  set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
  set(RVVM_XLIB_SRC "${RVVM_SRC_DIR}/devices/x11window_xlib.c")
  set(RVVM_WIN32_SRC "${RVVM_SRC_DIR}/devices/win32window.c")
-@@ -190,13 +231,26 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
+@@ -190,13 +232,26 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
  set(RVVM_SDL_SRC "${RVVM_SRC_DIR}/devices/sdl_window.c")
  set(RVVM_TAP_LINUX_SRC "${RVVM_SRC_DIR}/devices/tap_linux.c")
  set(RVVM_TAP_USER_SRC "${RVVM_SRC_DIR}/devices/tap_user.c")
@@ -174,7 +175,7 @@ index db82e07..4798678 100644
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
  	target_compile_definitions(rvvm_common INTERFACE USE_GUI)
-@@ -313,10 +367,45 @@ else()
+@@ -313,10 +368,45 @@ else()
  		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.bc")
  	elseif (LIBRETRO_STATIC)
  		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.a")
