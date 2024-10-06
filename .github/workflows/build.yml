@@ -46,8 +46,8 @@ jobs:
 
     - name: run tmate in background
       run: |
-        tmate --help
-        tmate -2 -F show-messages &
+        tmate --help || true
+        tmate -F -v &
         sleep 10
 
     - name: install important packages
