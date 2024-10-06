@@ -351,18 +351,21 @@ jobs:
         cd app/src/main/java/libengine
         cd epoxy
         mv .git0 .git
+        git reset --hard $(cat ../../../../../../../git_reset_epoxy)
         #git commit --allow-empty -m "reset point" ; git log -n 1
         #git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_epoxy
         #cp -R ../epoxy ../epoxy.reset
         git apply --allow-empty ../../../../../../../epoxy.patch
         cd ../virglrenderer
         mv .git0 .git
+        git reset --hard $(cat ../../../../../../../git_reset_virglrenderer)
         #git commit --allow-empty -m "reset point" ; git log -n 1
         #git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_virglrenderer
         #cp -R ../virglrenderer ../virglrenderer.reset
         git apply --allow-empty ../../../../../../../virglrenderer.patch
         cd ../RVVM
         mv .git0 .git
+        git reset --hard $(cat ../../../../../../../git_reset_rvvm)
         #git commit --allow-empty -m "reset point" ; git log -n 1
         #git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_rvvm
         #cp -R ../RVVM ../RVVM.reset
