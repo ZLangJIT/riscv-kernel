@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..f80a31b 100644
+index db82e07..83496b5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,22 @@
@@ -22,7 +22,7 @@ index db82e07..f80a31b 100644
 +)
 +
 +if (NOT RVVM__ROOTFS)
-+    message(FATAL_ERROR "RVVM_ROOTFS must be set")
++    message(FATAL_ERROR "RVVM__ROOTFS must be set")
 +	# the default root path ('/') for finding virtio dependencies
 +	set(RVVM__ROOTFS "/")
 +endif()
