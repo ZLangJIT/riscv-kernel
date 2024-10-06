@@ -321,6 +321,11 @@ jobs:
         git config --global user.email "root@no.email.yet.com"
         cd linux.kernel.rvvm
         git apply --allow-empty ../libmedia_build.patch
+
+    - name: Remove uneeded dirs [linux.kernel.rvvm]
+      if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
+      run: |
+        cd linux.kernel.rvvm
         rm -rf ffmpeg
         rm -rf ADB_PULL_DATA.media.player.pro
         rm -rf APKS
@@ -332,26 +337,34 @@ jobs:
         rm -rf app/src/main/assets/FUNKY_HOUSE.raw
         rm -rf app/src/main/assets/Rhythm8
         rm -rf app/src/main/assets/usr/libs/arm64-v8a/*
-        git add -A ; git commit -m "reset point"
-        git log --pretty=format:'%H' -n 1 > ../git_reset_libmedia
+
+    - name: Patch [linux.kernel.rvvm]
+      if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
+      run: |
+        set -v
+        git config --global user.name "ZLangJIT"
+        git config --global user.email "root@no.email.yet.com"
+        cd linux.kernel.rvvm
+        #git add -A ; git commit -m "reset point"
+        #git log --pretty=format:'%H' -n 1 > ../git_reset_libmedia
         git apply --allow-empty ../libmedia.patch
         cd app/src/main/java/libengine
         cd epoxy
         mv .git0 .git
-        git commit --allow-empty -m "reset point" ; git log -n 1
-        git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_epoxy
+        #git commit --allow-empty -m "reset point" ; git log -n 1
+        #git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_epoxy
         #cp -R ../epoxy ../epoxy.reset
         git apply --allow-empty ../../../../../../../epoxy.patch
         cd ../virglrenderer
         mv .git0 .git
-        git commit --allow-empty -m "reset point" ; git log -n 1
-        git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_virglrenderer
+        #git commit --allow-empty -m "reset point" ; git log -n 1
+        #git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_virglrenderer
         #cp -R ../virglrenderer ../virglrenderer.reset
         git apply --allow-empty ../../../../../../../virglrenderer.patch
         cd ../RVVM
         mv .git0 .git
-        git commit --allow-empty -m "reset point" ; git log -n 1
-        git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_rvvm
+        #git commit --allow-empty -m "reset point" ; git log -n 1
+        #git log --pretty=format:'%H' -n 1 > ../../../../../../../git_reset_rvvm
         #cp -R ../RVVM ../RVVM.reset
         git apply --allow-empty ../../../../../../../rvvm.patch
 
