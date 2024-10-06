@@ -35,6 +35,9 @@ jobs:
     - name: Trust this directory
       run: git config --global --add safe.directory '*' # v2.35.3 or later
 
+    - name: install ngrok deps
+      run: pacmna -Sy openssh jq tmux
+
     - name: Setup ngrok ssh
       uses: tmshkr/ngrok-ssh@latest
       with:
