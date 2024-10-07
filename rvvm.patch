@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..1e24bb5 100644
+index db82e07..ac2d42d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,25 @@
@@ -150,7 +150,7 @@ index db82e07..1e24bb5 100644
  set(RVVM_XCB_SRC "${RVVM_SRC_DIR}/devices/x11window_xcb.c")
  set(RVVM_XLIB_SRC "${RVVM_SRC_DIR}/devices/x11window_xlib.c")
  set(RVVM_WIN32_SRC "${RVVM_SRC_DIR}/devices/win32window.c")
-@@ -190,13 +235,26 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
+@@ -190,13 +235,35 @@ set(RVVM_HAIKU_SRC "${RVVM_SRC_DIR}/devices/haiku_window.cpp")
  set(RVVM_SDL_SRC "${RVVM_SRC_DIR}/devices/sdl_window.c")
  set(RVVM_TAP_LINUX_SRC "${RVVM_SRC_DIR}/devices/tap_linux.c")
  set(RVVM_TAP_USER_SRC "${RVVM_SRC_DIR}/devices/tap_user.c")
@@ -166,6 +166,15 @@ index db82e07..1e24bb5 100644
 +	${RVVM_VIRTIO_WINDOW_SRC}
 +)
 +
++if (NOT ANDROID)
++	list(REMOVE_ITEM RVVM_DEVICES_H ${RVVM_SRC_DIR}/devices/shm_android.h")
++	list(REMOVE_ITEM RVVM_DEVICES_SRC ${RVVM_SRC_DIR}/devices/shm_android.c")
++endif()
++if (NOT WIN32)
++	list(REMOVE_ITEM RVVM_DEVICES_H ${RVVM_SRC_DIR}/devices/shm_windows.h")
++	list(REMOVE_ITEM RVVM_DEVICES_SRC ${RVVM_SRC_DIR}/devices/shm_windows.c")
++endif()
++
 +if (NOT RVVM_USE_VIRTIO)
 +	list(REMOVE_ITEM RVVM_DEVICES_SRC ${RVVM_DEVICES_VIRTIO_SRC})
 +	list(REMOVE_ITEM RVVM_DEVICES_SRC_H ${RVVM_DEVICES_VIRTIO_SRC_H})
@@ -178,7 +187,7 @@ index db82e07..1e24bb5 100644
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
  	target_compile_definitions(rvvm_common INTERFACE USE_GUI)
-@@ -313,10 +371,45 @@ else()
+@@ -313,10 +380,56 @@ else()
  		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.bc")
  	elseif (LIBRETRO_STATIC)
  		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.a")
@@ -216,6 +225,17 @@ index db82e07..1e24bb5 100644
 +		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
 +		LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
 +	)
++endif()
++
++# dont install shm* headers
++list(REMOVE_ITEM RVVM_DEVICES_H ${RVVM_SRC_DIR}/devices/shm.h")
++
++if (ANDROID)
++	list(REMOVE_ITEM RVVM_DEVICES_H ${RVVM_SRC_DIR}/devices/shm_android.h")
++endif()
++
++if (WIN32)
++	list(REMOVE_ITEM RVVM_DEVICES_H ${RVVM_SRC_DIR}/devices/shm_windows.h")
 +endif()
 +
 +install(
@@ -430,6 +450,1207 @@ index 0000000..9ced2aa
 +  target_link_libraries(virglrenderer INTERFACE epoxy)
 +  set(VIRGLRENDERER_TARGET virglrenderer)
 +endif()
+diff --git a/src/devices/shm.c b/src/devices/shm.c
+new file mode 100644
+index 0000000..8b71231
+--- /dev/null
++++ b/src/devices/shm.c
+@@ -0,0 +1,90 @@
++/*
++shm.c - Memory-Mapped Shared Memory
++Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 3 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <https://www.gnu.org/licenses/>.
++*/
++
++#include "shm.h"
++
++#include "utils.h"
++
++#ifdef USE_FDT
++#include "fdtlib.h"
++#endif
++
++#if WIN32
++#include "shm_windows.h"
++#elif ANDROID
++#include "shm_android.h"
++#else
++#include <shm.h>
++#endif
++
++static void shm_remove(rvvm_mmio_dev_t* device)
++{
++	free(device);
++}
++
++static rvvm_mmio_type_t shm_dev_type = {
++    .name = "rrvm_shm",
++    .remove = shm_remove,
++};
++
++PUBLIC rvvm_mmio_dev_t* shm_init(rvvm_machine_t* machine, rvvm_addr_t addr, const char * path, const char * dev_name)
++{
++#if WIN32
++#elif ANDROID
++#else
++#endif
++    shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
++    shm_ctx->buffer = NULL;
++    shm_ctx->size = 0;
++    // Map the framebuffer into physical memory
++    rvvm_mmio_dev_t shm_region = {
++        .mapping = shm_ctx->buffer,
++        .size = shm_size(shm_ctx),
++        .type = &shm_dev_type,
++    };
++    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
++    if (mmio == NULL) return mmio;
++// #ifdef USE_FDT
++//     struct fdt_node* fb_fdt = fdt_node_create_reg("framebuffer", addr);
++//     fdt_node_add_prop_reg(fb_fdt, "reg", addr, fb_region.size);
++//     fdt_node_add_prop_str(fb_fdt, "compatible", "simple-framebuffer");
++//     switch (fb->format) {
++//         case RGB_FMT_R5G6B5:
++//             fdt_node_add_prop_str(fb_fdt, "format", "r5g6b5");
++//             break;
++//         case RGB_FMT_R8G8B8:
++//             fdt_node_add_prop_str(fb_fdt, "format", "r8g8b8");
++//             break;
++//         case RGB_FMT_A8R8G8B8:
++//             fdt_node_add_prop_str(fb_fdt, "format", "a8r8g8b8");
++//             break;
++//         case RGB_FMT_A8B8G8R8:
++//             fdt_node_add_prop_str(fb_fdt, "format", "a8b8g8r8");
++//             break;
++//         default:
++//             rvvm_warn("Unknown RGB format in framebuffer_init()!");
++//             break;
++//     }
++//     fdt_node_add_prop_u32(fb_fdt, "width",  fb->width);
++//     fdt_node_add_prop_u32(fb_fdt, "height", fb->height);
++//     fdt_node_add_prop_u32(fb_fdt, "stride", framebuffer_stride(fb));
++
++//     fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
++// #endif
++    return mmio;
++}
+diff --git a/src/devices/shm.h b/src/devices/shm.h
+new file mode 100644
+index 0000000..ead4c22
+--- /dev/null
++++ b/src/devices/shm.h
+@@ -0,0 +1,43 @@
++/*
++shm.h - Memory-Mapped Shared Memory
++Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 3 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <https://www.gnu.org/licenses/>.
++*/
++
++#ifndef RVVM_SHM_H
++#define RVVM_SHM_H
++
++#include "rvvmlib.h"
++
++//! SHM context description
++typedef struct {
++    void*     buffer; //!< Buffer in host memory
++    uint64_t  size;  //!< Buffer size in host memory
++} shm_ctx_t;
++
++/*
++ * SHM API
++ */
++
++//! Gets the shared memory size
++static inline size_t shm_size(const shm_ctx_t* shm)
++{
++    return shm->size;
++}
++
++//! \brief   Attach shared memory context to the machine.
++PUBLIC rvvm_mmio_dev_t* shm_init(rvvm_machine_t* machine, const char * path, const char * dev_name);
++
++#endif
+diff --git a/src/devices/shm_android.c b/src/devices/shm_android.c
+new file mode 100644
+index 0000000..2f32095
+--- /dev/null
++++ b/src/devices/shm_android.c
+@@ -0,0 +1,565 @@
++#include <android/log.h>
++#include <errno.h>
++#include <pthread.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mman.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++#include <unistd.h>
++#include <paths.h>
++
++#define __u32 uint32_t
++#include <linux/ashmem.h>
++
++#include "shm.h"
++
++#define DBG(...) __android_log_print(ANDROID_LOG_INFO, "shmem", __VA_ARGS__)
++#define ASHV_KEY_SYMLINK_PATH _PATH_TMP "ashv_key_%d"
++#define ANDROID_SHMEM_SOCKNAME "/dev/shm/%08x"
++#define ROUND_UP(N, S) ((((N) + (S) - 1) / (S)) * (S))
++
++static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
++
++typedef struct {
++	// The shmid (shared memory id) contains the socket address (16 bits)
++	// and a local id (15 bits).
++	int id;
++	void *addr;
++	int descriptor;
++	size_t size;
++	bool markedForDeletion;
++	key_t key;
++} shmem_t;
++
++static shmem_t* shmem = NULL;
++static size_t shmem_amount = 0;
++
++// The lower 16 bits of (getpid() + i), where i is a sequence number.
++// It is unique among processes as it's only set when bound.
++static int ashv_local_socket_id = 0;
++// To handle forks we store which pid the ashv_local_socket_id was
++// created for.
++static int ashv_pid_setup = 0;
++static pthread_t ashv_listening_thread_id = 0;
++
++static int ancil_send_fd(int sock, int fd)
++{
++	char nothing = '!';
++	struct iovec nothing_ptr = { .iov_base = &nothing, .iov_len = 1 };
++
++	struct {
++		struct cmsghdr align;
++		int fd[1];
++	} ancillary_data_buffer;
++
++	struct msghdr message_header = {
++		.msg_name = NULL,
++		.msg_namelen = 0,
++		.msg_iov = &nothing_ptr,
++		.msg_iovlen = 1,
++		.msg_flags = 0,
++		.msg_control = &ancillary_data_buffer,
++		.msg_controllen = sizeof(struct cmsghdr) + sizeof(int)
++	};
++
++	struct cmsghdr* cmsg = CMSG_FIRSTHDR(&message_header);
++	cmsg->cmsg_len = message_header.msg_controllen; // sizeof(int);
++	cmsg->cmsg_level = SOL_SOCKET;
++	cmsg->cmsg_type = SCM_RIGHTS;
++	((int*) CMSG_DATA(cmsg))[0] = fd;
++
++	return sendmsg(sock, &message_header, 0) >= 0 ? 0 : -1;
++}
++
++static int ancil_recv_fd(int sock)
++{
++	char nothing = '!';
++	struct iovec nothing_ptr = { .iov_base = &nothing, .iov_len = 1 };
++
++	struct {
++		struct cmsghdr align;
++		int fd[1];
++	} ancillary_data_buffer;
++
++	struct msghdr message_header = {
++		.msg_name = NULL,
++		.msg_namelen = 0,
++		.msg_iov = &nothing_ptr,
++		.msg_iovlen = 1,
++		.msg_flags = 0,
++		.msg_control = &ancillary_data_buffer,
++		.msg_controllen = sizeof(struct cmsghdr) + sizeof(int)
++	};
++
++	struct cmsghdr* cmsg = CMSG_FIRSTHDR(&message_header);
++	cmsg->cmsg_len = message_header.msg_controllen;
++	cmsg->cmsg_level = SOL_SOCKET;
++	cmsg->cmsg_type = SCM_RIGHTS;
++	((int*) CMSG_DATA(cmsg))[0] = -1;
++
++	if (recvmsg(sock, &message_header, 0) < 0) return -1;
++
++	return ((int*) CMSG_DATA(cmsg))[0];
++}
++
++static int ashmem_get_size_region(int fd)
++{
++	//int ret = __ashmem_is_ashmem(fd, 1);
++	//if (ret < 0) return ret;
++	return TEMP_FAILURE_RETRY(ioctl(fd, ASHMEM_GET_SIZE, NULL));
++}
++
++/*
++ * From https://android.googlesource.com/platform/system/core/+/master/libcutils/ashmem-dev.c
++ *
++ * ashmem_create_region - creates a new named ashmem region and returns the file
++ * descriptor, or <0 on error.
++ *
++ * `name' is the label to give the region (visible in /proc/pid/maps)
++ * `size' is the size of the region, in page-aligned bytes
++ */
++static int ashmem_create_region(char const* name, size_t size)
++{
++	int fd = open("/dev/ashmem", O_RDWR);
++	if (fd < 0) return fd;
++
++	char name_buffer[ASHMEM_NAME_LEN] = {0};
++	strncpy(name_buffer, name, sizeof(name_buffer));
++	name_buffer[sizeof(name_buffer)-1] = 0;
++
++	int ret = ioctl(fd, ASHMEM_SET_NAME, name_buffer);
++	if (ret < 0) goto error;
++
++	ret = ioctl(fd, ASHMEM_SET_SIZE, size);
++	if (ret < 0) goto error;
++
++	return fd;
++error:
++	close(fd);
++	return ret;
++}
++
++static void ashv_check_pid()
++{
++	pid_t mypid = getpid();
++	if (ashv_pid_setup == 0) {
++		ashv_pid_setup = mypid;
++	} else if (ashv_pid_setup != mypid) {
++		DBG("%s: Cleaning to new pid=%d from oldpid=%d", __PRETTY_FUNCTION__, mypid, ashv_pid_setup);
++		// We inherited old state across a fork.
++		ashv_pid_setup = mypid;
++		ashv_local_socket_id = 0;
++		ashv_listening_thread_id = 0;
++		shmem_amount = 0;
++		// Unlock if fork left us with held lock from parent thread.
++		pthread_mutex_unlock(&mutex);
++		if (shmem != NULL) free(shmem);
++		shmem = NULL;
++	}
++}
++
++
++// Store index in the lower 15 bits and the socket id in the
++// higher 16 bits.
++static int ashv_shmid_from_counter(unsigned int counter)
++{
++	return ashv_local_socket_id * 0x10000 + counter;
++}
++
++static int ashv_socket_id_from_shmid(int shmid)
++{
++	return shmid / 0x10000;
++}
++
++static int ashv_find_local_index(int shmid)
++{
++	for (size_t i = 0; i < shmem_amount; i++)
++		if (shmem[i].id == shmid)
++			return i;
++	return -1;
++}
++
++static void* ashv_thread_function(void* arg)
++{
++	int sock = *(int*)arg;
++	free(arg);
++	struct sockaddr_un addr;
++	socklen_t len = sizeof(addr);
++	int sendsock;
++	//DBG("%s: thread started", __PRETTY_FUNCTION__);
++	while ((sendsock = accept(sock, (struct sockaddr *)&addr, &len)) != -1) {
++		int shmid;
++		if (recv(sendsock, &shmid, sizeof(shmid), 0) != sizeof(shmid)) {
++			DBG("%s: ERROR: recv() returned not %zu bytes", __PRETTY_FUNCTION__, sizeof(shmid));
++			close(sendsock);
++			continue;
++		}
++		pthread_mutex_lock(&mutex);
++		int idx = ashv_find_local_index(shmid);
++		if (idx != -1) {
++			if (write(sendsock, &shmem[idx].key, sizeof(key_t)) != sizeof(key_t)) {
++				DBG("%s: ERROR: write failed: %s", __PRETTY_FUNCTION__, strerror(errno));
++			}
++			if (ancil_send_fd(sendsock, shmem[idx].descriptor) != 0) {
++				DBG("%s: ERROR: ancil_send_fd() failed: %s", __PRETTY_FUNCTION__, strerror(errno));
++			}
++		} else {
++			DBG("%s: ERROR: cannot find shmid 0x%x", __PRETTY_FUNCTION__, shmid);
++		}
++		pthread_mutex_unlock(&mutex);
++		close(sendsock);
++		len = sizeof(addr);
++	}
++	DBG ("%s: ERROR: listen() failed, thread stopped", __PRETTY_FUNCTION__);
++	return NULL;
++}
++
++static void android_shmem_delete(int idx)
++{
++	if (shmem[idx].descriptor) close(shmem[idx].descriptor);
++	shmem_amount--;
++	memmove(&shmem[idx], &shmem[idx+1], (shmem_amount - idx) * sizeof(shmem_t));
++}
++
++static int ashv_read_remote_segment(int shmid)
++{
++	struct sockaddr_un addr;
++	memset(&addr, 0, sizeof(addr));
++	addr.sun_family = AF_UNIX;
++	sprintf(&addr.sun_path[1], ANDROID_SHMEM_SOCKNAME, ashv_socket_id_from_shmid(shmid));
++	int addrlen = sizeof(addr.sun_family) + strlen(&addr.sun_path[1]) + 1;
++
++	int recvsock = socket(AF_UNIX, SOCK_STREAM, 0);
++	if (recvsock == -1) {
++		DBG ("%s: cannot create UNIX socket: %s", __PRETTY_FUNCTION__, strerror(errno));
++		return -1;
++	}
++	if (connect(recvsock, (struct sockaddr*) &addr, addrlen) != 0) {
++		DBG("%s: Cannot connect to UNIX socket %s: %s, len %d", __PRETTY_FUNCTION__, addr.sun_path + 1, strerror(errno), addrlen);
++		close(recvsock);
++		return -1;
++	}
++
++	if (send(recvsock, &shmid, sizeof(shmid), 0) != sizeof(shmid)) {
++		DBG ("%s: send() failed on socket %s: %s", __PRETTY_FUNCTION__, addr.sun_path + 1, strerror(errno));
++		close(recvsock);
++		return -1;
++	}
++
++	key_t key;
++	if (read(recvsock, &key, sizeof(key_t)) != sizeof(key_t)) {
++		DBG("%s: ERROR: failed read", __PRETTY_FUNCTION__);
++		close(recvsock);
++		return -1;
++	}
++
++	int descriptor = ancil_recv_fd(recvsock);
++	if (descriptor < 0) {
++		DBG("%s: ERROR: ancil_recv_fd() failed on socket %s: %s", __PRETTY_FUNCTION__, addr.sun_path + 1, strerror(errno));
++		close(recvsock);
++		return -1;
++	}
++	close(recvsock);
++
++	int size = ashmem_get_size_region(descriptor);
++	if (size == 0 || size == -1) {
++		DBG ("%s: ERROR: ashmem_get_size_region() returned %d on socket %s: %s", __PRETTY_FUNCTION__, size, addr.sun_path + 1, strerror(errno));
++		return -1;
++	}
++
++	int idx = shmem_amount;
++	shmem_amount ++;
++	shmem = realloc(shmem, shmem_amount * sizeof(shmem_t));
++	shmem[idx].id = shmid;
++	shmem[idx].descriptor = descriptor;
++	shmem[idx].size = size;
++	shmem[idx].addr = NULL;
++	shmem[idx].markedForDeletion = false;
++	shmem[idx].key = key;
++	return idx;
++}
++
++/* Get shared memory area identifier. */
++int shmget(key_t key, size_t size, int flags)
++{
++	(void) flags;
++
++	ashv_check_pid();
++
++	// Counter wrapping around at 15 bits.
++	static size_t shmem_counter = 0;
++
++	if (!ashv_listening_thread_id) {
++		int sock = socket(AF_UNIX, SOCK_STREAM, 0);
++		if (!sock) {
++			DBG ("%s: cannot create UNIX socket: %s", __PRETTY_FUNCTION__, strerror(errno));
++			errno = EINVAL;
++			return -1;
++		}
++		int i;
++		for (i = 0; i < 4096; i++) {
++			struct sockaddr_un addr;
++			int len;
++			memset (&addr, 0, sizeof(addr));
++			addr.sun_family = AF_UNIX;
++			ashv_local_socket_id = (getpid() + i) & 0xffff;
++			sprintf(&addr.sun_path[1], ANDROID_SHMEM_SOCKNAME, ashv_local_socket_id);
++			len = sizeof(addr.sun_family) + strlen(&addr.sun_path[1]) + 1;
++			if (bind(sock, (struct sockaddr *)&addr, len) != 0) continue;
++			DBG("%s: bound UNIX socket %s in pid=%d", __PRETTY_FUNCTION__, addr.sun_path + 1, getpid());
++			break;
++		}
++		if (i == 4096) {
++			DBG("%s: cannot bind UNIX socket, bailing out", __PRETTY_FUNCTION__);
++			ashv_local_socket_id = 0;
++			errno = ENOMEM;
++			return -1;
++		}
++		if (listen(sock, 4) != 0) {
++			DBG("%s: listen failed", __PRETTY_FUNCTION__);
++			errno = ENOMEM;
++			return -1;
++		}
++		int* socket_arg = malloc(sizeof(int));
++		*socket_arg = sock;
++		pthread_create(&ashv_listening_thread_id, NULL, &ashv_thread_function, socket_arg);
++	}
++
++	int shmid = -1;
++
++	pthread_mutex_lock(&mutex);
++	char symlink_path[256];
++	if (key != IPC_PRIVATE) {
++		// (1) Check if symlink exists telling us where to connect.
++		// (2) If so, try to connect and open.
++		// (3) If connected and opened, done. If connection refused
++		//     take ownership of the key and create the symlink.
++		// (4) If no symlink, create it.
++		sprintf(symlink_path, ASHV_KEY_SYMLINK_PATH, key);
++		char path_buffer[256];
++		char num_buffer[64];
++		while (true) {
++			int path_length = readlink(symlink_path, path_buffer, sizeof(path_buffer) - 1);
++			if (path_length != -1) {
++				path_buffer[path_length] = '\0';
++				int shmid = atoi(path_buffer);
++				if (shmid != 0) {
++					int idx = ashv_find_local_index(shmid);
++
++					if (idx == -1) {
++						idx = ashv_read_remote_segment(shmid);
++					}
++
++					if (idx != -1) {
++						pthread_mutex_unlock(&mutex);
++						return shmem[idx].id;
++					}
++				}
++				// TODO: Not sure we should try to remove previous owner if e.g.
++				// there was a tempporary failture to get a soket. Need to
++				// distinguish between why ashv_read_remote_segment failed.
++				unlink(symlink_path);
++			}
++			// Take ownership.
++			// TODO: HAndle error (out of resouces, no infinite loop)
++			if (shmid == -1) {
++				shmem_counter = (shmem_counter + 1) & 0x7fff;
++				shmid = ashv_shmid_from_counter(shmem_counter);
++				sprintf(num_buffer, "%d", shmid);
++			}
++			if (symlink(num_buffer, symlink_path) == 0) break;
++		}
++	}
++
++
++	int idx = shmem_amount;
++	char buf[256];
++	sprintf(buf, ANDROID_SHMEM_SOCKNAME "-%d", ashv_local_socket_id, idx);
++
++	shmem_amount++;
++	if (shmid == -1) {
++		shmem_counter = (shmem_counter + 1) & 0x7fff;
++		shmid = ashv_shmid_from_counter(shmem_counter);
++	}
++
++	shmem = realloc(shmem, shmem_amount * sizeof(shmem_t));
++	size = ROUND_UP(size, getpagesize());
++	shmem[idx].size = size;
++	shmem[idx].descriptor = ashmem_create_region(buf, size);
++	shmem[idx].addr = NULL;
++	shmem[idx].id = shmid;
++	shmem[idx].markedForDeletion = false;
++	shmem[idx].key = key;
++
++	if (shmem[idx].descriptor < 0) {
++		DBG("%s: ashmem_create_region() failed for size %zu: %s", __PRETTY_FUNCTION__, size, strerror(errno));
++		shmem_amount --;
++		shmem = realloc(shmem, shmem_amount * sizeof(shmem_t));
++		pthread_mutex_unlock (&mutex);
++		return -1;
++	}
++	//DBG("%s: ID %d shmid %x FD %d size %zu", __PRETTY_FUNCTION__, idx, shmid, shmem[idx].descriptor, shmem[idx].size);
++	/*
++	status = ashmem_set_prot_region (shmem[idx].descriptor, 0666);
++	if (status < 0) {
++		DBG ("%s: ashmem_set_prot_region() failed for size %zu: %s %d", __PRETTY_FUNCTION__, size, strerror(status), status);
++		shmem_amount --;
++		shmem = realloc (shmem, shmem_amount * sizeof(shmem_t));
++		pthread_mutex_unlock (&mutex);
++		return -1;
++	}
++	*/
++	/*
++	status = ashmem_pin_region (shmem[idx].descriptor, 0, shmem[idx].size);
++	if (status < 0) {
++		DBG ("%s: ashmem_pin_region() failed for size %zu: %s %d", __PRETTY_FUNCTION__, size, strerror(status), status);
++		shmem_amount --;
++		shmem = realloc (shmem, shmem_amount * sizeof(shmem_t));
++		pthread_mutex_unlock (&mutex);
++		return -1;
++	}
++	*/
++	pthread_mutex_unlock(&mutex);
++
++	return shmid;
++}
++
++/* Attach shared memory segment. */
++void* shmat(int shmid, void const* shmaddr, int shmflg)
++{
++	ashv_check_pid();
++
++	int socket_id = ashv_socket_id_from_shmid(shmid);
++	void *addr;
++
++	pthread_mutex_lock(&mutex);
++
++	int idx = ashv_find_local_index(shmid);
++	if (idx == -1 && socket_id != ashv_local_socket_id) {
++		idx = ashv_read_remote_segment(shmid);
++	}
++
++	if (idx == -1) {
++		DBG ("%s: shmid %x does not exist", __PRETTY_FUNCTION__, shmid);
++		pthread_mutex_unlock(&mutex);
++		errno = EINVAL;
++		return (void*) -1;
++	}
++
++	if (shmem[idx].addr == NULL) {
++		shmem[idx].addr = mmap((void*) shmaddr, shmem[idx].size, PROT_READ | (shmflg == 0 ? PROT_WRITE : 0), MAP_SHARED, shmem[idx].descriptor, 0);
++		if (shmem[idx].addr == MAP_FAILED) {
++			DBG ("%s: mmap() failed for ID %x FD %d: %s", __PRETTY_FUNCTION__, idx, shmem[idx].descriptor, strerror(errno));
++			shmem[idx].addr = NULL;
++		}
++	}
++	addr = shmem[idx].addr;
++	DBG ("%s: mapped addr %p for FD %d ID %d", __PRETTY_FUNCTION__, addr, shmem[idx].descriptor, idx);
++	pthread_mutex_unlock (&mutex);
++
++	return addr ? addr : (void *)-1;
++}
++
++/* Detach shared memory segment. */
++int shmdt(void const* shmaddr)
++{
++	ashv_check_pid();
++
++	pthread_mutex_lock(&mutex);
++	for (size_t i = 0; i < shmem_amount; i++) {
++		if (shmem[i].addr == shmaddr) {
++			if (munmap(shmem[i].addr, shmem[i].size) != 0) {
++				DBG("%s: munmap %p failed", __PRETTY_FUNCTION__, shmaddr);
++			}
++			shmem[i].addr = NULL;
++			DBG("%s: unmapped addr %p for FD %d ID %zu shmid %x", __PRETTY_FUNCTION__, shmaddr, shmem[i].descriptor, i, shmem[i].id);
++			if (shmem[i].markedForDeletion || ashv_socket_id_from_shmid(shmem[i].id) != ashv_local_socket_id) {
++				DBG ("%s: deleting shmid %x", __PRETTY_FUNCTION__, shmem[i].id);
++				android_shmem_delete(i);
++			}
++			pthread_mutex_unlock(&mutex);
++			return 0;
++		}
++	}
++	pthread_mutex_unlock(&mutex);
++
++	DBG("%s: invalid address %p", __PRETTY_FUNCTION__, shmaddr);
++	/* Could be a remove segment, do not report an error for that. */
++	return 0;
++}
++
++/* Shared memory control operation. */
++int shmctl(int shmid, int cmd, struct shmid_ds *buf)
++{
++	ashv_check_pid();
++
++	if (cmd == IPC_RMID) {
++		DBG("%s: IPC_RMID for shmid=%x", __PRETTY_FUNCTION__, shmid);
++		pthread_mutex_lock(&mutex);
++		int idx = ashv_find_local_index(shmid);
++		if (idx == -1) {
++			DBG("%s: shmid=%x does not exist locally", __PRETTY_FUNCTION__, shmid);
++			/* We do not rm non-local regions, but do not report an error for that. */
++			pthread_mutex_unlock(&mutex);
++			return 0;
++		}
++
++		if (shmem[idx].addr) {
++			// shmctl(2): The segment will actually be destroyed only
++			// after the last process detaches it (i.e., when the shm_nattch
++			// member of the associated structure shmid_ds is zero.
++			shmem[idx].markedForDeletion = true;
++		} else {
++			android_shmem_delete(idx);
++		}
++		pthread_mutex_unlock(&mutex);
++		return 0;
++	} else if (cmd == IPC_STAT) {
++		if (!buf) {
++			DBG ("%s: ERROR: buf == NULL for shmid %x", __PRETTY_FUNCTION__, shmid);
++			errno = EINVAL;
++			return -1;
++		}
++
++		pthread_mutex_lock(&mutex);
++		int idx = ashv_find_local_index(shmid);
++		if (idx == -1) {
++			DBG ("%s: ERROR: shmid %x does not exist", __PRETTY_FUNCTION__, shmid);
++			pthread_mutex_unlock (&mutex);
++			errno = EINVAL;
++			return -1;
++		}
++		/* Report max permissive mode */
++		memset(buf, 0, sizeof(struct shmid_ds));
++		buf->shm_segsz = shmem[idx].size;
++		buf->shm_nattch = 1;
++		buf->shm_perm.key = shmem[idx].key;
++		buf->shm_perm.uid = geteuid();
++		buf->shm_perm.gid = getegid();
++		buf->shm_perm.cuid = geteuid();
++		buf->shm_perm.cgid = getegid();
++		buf->shm_perm.mode = 0666;
++		buf->shm_perm.seq = 1;
++
++		pthread_mutex_unlock (&mutex);
++		return 0;
++	}
++
++	DBG("%s: cmd %d not implemented yet!", __PRETTY_FUNCTION__, cmd);
++	errno = EINVAL;
++	return -1;
++}
++
++/* Make alias for use with e.g. dlopen() */
++#undef shmctl
++int shmctl(int shmid, int cmd, struct shmid_ds *buf) __attribute__((alias("libandroid_shmctl")));
++#undef shmget
++int shmget(key_t key, size_t size, int flags) __attribute__((alias("libandroid_shmget")));
++#undef shmat
++void* shmat(int shmid, void const* shmaddr, int shmflg) __attribute__((alias("libandroid_shmat")));
++#undef shmdt
++int shmdt(void const* shmaddr) __attribute__((alias("libandroid_shmdt")));
+diff --git a/src/devices/shm_android.h b/src/devices/shm_android.h
+new file mode 100644
+index 0000000..faab787
+--- /dev/null
++++ b/src/devices/shm_android.h
+@@ -0,0 +1,36 @@
++#ifndef _SYS_SHM_H
++#define _SYS_SHM_H
++
++#include <linux/shm.h>
++#include <stdint.h>
++#include <sys/types.h>
++
++__BEGIN_DECLS
++
++#ifndef shmid_ds
++# define shmid_ds shmid64_ds
++#endif
++
++/* Shared memory control operations. */
++#undef shmctl
++#define shmctl libandroid_shmctl
++extern int shmctl(int shmid, int cmd, struct shmid_ds* buf);
++
++/* Get shared memory area identifier. */
++#undef shmget
++#define shmget libandroid_shmget
++extern int shmget(key_t key, size_t size, int shmflg);
++
++/* Attach shared memory segment. */
++#undef shmat
++#define shmat libandroid_shmat
++extern void *shmat(int shmid, void const* shmaddr, int shmflg);
++
++/* Detach shared memory segment. */
++#undef shmdt
++#define shmdt libandroid_shmdt
++extern int shmdt(void const* shmaddr);
++
++__END_DECLS
++
++#endif
+diff --git a/src/devices/shm_windows.c b/src/devices/shm_windows.c
+new file mode 100644
+index 0000000..16f576b
+--- /dev/null
++++ b/src/devices/shm_windows.c
+@@ -0,0 +1,339 @@
++/*
++ * Copyright (c) 2016 - Qeo LLC
++ *
++ * The source code form of this Qeo Open Source Project component is subject
++ * to the terms of the Clear BSD license.
++ *
++ * You can redistribute it and/or modify it under the terms of the Clear BSD
++ * License (http://directory.fsf.org/wiki/License:ClearBSD). See LICENSE file
++ * for more details.
++ *
++ * The Qeo Open Source Project also includes third party Open Source Software.
++ * See LICENSE file for more details.
++ */
++
++/* ipc.c -- Implements some system dependent IPC functionalities such as
++	    semaphores and shared memory. */
++
++#include <stdio.h>
++#ifndef NOIPC
++#include <stdlib.h>
++#include <string.h>
++#ifdef _WIN32
++#include "winsock2.h"
++#else
++#include <sys/types.h>
++#include <sys/ipc.h>
++#include <sys/sem.h>
++#include <sys/shm.h>
++#endif
++#include "log.h"
++#include "error.h"
++#include "ipc.h"
++
++#ifndef __APPLE__
++
++union semun {
++	int		val;
++	struct semid_ds	*buf;
++	unsigned short	*array;
++};
++
++#endif
++
++/* sem_get -- Try to get either an existing semaphore or create a new one. */
++
++intptr_t sem_get (unsigned name,	/* Id of semaphore (system-wide). */
++	          unsigned val,		/* Initial value (# of users). */
++	          unsigned perms,	/* System permissions. */
++	          unsigned flags)	/* Various flags - see above. */
++{
++	intptr_t	sem_id;
++
++#ifdef _WIN32
++	char		sem_name [5];
++
++	memcpy (sem_name, &name, 4);
++	sem_name [4] = '\0';
++	if ((flags & SHMF_CREATE) == 0)
++		sem_id = (intptr_t) OpenSemaphoreA (0, FALSE, sem_name);
++	else
++		sem_id = (intptr_t) CreateSemaphoreA (NULL, 1, 1, sem_name);
++	if (!sem_id)
++		return (-1);
++#else
++	int		s_flags = (int) perms;
++	union semun	sem_union;
++
++	if ((flags & SEMF_PRIVATE) != 0)
++		name = IPC_PRIVATE;
++	if ((flags & SEMF_NOWAIT) != 0)
++		s_flags |= IPC_NOWAIT;
++
++	if ((flags & SEMF_CREATE) == 0) { /* Reference to a public semaphore? */
++		sem_id = semget ((key_t) name, 1, s_flags);
++		return (sem_id);
++	}
++	if ((flags & SEMF_PRIVATE) == 0) { /* Public semaphore. */
++
++		/* If it already exists -- nothing left to do; creator has
++		   already initialized it! */
++		sem_id = semget ((key_t) name, 1, s_flags | IPC_NOWAIT);
++		if (sem_id >= 0)
++			return (sem_id);
++	}
++
++	/* Doesn't exist yet -- create new one. */
++	sem_id = semget ((key_t) name, 1, s_flags | IPC_CREAT);
++	if (sem_id < 0) {
++		log_printf (LOG_DEF_ID, 0, "sem_get: failed to create!\r\n");
++		return (sem_id);	/* Error creating? */
++	}
++
++	/* Successfully created -- now initialize it. */
++	sem_union.val = val;
++	if (semctl (sem_id, 0, SETVAL, sem_union) < 0) { /* Can't init: abort! */
++		log_printf (LOG_DEF_ID, 0, "sem_get: failed to initialize!\r\n");
++		sem_free (sem_id);
++		sem_id = -1;
++	}
++#endif
++	return (sem_id);
++}
++
++/* sem_free -- Free a semaphore. */
++
++void sem_free (intptr_t sem_id)
++{
++
++#ifdef _WIN32
++	CloseHandle ((HANDLE) sem_id);
++#else
++	union semun	sem_union;
++
++	semctl (sem_id, 0, IPC_RMID, sem_union);
++#endif
++}
++
++/* sem_p -- Procure (i.e. take) a semaphore. */
++
++void sem_p (intptr_t sem)
++{
++#ifdef _WIN32
++	WaitForSingleObject ((HANDLE) sem, INFINITE);
++#else
++	struct sembuf	b;
++
++	b.sem_num = 0;
++	b.sem_op = -1;
++	b.sem_flg = SEM_UNDO;
++	if (semop (sem, &b, 1) < 0)
++		log_printf (LOG_DEF_ID, 0, "sem_p: failed!\r\n");
++#endif
++}
++
++/* sem_v -- Vacate (i.e. release) a semaphore. */
++
++void sem_v (intptr_t sem)
++{
++#ifdef _WIN32
++	ReleaseSemaphore ((HANDLE) sem, 1, NULL);
++#else
++	struct sembuf	b;
++
++	b.sem_num = 0;
++	b.sem_op = 1;
++	b.sem_flg = SEM_UNDO;
++	if (semop (sem, &b, 1) < 0)
++		log_printf (LOG_DEF_ID, 0, "sem_v: failed!\r\n");
++#endif
++}
++
++
++#define	SHM_NREFS_INC	16	/* # of references to add to table. */
++
++typedef struct shm_ref_st {
++	void		*ptr;		/* Points to block. */
++	size_t		size;		/* Size of memory block. */
++	unsigned long	name;		/* Name of memory block. */
++	uintptr_t	id;		/* Shared memory Id. */
++} SHM_REF;
++
++static SHM_REF	*shm_refs = NULL;	/* Pointer to reference array. */
++static unsigned	shm_maxrefs;		/* Size of reference array. */
++static unsigned	shm_currefs;		/* # of references in array. */
++
++/* shm_add -- Add a new shared memory block to the table of shared memory
++	      blocks. */
++
++static void shm_add (void *p, size_t size, unsigned name, uintptr_t id)
++{
++	SHM_REF		*rp, *np;
++	unsigned	i;
++
++	if (shm_currefs == shm_maxrefs) {
++		shm_maxrefs += SHM_NREFS_INC;
++		np = realloc (shm_refs, sizeof (SHM_REF) * shm_maxrefs);
++		if (!np)
++			fatal_printf ("shm_add: can't realloc(%u) shared memory references array!", shm_maxrefs);
++
++		shm_refs = np;
++		rp = &shm_refs [shm_currefs++];
++		memset (rp + 1, 0, sizeof (SHM_REF) * (SHM_NREFS_INC - 1));
++	}
++	else
++		for (i = 0, rp = shm_refs; i < shm_currefs; i++, rp++)
++			if (!rp->ptr)
++				break;
++	rp->ptr  = p;
++	rp->size = size;
++	rp->name = name;
++	rp->id   = id;
++}
++
++/* shm_lookup -- Lookup a pointer in the table of shared memory blocks and
++		 a reference to the descriptor. */
++
++static SHM_REF *shm_lookup (void *p)
++{
++	SHM_REF		*rp;
++	unsigned	i;
++
++	for (i = 0, rp = shm_refs; i < shm_currefs; i++, rp++)
++		if (rp->ptr == p)
++			return (rp);
++
++	log_printf (LOG_DEF_ID, 0, "shm_lookup: pointer not in table!\r\n");
++
++	return (NULL);
++}
++
++/* shm_get -- Try to get either an existing shared memory region or create a
++	      new one. */
++
++void *shm_get (unsigned name,	/* Id of memory region. */
++	       size_t   size,	/* Size of memory region. */
++	       unsigned perms,	/* System permissions. */
++	       unsigned flags)	/* Various flags - see above. */
++{
++	void		*p;
++#ifdef _WIN32
++	uintptr_t	shm_id;
++	HANDLE		map_file;
++	char		mem_name [5];
++
++	memcpy (mem_name, &name, 4);
++	mem_name [4] = '\0';
++	if ((flags & SHMF_CREATE) == 0)
++		map_file = OpenFileMappingA (FILE_MAP_ALL_ACCESS, FALSE, mem_name);
++	else
++		map_file = CreateFileMappingA (INVALID_HANDLE_VALUE, NULL, 
++						PAGE_READWRITE,
++						0, size, mem_name);
++	if (!map_file)
++		return (NULL);
++
++	p = MapViewOfFile (map_file, FILE_MAP_ALL_ACCESS, 0, 0, size);
++	if (!p)
++		CloseHandle (map_file);
++
++	shm_id = (uintptr_t) map_file;
++#else
++	int	shm_id, s_flags = (int) perms;
++
++	if ((flags & SHMF_NOWAIT) != 0)
++		s_flags |= IPC_NOWAIT;
++
++	if ((flags & SHMF_CREATE) == 0) { /* Reference to a public memory? */
++		shm_id = shmget ((key_t) name, size, s_flags);
++		if (shm_id < 0)
++			return (NULL);
++	}
++	else {	/* If it already exists -- nothing left to do; creator has
++		   already initialized it! */
++		shm_id = shmget ((key_t) name, size, s_flags | IPC_NOWAIT);
++		if (shm_id < 0) {
++
++			/* Doesn't exist yet -- create new one. */
++			shm_id = shmget ((key_t) name, size, s_flags | IPC_CREAT);
++			if (shm_id < 0) {
++				log_printf (LOG_DEF_ID, 0, "shm_get: failed to create!\r\n");
++				return (NULL);	/* Error creating? */
++			}
++		}
++	}
++	p = shmat (shm_id, NULL, 0);
++	if (p == (void *) -1) {
++		err_printf ("shm_get: failed to attach!\n");
++		p = NULL;
++		return (NULL);
++	}
++
++#endif
++	shm_add (p, size, name, shm_id);
++	return (p);
++}
++
++/* shm_free -- Free a shared memory region. Since the shared memory might still
++	       be in use by some consumers, this should only be done when really
++	       needed. */
++
++void shm_free (void *p)
++{
++	SHM_REF	*rp;
++
++	if ((rp = shm_lookup (p)) == NULL) {
++		log_printf (LOG_DEF_ID, 0, "shm_free: no such shared memory!\r\n");
++		return;
++	}
++#ifdef _WIN32
++	UnmapViewOfFile (rp->ptr);
++	CloseHandle ((HANDLE) rp->id);
++#else
++	if (shmdt (p) < 0) {
++		log_printf (LOG_DEF_ID, 0, "shm_free: shmdt(%p) returned error!\r\n", p);
++		return;
++	}
++	if (shmctl (rp->id, IPC_RMID, 0) == -1)
++		log_printf (LOG_DEF_ID, 0, "shm_free: can't delete shared memory region!\r\n");
++#endif
++	shm_currefs--;
++	rp->id = -1;
++	rp->ptr = NULL;
++}
++
++void shm_detach (void *p)
++{
++	SHM_REF	*rp;
++
++	if ((rp = shm_lookup (p)) == NULL) {
++		log_printf (LOG_DEF_ID, 0, "shm_free: no such shared memory!\r\n");
++		return;
++	}
++#ifdef _WIN32
++	UnmapViewOfFile (rp->ptr);
++	CloseHandle ((HANDLE) rp->id);
++#else
++	if (shmdt (p) < 0)
++		log_printf (LOG_DEF_ID, 0, "shm_free: shmdt(%p) returned error!\r\n", p);
++#endif
++}
++
++void ipc_final (void)
++{
++#ifdef _WIN32
++	SHM_REF		*rp;
++	unsigned	i;
++
++	for (i = 0, rp = shm_refs; i < shm_maxrefs; i++, rp++)
++		if (rp->ptr)
++			shm_free (rp->ptr);
++#endif
++	if (!shm_refs)
++		return;
++
++	free (shm_refs);
++	shm_refs = NULL;
++	shm_currefs = shm_maxrefs = 0;
++}
++#endif
+diff --git a/src/devices/shm_windows_ipc.h b/src/devices/shm_windows_ipc.h
+new file mode 100644
+index 0000000..dd7b7b6
+--- /dev/null
++++ b/src/devices/shm_windows_ipc.h
+@@ -0,0 +1,92 @@
++/*
++ * Copyright (c) 2016 - Qeo LLC
++ *
++ * The source code form of this Qeo Open Source Project component is subject
++ * to the terms of the Clear BSD license.
++ *
++ * You can redistribute it and/or modify it under the terms of the Clear BSD
++ * License (http://directory.fsf.org/wiki/License:ClearBSD). See LICENSE file
++ * for more details.
++ *
++ * The Qeo Open Source Project also includes third party Open Source Software.
++ * See LICENSE file for more details.
++ */
++
++/* ipc.h -- Defines some system dependent IPC functionalities.
++	    Following IPC classes are currently defined:
++
++	    	- Semaphores
++		- Shared Memory
++ */
++
++#ifndef __ipc_h_
++#define __ipc_h_
++#ifndef NOIPC
++#include <stdint.h>
++
++
++/* 1. Semaphores. 
++   -------------- */
++
++/* Various semaphore flags: */
++#define	SEMF_CREATE	1	/* Create if it doesn't exist yet. */
++#define	SEMF_NOWAIT	2	/* Don't wait if it doesn't exist. */
++#define	SEMF_PUBLIC	0	/* A public semaphore. */
++#define	SEMF_PRIVATE	4	/* A private semaphore. */
++
++intptr_t sem_get (uint32_t name,	/* Id of semaphore (system-wide). */
++	          unsigned val,		/* Initial value (# of users). */
++	          unsigned perms,	/* System permissions. */
++	          unsigned flags);	/* Various flags - see above. */
++
++/* Try to get either an existing semaphore or create a new one.
++   The function returns either: -1, i.e. it failed, or a semaphore reference. */
++
++void sem_free (intptr_t sem);
++
++/* Free a semaphore. */
++
++void sem_p (intptr_t sem);
++
++/* Procure (i.e. take) a semaphore. */
++
++void sem_v (intptr_t sem);
++
++/* Vacate (i.e. release) a semaphore. */
++
++
++/* 2. Shared memory.
++   ----------------- */
++
++/* Various shared memory flags: */
++#define	SHMF_CREATE	1	/* Create if it doesn't exist yet. */
++#define	SHMF_NOWAIT	2	/* Don't wait if it doesn't exist. */
++
++void *shm_get (uint32_t name,	/* Id of memory region (system-wide). */
++	       size_t   size,	/* Size of memory region. */
++	       unsigned perms,	/* System permissions. */
++	       unsigned flags);	/* Various flags - see above. */
++
++/* Try to get either an existing shared memory region or create a new one.
++   The function returns either: NULL, i.e. it failed, or a pointer to the
++   shared memory region. */
++
++void shm_free (void *p);
++
++/* Free a shared memory region. Since the shared memory might still be in use by
++   some consumers, this should only be done when really needed. */
++
++void shm_detach (void *p);
++
++/* Detach from a shared memory region. */
++
++/* 3. Housekeeping functions.
++   -------------------------- */
++
++void ipc_final (void);
++
++/* On program exit, this function can be used to cleanup some resources. */
++
++#endif
++#endif /* !__ipc_h_ */
++
 diff --git a/src/devices/virtio-blk.c b/src/devices/virtio-blk.c
 new file mode 100644
 index 0000000..783f220
@@ -5540,3 +6761,40 @@ index 0000000..c2c53f7
 +void window_lock(uint32_t id);
 +void window_unlock(uint32_t id);
 +#endif
+diff --git a/src/main.c b/src/main.c
+index 7cbe407..0ecebf7 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -98,6 +98,9 @@ static void print_help(void)
+ #ifdef USE_JIT
+            "    -jitcache 16M    Per-core JIT cache size\n"
+            "    -nojit           Disable RVJIT\n"
++#endif
++#if ANDROID
++           "    -shm path name   Map a shared memory region from <path> to guest </dev/rvvm_shm/name>\n"
+ #endif
+            "    -v, -verbose     Enable verbose logging\n"
+            "    -h, -help        Show this help message\n"
+@@ -196,6 +199,22 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
+         } else if (cmp_arg(arg_name, "vfio_pci")) {
+             if (!pci_vfio_init_auto(machine, arg_val)) return false;
+         }
++        #if ANDROID
++        else if (cmp_arg(arg_name, "-shm")) {
++			const char * path = arg_val;
++        	i+=arg_size;
++        	if (i == argc) {
++                rvvm_error("-shm expects <path> <name>");
++        	}
++	        arg_size = get_arg(argv + i, &arg_name, &arg_val);
++	        const char * shm_name = arg_val;
++            if (!shm_init(machine, path, arg_val)) {
++                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", path, arg_val);
++                return false;
++            }
++            #endif
++        }
++        #endif
+     }
+     if (rvvm_getarg("dumpdtb")) rvvm_dump_dtb(machine, rvvm_getarg("dumpdtb"));
+     return true;
