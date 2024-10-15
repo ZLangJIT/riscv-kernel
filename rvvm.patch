@@ -432,7 +432,7 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..f248aab
+index 0000000..b1813ea
 --- /dev/null
 +++ b/src/devices/shm.c
 @@ -0,0 +1,183 @@
@@ -529,14 +529,14 @@ index 0000000..f248aab
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
-+		rvvm_info("Failed to map file %s (open() failed)", path);
++		rvvm_error("Failed to map file %s (open() failed)", path);
 +		return NULL;
 +	}
 +	struct stat file_info;
 +	if (fstat(file_handle, &file_info) == -1) {
 +		close(file_handle);
 +		free(shm_ctx);
-+		rvvm_info("Failed to map file %s (fstat() failed)", path);
++		rvvm_error("Failed to map file %s (fstat() failed)", path);
 +		return NULL;
 +	}
 +	shm_ctx->size = file_info.st_size;
@@ -544,7 +544,7 @@ index 0000000..f248aab
 +	close(file_handle);
 +	if (shm_ctx->buffer == MAP_FAILED) {
 +		free(shm_ctx);
-+		rvvm_info("Failed to map file %s (MAP_FAILED)", path);
++		rvvm_error("Failed to map file %s (MAP_FAILED)", path);
 +		return NULL;
 +	}
 +#endif
@@ -578,14 +578,14 @@ index 0000000..f248aab
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
-+		rvvm_info("Failed to map file %s (open() failed)", path);
++		rvvm_error("Failed to map file %s (open() failed)", path);
 +		return NULL;
 +	}
 +	struct stat file_info;
 +	if (fstat(file_handle, &file_info) == -1) {
 +		close(file_handle);
 +		free(shm_ctx);
-+		rvvm_info("Failed to map file %s (fstat() failed)", path);
++		rvvm_error("Failed to map file %s (fstat() failed)", path);
 +		return NULL;
 +	}
 +	shm_ctx->size = file_info.st_size;
@@ -593,7 +593,7 @@ index 0000000..f248aab
 +	close(file_handle);
 +	if (shm_ctx->buffer == MAP_FAILED) {
 +		free(shm_ctx);
-+		rvvm_info("Failed to map file %s (MAP_FAILED)", path);
++		rvvm_error("Failed to map file %s (MAP_FAILED)", path);
 +		return NULL;
 +	}
 +#endif
@@ -5775,7 +5775,7 @@ index 0000000..c2c53f7
 +void window_unlock(uint32_t id);
 +#endif
 diff --git a/src/main.c b/src/main.c
-index 7cbe407..c1e9959 100644
+index 7cbe407..292ffeb 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -99,6 +99,8 @@ static void print_help(void)
@@ -5787,33 +5787,51 @@ index 7cbe407..c1e9959 100644
             "    -v, -verbose     Enable verbose logging\n"
             "    -h, -help        Show this help message\n"
  #if defined(_WIN32) && !defined(UNDER_CE)
-@@ -196,6 +198,32 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
+@@ -196,6 +198,50 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
          } else if (cmp_arg(arg_name, "vfio_pci")) {
              if (!pci_vfio_init_auto(machine, arg_val)) return false;
          }
-+        else if (cmp_arg(arg_name, "-shm_data")) {
-+			const char * path = arg_val;
-+        	i+=arg_size;
++        else if (cmp_arg(arg_name, "shm_data")) {
 +        	if (i == argc) {
-+                rvvm_error("-shm expects <path> <name>");
++                rvvm_error("-shm_data expects <path> <name>");
++                return false;
 +        	}
-+	        arg_size = get_arg(argv + i, &arg_name, &arg_val);
-+	        const char * shm_name = arg_val;
-+            if (!shm_init_data(machine, path, arg_val)) {
-+                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", path, arg_val);
++        	i++;
++        	if (i == argc) {
++                rvvm_error("-shm_data expects <path> <name>");
++                return false;
++        	}
++			const char * path = argv[i];
++        	i++;
++        	if (i == argc) {
++                rvvm_error("-shm_data expects <path> <name>");
++                return false;
++        	}
++			const char * name = argv[i];
++            if (!shm_init_data(machine, path, name)) {
++                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", path, name);
 +                return false;
 +            }
 +        }
-+        else if (cmp_arg(arg_name, "-shm_exe")) {
-+			const char * path = arg_val;
-+        	i+=arg_size;
++        else if (cmp_arg(arg_name, "shm_exe")) {
 +        	if (i == argc) {
-+                rvvm_error("-shm expects <path> <name>");
++                rvvm_error("-shm_exe expects <path> <name>");
++                return false;
 +        	}
-+	        arg_size = get_arg(argv + i, &arg_name, &arg_val);
-+	        const char * shm_name = arg_val;
-+            if (!shm_init_exe(machine, path, arg_val)) {
-+                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", path, arg_val);
++        	i++;
++        	if (i == argc) {
++                rvvm_error("-shm_exe expects <path> <name>");
++                return false;
++        	}
++			const char * path = argv[i];
++        	i++;
++        	if (i == argc) {
++                rvvm_error("-shm_exe expects <path> <name>");
++                return false;
++        	}
++			const char * name = argv[i];
++            if (!shm_init_exe(machine, path, name)) {
++                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", path, name);
 +                return false;
 +            }
 +        }
