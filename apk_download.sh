@@ -1,35 +1,4 @@
-IS_VERBOSE="-q"
-while [[ $# -gt '0' ]]
-  do
-    if [[ "$1" == '-v' ]]
-      then
-        IS_VERBOSE="--show-progress -q"
-        shift
-        if [[ $# -gt '0' ]]
-          then
-            if [[ "$1" == '-v' ]]
-              then
-                IS_VERBOSE="--show-progress -v"
-                shift
-            fi
-        fi
-    else
-      if [[ "$1" == '--version_code' ]]
-        then
-          LIBMEDIA_GRADLE_VERSION_CODE="$2"
-          shift
-          shift
-        else
-          shift
-      fi
-  fi
-done
-if [[ -z $LIBMEDIA_GRADLE_VERSION_CODE ]]
-  then
-    . ./compute_libmedia_version.sh
-fi
-TAG=$LIBMEDIA_GRADLE_VERSION_CODE
-
+. get_tag.sh $@
 if $(am --help 2>&1 | grep -q -i "to-intent-uri")
   then
     echo "Android detected"
@@ -37,7 +6,7 @@ if $(am --help 2>&1 | grep -q -i "to-intent-uri")
     if $(pm list packages -3 2>&1 | grep -q "idm.internet.download.manager.plus")
       then
         echo "1DM+ detected"
-        am start --user 0 -n "idm.internet.download.manager.plus/idm.internet.download.manager.UrlHandlerDownloader" -d https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/linux.kernel.rvvm.release.apk
+        am start --user 0 -n "idm.internet.download.manager.plus/idm.internet.download.manager.UrlHandlerDownloader" -d https://github.com/ZLangJIT/riscv-kernel/releases/download/$LIBMEDIA_GRADLE_VERSION_CODE/linux.kernel.rvvm.release.apk
         exit
     fi
     if [[ -d /data/data/com.termux/files/usr ]]
@@ -48,7 +17,7 @@ if $(am --help 2>&1 | grep -q -i "to-intent-uri")
         	then
         		rm -v linux.kernel.rvvm.release.apk
         fi
-        wget --no-verbose --show-progress https://github.com/ZLangJIT/riscv-kernel/releases/download/$TAG/linux.kernel.rvvm.release.apk &&
+        wget --no-verbose --show-progress https://github.com/ZLangJIT/riscv-kernel/releases/download/$LIBMEDIA_GRADLE_VERSION_CODE/linux.kernel.rvvm.release.apk &&
         set +x &&
         echo &&
         echo 'please install the following apk ...' &&

@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..3c56036
+index 0000000..f248aab
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,177 @@
+@@ -0,0 +1,183 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -462,7 +462,7 @@ index 0000000..3c56036
 +#include "fdtlib.h"
 +#endif
 +
-+#if WIN32
++#if _WIN32
 +
 +#include <fileapi.h> // CreateFile
 +#include <memoryapi.h> // MapViewOfFile, UnmapViewOfFile
@@ -482,7 +482,7 @@ index 0000000..3c56036
 +static void shm_remove_file(rvvm_mmio_dev_t* device)
 +{
 +    shm_ctx_t* shm_ctx = (shm_ctx_t*)device->data;
-+#if WIN32
++#if _WIN32
 +    UnmapViewOfFile(shm_ctx->buffer);
 +#else
 +	munmap(shm_ctx->buffer, shm_ctx->size);
@@ -511,7 +511,7 @@ index 0000000..3c56036
 +PUBLIC rvvm_mmio_dev_t* shm_init_data(rvvm_machine_t* machine, const char * path, const char * dev_name)
 +{
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
-+#if WIN32
++#if _WIN32
 +	HANDLE file_handle = CreateFileA(path,
 +		GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 +	);
@@ -529,12 +529,14 @@ index 0000000..3c56036
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
++		rvvm_info("Failed to map file %s (open() failed)", path);
 +		return NULL;
 +	}
 +	struct stat file_info;
 +	if (fstat(file_handle, &file_info) == -1) {
 +		close(file_handle);
 +		free(shm_ctx);
++		rvvm_info("Failed to map file %s (fstat() failed)", path);
 +		return NULL;
 +	}
 +	shm_ctx->size = file_info.st_size;
@@ -542,6 +544,7 @@ index 0000000..3c56036
 +	close(file_handle);
 +	if (shm_ctx->buffer == MAP_FAILED) {
 +		free(shm_ctx);
++		rvvm_info("Failed to map file %s (MAP_FAILED)", path);
 +		return NULL;
 +	}
 +#endif
@@ -558,7 +561,7 @@ index 0000000..3c56036
 +PUBLIC rvvm_mmio_dev_t* shm_init_exe(rvvm_machine_t* machine, const char * path, const char * dev_name)
 +{
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
-+#if WIN32
++#if _WIN32
 +	HANDLE file_handle = CreateFileA(path,
 +		GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 +	);
@@ -575,12 +578,14 @@ index 0000000..3c56036
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
++		rvvm_info("Failed to map file %s (open() failed)", path);
 +		return NULL;
 +	}
 +	struct stat file_info;
 +	if (fstat(file_handle, &file_info) == -1) {
 +		close(file_handle);
 +		free(shm_ctx);
++		rvvm_info("Failed to map file %s (fstat() failed)", path);
 +		return NULL;
 +	}
 +	shm_ctx->size = file_info.st_size;
@@ -588,6 +593,7 @@ index 0000000..3c56036
 +	close(file_handle);
 +	if (shm_ctx->buffer == MAP_FAILED) {
 +		free(shm_ctx);
++		rvvm_info("Failed to map file %s (MAP_FAILED)", path);
 +		return NULL;
 +	}
 +#endif
