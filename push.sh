@@ -14,13 +14,24 @@ while [[ $# -gt '0' ]]
             fi
         fi
     else
-      if [[ "$1" == '--version_code' ]]
+      if [[ "$1" == '--version-code' ]]
         then
           LIBMEDIA_GRADLE_VERSION_CODE="$2"
           shift
           shift
         else
-          shift
+          if [[ "$1" == '-h' || "$1" == '--help' ]]
+            then
+              echo "usage:"
+              echo ""
+              echo "    -h, --help        this help text"
+              echo "    -v                print file download progress"
+              echo "    -v -v             print detailed file download progress"
+              echo "    --version-code    specify the version code, eg   --version-code 17"
+              exit 1
+            else
+              shift
+          fi
       fi
   fi
 done

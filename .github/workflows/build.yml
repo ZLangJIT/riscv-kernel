@@ -48,7 +48,7 @@ jobs:
         echo "HAVE_TMATE=1" | tee -a $GITHUB_ENV
 
     - name: run tmate in background
-    if: ${{ env.HAVE_TMATE == '1' }}
+      if: ${{ env.HAVE_TMATE == '1' }}
       run: |
         nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' &
         sleep 2
