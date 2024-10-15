@@ -432,7 +432,7 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..c830c74
+index 0000000..3539e3e
 --- /dev/null
 +++ b/src/devices/shm.c
 @@ -0,0 +1,196 @@
@@ -564,8 +564,8 @@ index 0000000..c830c74
 +    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
 +    if (mmio == NULL) return mmio;
 +#ifdef USE_FDT
-+    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_data_file", shm_region->mapping);
-+    fdt_node_add_prop_u32(fb_fdt, "size", shm_region->size);
++    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_data_file", shm_region.mapping);
++    fdt_node_add_prop_u32(fb_fdt, "size", shm_region.size);
 +    fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
 +#endif
 +    return mmio;
@@ -626,8 +626,8 @@ index 0000000..c830c74
 +    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
 +    if (mmio == NULL) return mmio;
 +#ifdef USE_FDT
-+    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_exe_file", shm_region->mapping);
-+    fdt_node_add_prop_u32(fb_fdt, "size", shm_region->size);
++    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_exe_file", shm_region.mapping);
++    fdt_node_add_prop_u32(fb_fdt, "size", shm_region.size);
 +    fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
 +#endif
 +    return mmio;
