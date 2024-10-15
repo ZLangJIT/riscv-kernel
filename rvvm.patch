@@ -1,6 +1,6 @@
 patch file
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index db82e07..e7b5b43 100644
+index db82e07..1e24bb5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,13 +1,25 @@
@@ -178,7 +178,7 @@ index db82e07..e7b5b43 100644
  
  if (RVVM_USE_GUI AND (NOT BUILD_LIBRETRO))
  	target_compile_definitions(rvvm_common INTERFACE USE_GUI)
-@@ -313,10 +371,48 @@ else()
+@@ -313,10 +371,45 @@ else()
  		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.bc")
  	elseif (LIBRETRO_STATIC)
  		set_target_properties(rvvm_libretro PROPERTIES SUFFIX "${LIBRETRO_SUFFIX}.a")
@@ -217,9 +217,6 @@ index db82e07..e7b5b43 100644
 +		LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
 +	)
 +endif()
-+
-+# dont install shm* headers
-+list(REMOVE_ITEM RVVM_DEVICES_H ${RVVM_SRC_DIR}/devices/shm.h")
 +
 +install(
 +	FILES
