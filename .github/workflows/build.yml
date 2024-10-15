@@ -452,6 +452,8 @@ jobs:
       if: ${{ env.GRADLE_RETURN_CODE == '1' }}
       shell: bash
       run: |
+        set -v
+        cat linux.kernel.rvvm/app/.cxx/cmake/debug/arm64-v8a/cmake_server_log.txt
         if [[ ${{ env.HAVE_TMATE }} == 1 ]]
         	then
         		echo "tmate (remote terminal) is installed, sleeping for 6 hours"
