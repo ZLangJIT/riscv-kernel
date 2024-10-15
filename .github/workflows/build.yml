@@ -448,17 +448,12 @@ jobs:
         		echo "GRADLE_RETURN_CODE=1" | tee -a $GITHUB_ENV
         fi
 
-    - name: APK build failed [linux.kernel.rvvm]
+    - name: APK build failed - print last 600 lines from cmake [linux.kernel.rvvm]
       if: ${{ env.GRADLE_RETURN_CODE == '1' }}
       shell: bash
       run: |
-        set -v
-        cat linux.kernel.rvvm/app/.cxx/cmake/debug/arm64-v8a/cmake_server_log.txt
-        if [[ ${{ env.HAVE_TMATE }} == 1 ]]
-        	then
-        		echo "tmate (remote terminal) is installed, sleeping for 6 hours"
-        		sleep 6h
-        fi
+        echo "printing the last 600 lines from linux.kernel.rvvm/app/.../cmake_server_log.txt"
+        tail -n 600 linux.kernel.rvvm/app/.cxx/cmake/debug/arm64-v8a/cmake_server_log.txt
         false
 
     - name: Build debug APK [linux.kernel.rvvm]

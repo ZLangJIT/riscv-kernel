@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..f987fe5
+index 0000000..3c56036
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,172 @@
+@@ -0,0 +1,177 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -470,13 +470,14 @@ index 0000000..f987fe5
 +#elif ANDROID
 +
 +#include <fcntl.h> // open
++#include <unistd.h> // close
 +#include <sys/stat.h> // stat
 +#include <sys/mman.h> // mmap
 +
 +#else
 +#endif
 +
-+PUBLIC rvvm_mmio_dev_t* shm_init_(rvvm_machine_t* machine, rvvm_addr_t addr, rvvm_mmio_dev_t* shm_region, const char * dev_name);
++PUBLIC rvvm_mmio_dev_t* shm_init_(rvvm_machine_t* machine, rvvm_mmio_dev_t* shm_region, const char * dev_name);
 +
 +static void shm_remove_file(rvvm_mmio_dev_t* device)
 +{
@@ -501,6 +502,9 @@ index 0000000..f987fe5
 +
 +PUBLIC rvvm_mmio_dev_t* shm_init_named(rvvm_machine_t* machine, const char * global_name, const char * dev_name)
 +{
++	UNUSED(machine);
++	UNUSED(global_name);
++	UNUSED(dev_name);
 +	return NULL;
 +}
 +
@@ -548,10 +552,10 @@ index 0000000..f987fe5
 +        .data = shm_ctx,
 +        .type = &shm_data_dev_type,
 +    };
-+	return shm_init_(machine, addr, &shm_region, dev_name);
++	return shm_init_(machine, &shm_region, dev_name);
 +}
 +
-+PUBLIC rvvm_mmio_dev_t* shm_init_exe(rvvm_machine_t* machine, rvvm_addr_t addr, const char * path, const char * dev_name)
++PUBLIC rvvm_mmio_dev_t* shm_init_exe(rvvm_machine_t* machine, const char * path, const char * dev_name)
 +{
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
 +#if WIN32
@@ -594,11 +598,12 @@ index 0000000..f987fe5
 +        .data = shm_ctx,
 +        .type = &shm_exe_dev_type,
 +    };
-+  return shm_init_(machine, addr, &shm_region, dev_name);
++  return shm_init_(machine, &shm_region, dev_name);
 +}
 +
-+PUBLIC rvvm_mmio_dev_t* shm_init_(rvvm_machine_t* machine, rvvm_addr_t addr, rvvm_mmio_dev_t* shm_region, const char * dev_name)
++PUBLIC rvvm_mmio_dev_t* shm_init_(rvvm_machine_t* machine, rvvm_mmio_dev_t* shm_region, const char * dev_name)
 +{
++	UNUSED(dev_name);
 +    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
 +    if (mmio == NULL) return mmio;
 +#ifdef USE_FDT
