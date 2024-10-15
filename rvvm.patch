@@ -5774,7 +5774,7 @@ index 0000000..c2c53f7
 +void window_unlock(uint32_t id);
 +#endif
 diff --git a/src/main.c b/src/main.c
-index 7cbe407..3b783b0 100644
+index 7cbe407..8e5e681 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -39,6 +39,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -5847,17 +5847,18 @@ index 7cbe407..3b783b0 100644
  #if defined(_WIN32) && !defined(UNDER_CE)
             "\n";
      WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), help, wcslen(help), NULL, NULL);
-@@ -162,6 +172,9 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
+@@ -162,6 +172,10 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
      if (rvvm_getarg("k") && !rvvm_load_kernel(machine, rvvm_getarg("k"))) return false;
      if (rvvm_getarg("kernel") && !rvvm_load_kernel(machine, rvvm_getarg("kernel"))) return false;
      if (rvvm_getarg("dtb") && !rvvm_load_dtb(machine, rvvm_getarg("dtb"))) return false;
 +    
 +    const char * shm_data_path = NULL;
 +    const char * shm_exe_path = NULL;
++    const char * shm_id = NULL;
  
      for (int i=1; i<argc; i+=arg_size) {
          arg_size = get_arg(argv + i, &arg_name, &arg_val);
-@@ -196,6 +209,44 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
+@@ -196,6 +210,44 @@ static bool rvvm_cli_configure(rvvm_machine_t* machine, int argc, const char** a
          } else if (cmp_arg(arg_name, "vfio_pci")) {
              if (!pci_vfio_init_auto(machine, arg_val)) return false;
          }
@@ -5868,7 +5869,7 @@ index 7cbe407..3b783b0 100644
 +        	}
 +        	shm_id = arg_val;
 +            if (shm_exe_path == NULL ? !shm_init_data(machine, shm_data_path, shm_id) : !shm_init_exe(machine, shm_exe_path, shm_id)) {
-+                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", path, name);
++                rvvm_error("Failed to attach shm path \"%s\" with guest name /dev/rvvm_shm/%s", shm_exe_path == NULL ? shm_data_path : shm_exe_path, shm_id);
 +                return false;
 +            }
 +            shm_data_path = NULL;
