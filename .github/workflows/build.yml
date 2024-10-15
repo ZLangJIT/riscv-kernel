@@ -40,14 +40,18 @@ jobs:
       run: |
         pacman -Sy --noconfirm archlinux-keyring archlinuxcn-keyring
         pacman -Su --noconfirm
+        echo "HAVE_TMATE=0" | tee -a $GITHUB_ENV
 
-    # - name: Install tmate (remote terminal)
-    #   run: pacman -S --noconfirm tmate
+    - name: Install tmate (remote terminal)
+      run: |
+        pacman -S --noconfirm tmate
+        echo "HAVE_TMATE=1" | tee -a $GITHUB_ENV
 
-    # - name: run tmate in background
-    #   run: |
-    #     nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' &
-    #     sleep 2
+    - name: run tmate in background
+    if: ${{ env.HAVE_TMATE == '1' }}
+      run: |
+        nohup script /dev/null -c 'tmate -F -v -2 new-session -d -P bash' &
+        sleep 2
 
     - name: install important packages
       run: |
@@ -435,8 +439,26 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        ./gradlew build --info #|| bash -c "echo sleeping for 6 hours ; sleep 6h ; false"
+        
         # info shows cmake output but also tons of Transforming Artifact output
+        ./gradlew build --info
+        if [[ $? == 0 ]]
+        	then
+        		echo "GRADLE_RETURN_CODE=0" | tee -a $GITHUB_ENV
+        	else
+        		echo "GRADLE_RETURN_CODE=1" | tee -a $GITHUB_ENV
+        fi
+
+    - name: APK build failed [linux.kernel.rvvm]
+      if: ${{ env.GRADLE_RETURN_CODE == '1' }}
+      shell: bash
+      run: |
+        if [[ ${{ env.HAVE_TMATE }} == 1 ]]
+        	then
+        		echo "tmate (remote terminal) is installed, sleeping for 6 hours"
+        		sleep 6h
+        fi
+        false
 
     - name: Build debug APK [linux.kernel.rvvm]
       if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
