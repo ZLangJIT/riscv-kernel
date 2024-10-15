@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..b991dd5
+index 0000000..c830c74
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,196 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -482,8 +482,10 @@ index 0000000..b991dd5
 +{
 +    shm_ctx_t* shm_ctx = (shm_ctx_t*)device->data;
 +#if _WIN32
++    rvvm_info("unmapping path '%s' via UnmapViewOfFile\n", shm_ctx->source);
 +    UnmapViewOfFile(shm_ctx->buffer);
 +#else
++    rvvm_info("unmapping path '%s' via munmmap\n", shm_ctx->source);
 +	munmap(shm_ctx->buffer, shm_ctx->size);
 +#endif
 +    free(shm_ctx);
@@ -510,7 +512,9 @@ index 0000000..b991dd5
 +PUBLIC rvvm_mmio_dev_t* shm_init_data(rvvm_machine_t* machine, const char * path, const char * dev_name)
 +{
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
++	shm_ctx->source = path;
 +#if _WIN32
++    rvvm_info("mapping path '%s' via MapViewOfFile\n", path);
 +	HANDLE file_handle = CreateFileA(path,
 +		GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 +	);
@@ -525,6 +529,7 @@ index 0000000..b991dd5
 +	shm_ctx->buffer = MapViewOfFile(file_mapping, FILE_MAP_READ, 0, 0, shm_ctx->size);
 +	CloseHandle(file_mapping);
 +#else
++    rvvm_info("mapping path '%s' via mmap\n", path);
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
@@ -547,20 +552,31 @@ index 0000000..b991dd5
 +		return NULL;
 +	}
 +#endif
-+    // Map the buffer into physical memory
-+    rvvm_mmio_dev_t shm_region = {
-+        .mapping = shm_ctx->buffer,
-+        .size = shm_ctx->size,
-+        .data = shm_ctx,
-+        .type = &shm_data_dev_type,
-+    };
-+	return shm_init_(machine, &shm_region, dev_name);
++	// Map the buffer into physical memory
++	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm->size);
++	rvvm_mmio_dev_t shm_region = {
++		.mapping = shm_ctx->buffer,
++		.size = shm_ctx->size,
++		.data = shm_ctx,
++		.type = &shm_data_dev_type,
++	};
++	UNUSED(dev_name);
++    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
++    if (mmio == NULL) return mmio;
++#ifdef USE_FDT
++    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_data_file", shm_region->mapping);
++    fdt_node_add_prop_u32(fb_fdt, "size", shm_region->size);
++    fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
++#endif
++    return mmio;
 +}
 +
 +PUBLIC rvvm_mmio_dev_t* shm_init_exe(rvvm_machine_t* machine, const char * path, const char * dev_name)
 +{
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
++    shm_ctx->source = path;
 +#if _WIN32
++    rvvm_info("mapping path '%s' via MapViewOfFile\n", path);
 +	HANDLE file_handle = CreateFileA(path,
 +		GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 +	);
@@ -574,6 +590,7 @@ index 0000000..b991dd5
 +	shm_ctx->buffer = MapViewOfFile(file_mapping, FILE_MAP_READ | FILE_MAP_EXECUTE, 0, 0, shm_ctx->size);
 +	CloseHandle(file_mapping);
 +#else
++    rvvm_info("mapping path '%s' via mmap\n", path);
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
@@ -596,23 +613,20 @@ index 0000000..b991dd5
 +		return NULL;
 +	}
 +#endif
-+    // Map the buffer into physical memory
-+    rvvm_mmio_dev_t shm_region = {
-+        .mapping = shm_ctx->buffer,
-+        .size = shm_ctx->size,
-+        .data = shm_ctx,
-+        .type = &shm_exe_dev_type,
-+    };
-+  return shm_init_(machine, &shm_region, dev_name);
-+}
++	// Map the buffer into physical memory
++	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm->size);
++	rvvm_mmio_dev_t shm_region = {
++		.mapping = shm_ctx->buffer,
++		.size = shm_ctx->size,
++		.data = shm_ctx,
++		.type = &shm_exe_dev_type,
++	};
 +
-+PUBLIC rvvm_mmio_dev_t* shm_init_(rvvm_machine_t* machine, rvvm_mmio_dev_t* shm_region, const char * dev_name)
-+{
 +	UNUSED(dev_name);
 +    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
 +    if (mmio == NULL) return mmio;
 +#ifdef USE_FDT
-+    struct fdt_node* fb_fdt = fdt_node_create_reg("shm", shm_region->mapping);
++    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_exe_file", shm_region->mapping);
 +    fdt_node_add_prop_u32(fb_fdt, "size", shm_region->size);
 +    fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
 +#endif
@@ -620,10 +634,10 @@ index 0000000..b991dd5
 +}
 diff --git a/src/devices/shm.h b/src/devices/shm.h
 new file mode 100644
-index 0000000..8e8ace9
+index 0000000..dad2653
 --- /dev/null
 +++ b/src/devices/shm.h
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,40 @@
 +/*
 +shm.h - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -649,6 +663,7 @@ index 0000000..8e8ace9
 +
 +//! SHM context description
 +typedef struct {
++	const char * source;
 +    void*     buffer; //!< Buffer in host memory
 +    uint64_t  size;  //!< Buffer size in host memory
 +} shm_ctx_t;
