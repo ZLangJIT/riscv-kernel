@@ -432,7 +432,7 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..6eda033
+index 0000000..fddf9c3
 --- /dev/null
 +++ b/src/devices/shm.c
 @@ -0,0 +1,199 @@
@@ -482,10 +482,10 @@ index 0000000..6eda033
 +{
 +    shm_ctx_t* shm_ctx = (shm_ctx_t*)device->data;
 +#if _WIN32
-+    rvvm_info("unmapping path '%s' via UnmapViewOfFile\n", shm_ctx->source);
++    rvvm_info("unmapping path '%s' via UnmapViewOfFile", shm_ctx->source);
 +    UnmapViewOfFile(shm_ctx->buffer);
 +#else
-+    rvvm_info("unmapping path '%s' via munmmap\n", shm_ctx->source);
++    rvvm_info("unmapping path '%s' via munmmap", shm_ctx->source);
 +	munmap(shm_ctx->buffer, shm_ctx->size);
 +#endif
 +    free(shm_ctx);
@@ -514,7 +514,7 @@ index 0000000..6eda033
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
 +	shm_ctx->source = path;
 +#if _WIN32
-+    rvvm_info("mapping path '%s' via MapViewOfFile\n", path);
++    rvvm_info("mapping path '%s' via MapViewOfFile", path);
 +	HANDLE file_handle = CreateFileA(path,
 +		GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 +	);
@@ -529,7 +529,7 @@ index 0000000..6eda033
 +	shm_ctx->buffer = MapViewOfFile(file_mapping, FILE_MAP_READ, 0, 0, shm_ctx->size);
 +	CloseHandle(file_mapping);
 +#else
-+    rvvm_info("mapping path '%s' via mmap\n", path);
++    rvvm_info("mapping path '%s' via mmap", path);
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
@@ -553,7 +553,7 @@ index 0000000..6eda033
 +	}
 +#endif
 +	// Map the buffer into physical memory
-+	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm_ctx->size);
++	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
 +		.size = shm_ctx->size,
@@ -577,7 +577,7 @@ index 0000000..6eda033
 +	shm_ctx_t* shm_ctx = safe_new_obj(shm_ctx_t);
 +    shm_ctx->source = path;
 +#if _WIN32
-+    rvvm_info("mapping path '%s' via MapViewOfFile\n", path);
++    rvvm_info("mapping path '%s' via MapViewOfFile", path);
 +	HANDLE file_handle = CreateFileA(path,
 +		GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 +	);
@@ -591,7 +591,7 @@ index 0000000..6eda033
 +	shm_ctx->buffer = MapViewOfFile(file_mapping, FILE_MAP_READ | FILE_MAP_EXECUTE, 0, 0, shm_ctx->size);
 +	CloseHandle(file_mapping);
 +#else
-+    rvvm_info("mapping path '%s' via mmap\n", path);
++    rvvm_info("mapping path '%s' via mmap", path);
 +	int file_handle = open(path, O_RDONLY);
 +	if (file_handle == -1) {
 +		free(shm_ctx);
@@ -615,7 +615,7 @@ index 0000000..6eda033
 +	}
 +#endif
 +	// Map the buffer into physical memory
-+	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm_ctx->size);
++	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
 +		.size = shm_ctx->size,
