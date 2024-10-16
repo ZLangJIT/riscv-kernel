@@ -5917,7 +5917,7 @@ index 7cbe407..8e5e681 100644
      if (rvvm_getarg("dumpdtb")) rvvm_dump_dtb(machine, rvvm_getarg("dumpdtb"));
      return true;
 diff --git a/src/rvvm.c b/src/rvvm.c
-index 71f1dbf..7b19c2c 100644
+index 71f1dbf..800e098 100644
 --- a/src/rvvm.c
 +++ b/src/rvvm.c
 @@ -691,16 +691,60 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine)
@@ -5954,7 +5954,7 @@ index 71f1dbf..7b19c2c 100644
 +|-------------|
 +      |-------|
 +*/
-+static inline bool rvvm_mmio_zone_check_overlap(rvvm_machine_t* machine, rvvm_addr_t A_BEGIN, rvvm_addr_t A_END, rvvm_addr_t B_BEGIN, rvvm_addr_t B_END) {
++static inline bool rvvm_mmio_zone_check_overlap(rvvm_addr_t A_BEGIN, rvvm_addr_t A_END, rvvm_addr_t B_BEGIN, rvvm_addr_t B_END) {
 +    return
 +    (
 +        A_BEGIN >= B_BEGIN && (     // handle  1,      3,      5,  6,  7,  8,  9
