@@ -432,7 +432,7 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..0110aed
+index 0000000..bc8fa0b
 --- /dev/null
 +++ b/src/devices/shm.c
 @@ -0,0 +1,223 @@
@@ -555,7 +555,7 @@ index 0000000..0110aed
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
-+		//.mapping = shm_ctx->buffer,
++		.mapping = shm_ctx->buffer,
 +		.addr = rvvm_mmio_zone_auto(machine, 0, shm_ctx->size),
 +		.size = shm_ctx->size,
 +		.data = shm_ctx,
@@ -623,7 +623,7 @@ index 0000000..0110aed
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
-+		//.mapping = shm_ctx->buffer,
++		.mapping = shm_ctx->buffer,
 +		.addr = rvvm_mmio_zone_auto(machine, 0, shm_ctx->size),
 +		.size = shm_ctx->size,
 +		.data = shm_ctx,
@@ -650,7 +650,7 @@ index 0000000..0110aed
 +
 +rm f.i ; cat images/android-logo-mask.png >> f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i;  ls -l images/android-logo-mask.png f.i -h
 +
-+cd ASSETS ; cat images/android-logo-mask.png > f.i2 ; ./boot_rvvm_disk.sh "" "-shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo "
++cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo"
 +cd /sys/firmware/devicetree/base/soc/rvvm_shm_data_file\@*
 +cat source ; echo
 +file buffer
