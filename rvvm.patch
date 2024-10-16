@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..347d418
+index 0000000..efe9fc3
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,206 @@
+@@ -0,0 +1,208 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -554,7 +554,7 @@ index 0000000..347d418
 +#endif
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
-+    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, 0);
++    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
 +		.addr = addr,
@@ -569,7 +569,7 @@ index 0000000..347d418
 +    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_data_file", (uint64_t)shm_region.mapping);
 +    fdt_node_add_prop_str(memory, "device_type", "memory");
 +	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
-+    fdt_node_add_prop_reg(memory, "reg", (uint64_t)shm_region.mapping, shm_region.size);
++    fdt_node_add_prop(memory, "buffer", shm_region.mapping, (uint32_t)shm_region.size);
 +	fdt_node_add_prop_u64(memory, "size", shm_region.size);
 +    fdt_node_add_child(rvvm_get_fdt_soc(machine), memory);
 +	#endif
@@ -620,7 +620,7 @@ index 0000000..347d418
 +#endif
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
-+    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, 0);
++    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
 +		.addr = addr,
@@ -636,12 +636,14 @@ index 0000000..347d418
 +    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_exe_file", (uint64_t)shm_region.mapping);
 +    fdt_node_add_prop_str(memory, "device_type", "memory");
 +	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
-+    fdt_node_add_prop_reg(memory, "reg", (uint64_t)shm_region.mapping, shm_region.size);
++    fdt_node_add_prop(memory, "buffer", shm_region.mapping, (uint32_t)shm_region.size);
 +	fdt_node_add_prop_u64(memory, "size", shm_region.size);
 +    fdt_node_add_child(rvvm_get_fdt_soc(machine), memory);
 +	#endif
 +	return mmio;
 +}
++
++// cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo"
 diff --git a/src/devices/shm.h b/src/devices/shm.h
 new file mode 100644
 index 0000000..dad2653
