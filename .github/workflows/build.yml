@@ -235,7 +235,12 @@ jobs:
         sdkmanager --help || true # sdkmanager exits with code 1
 
     - name: List sdkmanager packages
-      if: ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
+      #
+      # this can take up to 5 mins so we disable this
+      #
+      # can enable to "poke" the list
+      #
+      if: false && ${{ env.REBUILD_KERNEL_FLAG != '' || env.REBUILD_BUILDROOT_FLAG != '' || env.REBUILD_RVVM_FLAG != '' || env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_LIBMEDIA_FLAG != '' }}
       shell: bash
       run: |
         . ~/.bashrc

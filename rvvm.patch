@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..62f744e
+index 0000000..bfa9f55
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,205 @@
+@@ -0,0 +1,213 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -640,7 +640,16 @@ index 0000000..62f744e
 +	return mmio;
 +}
 +
-+// cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo"
++/*
++cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo"
++cd /sys/firmware/devicetree/base/soc/rvvm_shm_data_file\@*
++cat source
++file buffer
++echo 1 > buffer
++cat source
++file buffer
++*/
+\ No newline at end of file
 diff --git a/src/devices/shm.h b/src/devices/shm.h
 new file mode 100644
 index 0000000..dad2653
