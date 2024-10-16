@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..bc8fa0b
+index 0000000..fae06b2
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,193 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -564,17 +564,6 @@ index 0000000..bc8fa0b
 +	UNUSED(dev_name);
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
-+	/*
-+	#ifdef USE_FDT
-+	rvvm_info("Exposing via Device Tree /sys/firmware/devicetree/base/soc/rvvm_shm_data_file@%p", shm_ctx->buffer);
-+    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_data_file", (uint64_t)shm_region.mapping);
-+    fdt_node_add_prop_str(memory, "device_type", "memory");
-+	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
-+    fdt_node_add_prop(memory, "buffer", shm_region.mapping, (uint32_t)shm_region.size);
-+	fdt_node_add_prop_u64(memory, "size", shm_region.size);
-+    fdt_node_add_child(rvvm_get_fdt_soc(machine), memory);
-+	#endif
-+	*/
 +	return mmio;
 +}
 +
@@ -632,32 +621,13 @@ index 0000000..bc8fa0b
 +	UNUSED(dev_name);
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
-+	/*
-+	#ifdef USE_FDT
-+	rvvm_info("Exposing via Device Tree /sys/firmware/devicetree/base/soc/rvvm_shm_exe_file@%p", shm_ctx->buffer);
-+    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_exe_file", (uint64_t)shm_region.mapping);
-+    fdt_node_add_prop_str(memory, "device_type", "memory");
-+	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
-+    fdt_node_add_prop(memory, "buffer", shm_region.mapping, (uint32_t)shm_region.size);
-+	fdt_node_add_prop_u64(memory, "size", shm_region.size);
-+    fdt_node_add_child(rvvm_get_fdt_soc(machine), memory);
-+	#endif
-+	*/
 +	return mmio;
 +}
 +
 +/*
 +
-+rm f.i ; cat images/android-logo-mask.png >> f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i;  ls -l images/android-logo-mask.png f.i -h
-+
-+cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo"
-+cd /sys/firmware/devicetree/base/soc/rvvm_shm_data_file\@*
-+cat source ; echo
-+file buffer
-+chmod +w buffer
-+echo 1 > buffer
-+cat source ; echo
-+file buffer
++cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo -shm_data disk.img -shm_id foo"
++memtool md 0x0
 +*/
 \ No newline at end of file
 diff --git a/src/devices/shm.h b/src/devices/shm.h
@@ -5946,3 +5916,31 @@ index 7cbe407..8e5e681 100644
      }
      if (rvvm_getarg("dumpdtb")) rvvm_dump_dtb(machine, rvvm_getarg("dumpdtb"));
      return true;
+diff --git a/src/rvvm.c b/src/rvvm.c
+index 71f1dbf..5677da8 100644
+--- a/src/rvvm.c
++++ b/src/rvvm.c
+@@ -695,13 +695,23 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine)
+ static rvvm_addr_t rvvm_mmio_zone_check(rvvm_machine_t* machine, rvvm_addr_t addr, size_t size)
+ {
+     if (addr >= machine->mem.begin && (addr + size) <= (machine->mem.begin + machine->mem.size)) {
++        rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" is inside of region 0x%08"PRIx64"-0x%08"PRIx64"",
++                  addr, (addr + size), machine->mem.begin, (machine->mem.begin + machine->mem.size));
+         addr = machine->mem.begin + machine->mem.size;
++    } else {
++        rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" is outside of region 0x%08"PRIx64"-0x%08"PRIx64"",
++                  addr, (addr + size), machine->mem.begin, (machine->mem.begin + machine->mem.size));
+     }
+ 
+     vector_foreach(machine->mmio_devs, i) {
+         rvvm_mmio_dev_t* dev = vector_at(machine->mmio_devs, i);
+         if (addr >= dev->addr && (addr + size) <= (dev->addr + dev->size)) {
++	        rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" is inside of region 0x%08"PRIx64"-0x%08"PRIx64" of device \"%s\"",
++	                  addr, (addr + size), dev->addr, (dev->addr + dev->size), dev->type ? dev->type->name : "null");
+             addr = dev->addr + dev->size;
++        } else {
++	        rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" is outside of region 0x%08"PRIx64"-0x%08"PRIx64" of device \"%s\"",
++	                  addr, (addr + size), dev->addr, (dev->addr + dev->size), dev->type ? dev->type->name : "null");
+         }
+     }
+ 
