@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..651d09d
+index 0000000..347d418
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,208 @@
+@@ -0,0 +1,206 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -571,8 +571,7 @@ index 0000000..651d09d
 +	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
 +    fdt_node_add_prop_reg(memory, "reg", (uint64_t)shm_region.mapping, shm_region.size);
 +	fdt_node_add_prop_u64(memory, "size", shm_region.size);
-+    fdt_node_add_child(machine->fdt, memory);
-+    // rvvm_get_fdt_soc(machine)
++    fdt_node_add_child(rvvm_get_fdt_soc(machine), memory);
 +	#endif
 +	return mmio;
 +}
@@ -639,8 +638,7 @@ index 0000000..651d09d
 +	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
 +    fdt_node_add_prop_reg(memory, "reg", (uint64_t)shm_region.mapping, shm_region.size);
 +	fdt_node_add_prop_u64(memory, "size", shm_region.size);
-+    fdt_node_add_child(machine->fdt, memory);
-+    // rvvm_get_fdt_soc(machine)
++    fdt_node_add_child(rvvm_get_fdt_soc(machine), memory);
 +	#endif
 +	return mmio;
 +}
