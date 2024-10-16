@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..efe9fc3
+index 0000000..2bdf3e8
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,208 @@
+@@ -0,0 +1,205 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -554,10 +554,8 @@ index 0000000..efe9fc3
 +#endif
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
-+    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
-+		.addr = addr,
 +		.size = shm_ctx->size,
 +		.data = shm_ctx,
 +		.type = &shm_data_dev_type,
@@ -566,6 +564,7 @@ index 0000000..efe9fc3
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
 +	#ifdef USE_FDT
++	rvvm_info("Exposing via Device Tree /sys/firmware/devicetree/base/soc/rvvm_shm_data_file@%p", shm_ctx->buffer);
 +    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_data_file", (uint64_t)shm_region.mapping);
 +    fdt_node_add_prop_str(memory, "device_type", "memory");
 +	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
@@ -620,19 +619,17 @@ index 0000000..efe9fc3
 +#endif
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
-+    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
-+		.addr = addr,
 +		.size = shm_ctx->size,
 +		.data = shm_ctx,
 +		.type = &shm_exe_dev_type,
 +	};
-+
 +	UNUSED(dev_name);
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
 +	#ifdef USE_FDT
++	rvvm_info("Exposing via Device Tree /sys/firmware/devicetree/base/soc/rvvm_shm_data_file@%p", shm_ctx->buffer);
 +    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_exe_file", (uint64_t)shm_region.mapping);
 +    fdt_node_add_prop_str(memory, "device_type", "memory");
 +	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
