@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..c773004
+index 0000000..ab6222c
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,216 @@
+@@ -0,0 +1,219 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -643,7 +643,10 @@ index 0000000..c773004
 +}
 +
 +/*
-+cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo -shm_data disk.img -shm_id foo -shm_data disk.img -shm_id foo -shm_data disk.img -shm_id foo -shm_data disk.img -shm_id foo"
++
++rm f.i ; cat images/android-logo-mask.png >> f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat f.i >> f.i2; cat f.i >> f.i2; mv f.i2 f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i; cat images/android-logo-mask.png >> f.i;  ls -l images/android-logo-mask.png f.i -h
++
++cd ASSETS ; cat images/android-logo-mask.png > f.i2 ; ./boot_rvvm_disk.sh "" "-shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo -shm_data f.i2 -shm_id foo "
 +cd /sys/firmware/devicetree/base/soc/rvvm_shm_data_file\@*
 +cat source ; echo
 +file buffer
