@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..3539e3e
+index 0000000..bc9c91e
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,196 @@
+@@ -0,0 +1,199 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -561,14 +561,15 @@ index 0000000..3539e3e
 +		.type = &shm_data_dev_type,
 +	};
 +	UNUSED(dev_name);
-+    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
-+    if (mmio == NULL) return mmio;
-+#ifdef USE_FDT
-+    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_data_file", shm_region.mapping);
-+    fdt_node_add_prop_u32(fb_fdt, "size", shm_region.size);
-+    fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
-+#endif
-+    return mmio;
++	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
++	if (mmio == NULL) return mmio;
++	#ifdef USE_FDT
++	struct fdt_node* fb_fdt = fdt_node_create("rvvm_shm_data_file");
++	fdt_node_add_prop_str(fb_fdt, "source", shm_ctx->source);
++	fdt_node_add_prop(fb_fdt, "buffer", shm_region.mapping, shm_region.size);
++	fdt_node_add_prop_u64(fb_fdt, "size", shm_region.size);
++	#endif
++	return mmio;
 +}
 +
 +PUBLIC rvvm_mmio_dev_t* shm_init_exe(rvvm_machine_t* machine, const char * path, const char * dev_name)
@@ -623,14 +624,16 @@ index 0000000..3539e3e
 +	};
 +
 +	UNUSED(dev_name);
-+    rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, shm_region);
-+    if (mmio == NULL) return mmio;
-+#ifdef USE_FDT
-+    struct fdt_node* fb_fdt = fdt_node_create_reg("rvvm_shm_exe_file", shm_region.mapping);
-+    fdt_node_add_prop_u32(fb_fdt, "size", shm_region.size);
-+    fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
-+#endif
-+    return mmio;
++	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
++	if (mmio == NULL) return mmio;
++	#ifdef USE_FDT
++	struct fdt_node* fb_fdt = fdt_node_create("rvvm_shm_exe_file");
++	fdt_node_add_prop_str(fb_fdt, "source", shm_ctx->source);
++	fdt_node_add_prop(fb_fdt, "buffer", shm_region.mapping, shm_region.size);
++	fdt_node_add_prop_u64(fb_fdt, "size", shm_region.size);
++	fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
++	#endif
++	return mmio;
 +}
 diff --git a/src/devices/shm.h b/src/devices/shm.h
 new file mode 100644
