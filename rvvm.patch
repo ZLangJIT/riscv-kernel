@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..fddf9c3
+index 0000000..651d09d
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,199 @@
+@@ -0,0 +1,208 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -554,8 +554,10 @@ index 0000000..fddf9c3
 +#endif
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
++    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, 0);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
++		.addr = addr,
 +		.size = shm_ctx->size,
 +		.data = shm_ctx,
 +		.type = &shm_data_dev_type,
@@ -564,10 +566,13 @@ index 0000000..fddf9c3
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
 +	#ifdef USE_FDT
-+	struct fdt_node* fb_fdt = fdt_node_create("rvvm_shm_data_file");
-+	fdt_node_add_prop_str(fb_fdt, "source", shm_ctx->source);
-+	fdt_node_add_prop(fb_fdt, "buffer", shm_region.mapping, shm_region.size);
-+	fdt_node_add_prop_u64(fb_fdt, "size", shm_region.size);
++    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_data_file", (uint64_t)shm_region.mapping);
++    fdt_node_add_prop_str(memory, "device_type", "memory");
++	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
++    fdt_node_add_prop_reg(memory, "reg", (uint64_t)shm_region.mapping, shm_region.size);
++	fdt_node_add_prop_u64(memory, "size", shm_region.size);
++    fdt_node_add_child(machine->fdt, memory);
++    // rvvm_get_fdt_soc(machine)
 +	#endif
 +	return mmio;
 +}
@@ -616,8 +621,10 @@ index 0000000..fddf9c3
 +#endif
 +	// Map the buffer into physical memory
 +	rvvm_info("mapped path '%s' at address %p with size %zu", path, shm_ctx->buffer, shm_ctx->size);
++    rvvm_addr_t addr = rvvm_mmio_zone_auto(machine, 0, 0);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
++		.addr = addr,
 +		.size = shm_ctx->size,
 +		.data = shm_ctx,
 +		.type = &shm_exe_dev_type,
@@ -627,11 +634,13 @@ index 0000000..fddf9c3
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
 +	#ifdef USE_FDT
-+	struct fdt_node* fb_fdt = fdt_node_create("rvvm_shm_exe_file");
-+	fdt_node_add_prop_str(fb_fdt, "source", shm_ctx->source);
-+	fdt_node_add_prop(fb_fdt, "buffer", shm_region.mapping, shm_region.size);
-+	fdt_node_add_prop_u64(fb_fdt, "size", shm_region.size);
-+	fdt_node_add_child(rvvm_get_fdt_soc(machine), fb_fdt);
++    struct fdt_node* memory = fdt_node_create_reg("rvvm_shm_exe_file", (uint64_t)shm_region.mapping);
++    fdt_node_add_prop_str(memory, "device_type", "memory");
++	fdt_node_add_prop_str(memory, "source", shm_ctx->source);
++    fdt_node_add_prop_reg(memory, "reg", (uint64_t)shm_region.mapping, shm_region.size);
++	fdt_node_add_prop_u64(memory, "size", shm_region.size);
++    fdt_node_add_child(machine->fdt, memory);
++    // rvvm_get_fdt_soc(machine)
 +	#endif
 +	return mmio;
 +}
