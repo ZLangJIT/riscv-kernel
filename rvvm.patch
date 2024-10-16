@@ -432,7 +432,7 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..bc9c91e
+index 0000000..6eda033
 --- /dev/null
 +++ b/src/devices/shm.c
 @@ -0,0 +1,199 @@
@@ -553,7 +553,7 @@ index 0000000..bc9c91e
 +	}
 +#endif
 +	// Map the buffer into physical memory
-+	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm->size);
++	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
 +		.size = shm_ctx->size,
@@ -615,7 +615,7 @@ index 0000000..bc9c91e
 +	}
 +#endif
 +	// Map the buffer into physical memory
-+	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm->size);
++	rvvm_info("mapped path '%s' at address %p with size %zu\n", path, shm_ctx->buffer, shm_ctx->size);
 +	rvvm_mmio_dev_t shm_region = {
 +		.mapping = shm_ctx->buffer,
 +		.size = shm_ctx->size,
