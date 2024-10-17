@@ -5918,7 +5918,7 @@ index 7cbe407..8e5e681 100644
      if (rvvm_getarg("dumpdtb")) rvvm_dump_dtb(machine, rvvm_getarg("dumpdtb"));
      return true;
 diff --git a/src/rvvm.c b/src/rvvm.c
-index 71f1dbf..9251ba7 100644
+index 71f1dbf..0a90d29 100644
 --- a/src/rvvm.c
 +++ b/src/rvvm.c
 @@ -691,17 +691,30 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine)
@@ -5954,3 +5954,24 @@ index 71f1dbf..9251ba7 100644
          }
      }
  
+@@ -743,10 +756,16 @@ PUBLIC rvvm_mmio_dev_t* rvvm_attach_mmio(rvvm_machine_t* machine, const rvvm_mmi
+         rvvm_mmio_free(dev);
+         return NULL;
+     }
+-    if (dev->mapping && ((dev->addr & 0xFFF) || (((size_t)dev->mapping) & 0xFFF))) {
+-        // Misaligned mappings harm performance when used with KVM or shadow pagetable accel
+-        rvvm_warn("MMIO device \"%s\" has misaligned mapping, expect lower perf",
+-                  dev->type ? dev->type->name : "null");
++    if (dev->mapping) {
++        if (dev->addr & 0xFFF) {
++            // Misaligned mappings harm performance when used with KVM or shadow pagetable accel
++            rvvm_warn("MMIO device \"%s\" has misaligned address, expect lower perf",
++                      dev->type ? dev->type->name : "null");
++        } else if (((size_t)dev->mapping) & 0xFFF) {
++            // Misaligned mappings harm performance when used with KVM or shadow pagetable accel
++            rvvm_warn("MMIO device \"%s\" has misaligned mapping, expect lower perf",
++                      dev->type ? dev->type->name : "null");
++        }
+     }
+ 
+     rvvm_info("Attached MMIO device at 0x%08"PRIx64", type \"%s\"",
