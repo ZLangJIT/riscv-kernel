@@ -432,7 +432,7 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..fae06b2
+index 0000000..24c641e
 --- /dev/null
 +++ b/src/devices/shm.c
 @@ -0,0 +1,193 @@
@@ -626,7 +626,7 @@ index 0000000..fae06b2
 +
 +/*
 +
-+cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo -shm_data disk.img -shm_id foo"
++cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo -shm_data disk.img -shm_id foo -shm_data disk.img -shm_id foo"
 +memtool md 0x0
 +*/
 \ No newline at end of file
@@ -5917,67 +5917,30 @@ index 7cbe407..8e5e681 100644
      if (rvvm_getarg("dumpdtb")) rvvm_dump_dtb(machine, rvvm_getarg("dumpdtb"));
      return true;
 diff --git a/src/rvvm.c b/src/rvvm.c
-index 71f1dbf..7f09a93 100644
+index 71f1dbf..a3578b8 100644
 --- a/src/rvvm.c
 +++ b/src/rvvm.c
-@@ -691,16 +691,58 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine)
+@@ -691,16 +691,21 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine)
      free(machine);
  }
  
-+/*
-+should detect
-+1. A == B
-+|------------|
-+|------------|
-+2. A overlaps B
-+|------------|
-+   |------------|
-+3. B overlaps A
-+   |------------|
-+|------------|
-+4. B inside A
-+|-------------|
-+   |-------|
-+5. A inside B
-+   |-------|
-+|-------------|
-+6. A inside B
-+|-------|
-+|-------------|
-+7. B inside A
-+|-------------|
-+|-------|
-+8. A inside B
-+      |-------|
-+|-------------|
-+9. B inside A
-+|-------------|
-+      |-------|
-+*/
-+static inline bool rvvm_mmio_zone_check_overlap(rvvm_addr_t A_BEGIN, rvvm_addr_t A_END, rvvm_addr_t B_BEGIN, rvvm_addr_t B_END) {
-+    return
-+        (A_BEGIN >= B_BEGIN && (    // handle  1,      3,      5,  6,  7,  8,  9
-+            (A_END <= B_END)        // handle *1,  2,         *5, *6,     *8, *9
-+            || (A_END >= B_END)     // handle  1,     *3,  4,         *7,  8,  9
-+        ))
-+        || (B_BEGIN >= A_BEGIN && ( // handle  1,  2,      4,      6,  7,      9
-+            (B_END <= A_END)        // handle *1,      3, *4,         *7,  8, *9
-+            || (B_END >= A_END)     // handle  1, *2,          5, *6,      8,  9
-+        ));
-+}
++// https://stackoverflow.com/a/3269471
++#define rvvm_mmio_zone_check_overlap(start1, size1, start2, size2) ((start1) < (start2+size2) && (start2) < (start1+size1))
 +
  // Returns addr if zone is free
  static rvvm_addr_t rvvm_mmio_zone_check(rvvm_machine_t* machine, rvvm_addr_t addr, size_t size)
  {
 -    if (addr >= machine->mem.begin && (addr + size) <= (machine->mem.begin + machine->mem.size)) {
-+    if (rvvm_mmio_zone_check_overlap(addr, addr+size, machine->mem.begin, machine->mem.begin+machine->mem.size)) {
++    if (rvvm_mmio_zone_check_overlap(addr, size, machine->mem.begin, machine->mem.size)) {
++    	rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" is inside of region 0x%08"PRIx64"-0x%08"PRIx64" of        \"<machine memory>\"", addr, (addr + size), machine->mem.begin, (machine->mem.begin + machine->mem.size));
          addr = machine->mem.begin + machine->mem.size;
      }
  
      vector_foreach(machine->mmio_devs, i) {
          rvvm_mmio_dev_t* dev = vector_at(machine->mmio_devs, i);
 -        if (addr >= dev->addr && (addr + size) <= (dev->addr + dev->size)) {
-+	    if (rvvm_mmio_zone_check_overlap(addr, addr+size, dev->addr, dev->addr+dev->size)) {
++	    if (rvvm_mmio_zone_check_overlap(addr, size, dev->addr, dev->size)) {
++	    	rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" is inside of region 0x%08"PRIx64"-0x%08"PRIx64" of device \"%s\"", addr, addr + size, dev->addr, dev->addr + dev->size, dev->type ? dev->type->name : "null");
              addr = dev->addr + dev->size;
          }
      }
