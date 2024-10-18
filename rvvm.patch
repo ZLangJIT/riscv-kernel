@@ -432,10 +432,10 @@ index 0000000..9ced2aa
 +endif()
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..3997692
+index 0000000..c0a78a9
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,194 @@
+@@ -0,0 +1,210 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -455,6 +455,8 @@ index 0000000..3997692
 +*/
 +
 +#include "shm.h"
++
++#include "rvvm.h"
 +
 +#include "utils.h"
 +
@@ -621,13 +623,27 @@ index 0000000..3997692
 +	UNUSED(dev_name);
 +	rvvm_mmio_dev_t* mmio = rvvm_attach_mmio(machine, &shm_region);
 +	if (mmio == NULL) return mmio;
++#ifdef USE_FDT
++    struct fdt_node* memory = fdt_node_create("reserved_memory");
++    fdt_node_add_prop_u32(memory, "#address-cells", 3);
++    fdt_node_add_prop_u32(memory, "#size-cells", 2);
++    // Range header: ((cacheable) << 30 | (space) << 24 | (bus) << 16 | (dev) << 11 | (fun) << 8 | (reg))
++    uint32_t ranges[2] = {
++        machine->mem.begin, 0x32
++    };
++    fdt_node_add_prop_cells(memory, "ranges", ranges, 2);
++    // struct fdt_node* test = fdt_node_create_reg("THIRTY_TWO_BYTES", machine->mem.begin);
++    // fdt_node_add_prop_reg(memory, "reg", machine->mem.begin, 0x32);
++    fdt_node_add_child(rvvm_get_fdt_root(machine), memory);
++#endif
 +	return mmio;
 +}
 +
 +/*
 +
 +cd ASSETS ; ./boot_rvvm_disk.sh "" "-shm_data images/android-logo-mask.png -shm_id foo -shm_data disk.img -shm_id foo -shm_data disk.img -shm_id foo"
-+memtool md 0x0
++
++memtool md 0x000080000000 # start of guest RAM
 +
 +*/
 \ No newline at end of file
@@ -5788,7 +5804,7 @@ index 0000000..c2c53f7
 +void window_unlock(uint32_t id);
 +#endif
 diff --git a/src/main.c b/src/main.c
-index 7cbe407..8e5e681 100644
+index 7cbe407..0b0bcc1 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -39,6 +39,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -5855,7 +5871,7 @@ index 7cbe407..8e5e681 100644
 +           "    -shm_data path        Expose <path> to guest as a non-executable read-only file\n"
 +           "    -shm_exe path         Expose <path> to guest as an executable read-only file\n"
 +           "    -shm_id name          Specify a guest id </dev/rvvm_shm/name> with 'name' as <name>\n"
-+           "                          Must come after -shm_data or -shm_exe"
++           "                          Must come after -shm_data or -shm_exe\n"
 +           "    -v, -verbose          Enable verbose logging\n"
 +           "    -h, -help             Show this help message\n"
  #if defined(_WIN32) && !defined(UNDER_CE)
@@ -5917,8 +5933,16 @@ index 7cbe407..8e5e681 100644
      }
      if (rvvm_getarg("dumpdtb")) rvvm_dump_dtb(machine, rvvm_getarg("dumpdtb"));
      return true;
+@@ -263,6 +315,7 @@ static int rvvm_cli_main(int argc, const char** argv)
+ #endif
+ 
+     if (rvvm_cli_configure(machine, argc, argv, bootrom, tap)) {
++        rvvm_mmio_print_map(machine);
+         rvvm_start_machine(machine);
+ 
+         if (!rvvm_has_arg("noisolation")) {
 diff --git a/src/rvvm.c b/src/rvvm.c
-index 71f1dbf..a22f382 100644
+index 71f1dbf..79b4826 100644
 --- a/src/rvvm.c
 +++ b/src/rvvm.c
 @@ -691,17 +691,30 @@ PUBLIC void rvvm_free_machine(rvvm_machine_t* machine)
@@ -5933,10 +5957,10 @@ index 71f1dbf..a22f382 100644
  {
 -    if (addr >= machine->mem.begin && (addr + size) <= (machine->mem.begin + machine->mem.size)) {
 +    if (rvvm_mmio_zone_check_overlap(addr, size, machine->mem.begin, machine->mem.size)) {
-+        rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" overlaps region 0x%08"PRIx64"-0x%08"PRIx64" of        \"<machine memory>\"", addr, addr + size, machine->mem.begin, machine->mem.begin + machine->mem.size);
++        //rvvm_info("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" overlaps region 0x%08"PRIx64"-0x%08"PRIx64" of        \"<machine memory>\"", addr, addr + size, machine->mem.begin, machine->mem.begin + machine->mem.size);
          addr = machine->mem.begin + machine->mem.size;
 +        if (addr & 0xFFF) {
-+            rvvm_warn("MMIO device aligning new unaligned region 0x%08"PRIx64"-0x%08"PRIx64" to 0x%08"PRIx64"-0x%08"PRIx64"", addr, addr + size, addr + (0x1000 - (addr % 0x1000)), (addr + (0x1000 - (addr % 0x1000))) + size);
++            //rvvm_info("MMIO device aligning new unaligned region 0x%08"PRIx64"-0x%08"PRIx64" to 0x%08"PRIx64"-0x%08"PRIx64"", addr, addr + size, addr + (0x1000 - (addr % 0x1000)), (addr + (0x1000 - (addr % 0x1000))) + size);
 +            addr = addr + (0x1000 - (addr % 0x1000));
 +        }
      }
@@ -5945,10 +5969,10 @@ index 71f1dbf..a22f382 100644
          rvvm_mmio_dev_t* dev = vector_at(machine->mmio_devs, i);
 -        if (addr >= dev->addr && (addr + size) <= (dev->addr + dev->size)) {
 +        if (rvvm_mmio_zone_check_overlap(addr, size, dev->addr, dev->size)) {
-+            rvvm_warn("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" overlaps region 0x%08"PRIx64"-0x%08"PRIx64" of device \"%s\"", addr, addr + size, dev->addr, dev->addr + dev->size, dev->type ? dev->type->name : "null");
++            //rvvm_info("MMIO device desired region 0x%08"PRIx64"-0x%08"PRIx64" overlaps region 0x%08"PRIx64"-0x%08"PRIx64" of device \"%s\"", addr, addr + size, dev->addr, dev->addr + dev->size, dev->type ? dev->type->name : "null");
              addr = dev->addr + dev->size;
 +            if (addr & 0xFFF) {
-+                rvvm_warn("MMIO device aligning new unaligned region 0x%08"PRIx64"-0x%08"PRIx64" to 0x%08"PRIx64"-0x%08"PRIx64"", addr, addr + size, addr + (0x1000 - (addr % 0x1000)), (addr + (0x1000 - (addr % 0x1000))) + size);
++                //rvvm_info("MMIO device aligning new unaligned region 0x%08"PRIx64"-0x%08"PRIx64" to 0x%08"PRIx64"-0x%08"PRIx64"", addr, addr + size, addr + (0x1000 - (addr % 0x1000)), (addr + (0x1000 - (addr % 0x1000))) + size);
 +                addr = addr + (0x1000 - (addr % 0x1000));
 +            }
          }
@@ -5975,3 +5999,32 @@ index 71f1dbf..a22f382 100644
      }
  
      rvvm_info("Attached MMIO device at 0x%08"PRIx64", type \"%s\"",
+@@ -913,3 +932,13 @@ PUBLIC void rvvm_write_cpu_reg(rvvm_hart_t* thread, size_t reg_id, rvvm_addr_t r
+         rvvm_warn("Unknown register %d in rvvm_write_cpu_reg()!", (uint32_t)reg_id);
+     }
+ }
++
++PUBLIC void rvvm_mmio_print_map(rvvm_machine_t* machine) {
++    rvvm_info("MMIO Region Map:");
++    rvvm_info("    [0x%08"PRIx64"-0x%08"PRIx64"] - \"<machine memory>\"", machine->mem.begin, machine->mem.begin + machine->mem.size);
++
++    vector_foreach(machine->mmio_devs, i) {
++        rvvm_mmio_dev_t* dev = vector_at(machine->mmio_devs, i);
++        rvvm_info("    [0x%08"PRIx64"-0x%08"PRIx64"] - \"%s\"", dev->addr, dev->addr + dev->size, dev->type ? dev->type->name : "<null>");
++    }
++}
+\ No newline at end of file
+diff --git a/src/rvvmlib.h b/src/rvvmlib.h
+index ce5f187..f36280d 100644
+--- a/src/rvvmlib.h
++++ b/src/rvvmlib.h
+@@ -290,6 +290,9 @@ PUBLIC rvvm_addr_t rvvm_read_cpu_reg(rvvm_hart_t* thread, size_t reg_id);
+ //! \brief Write thread context register
+ PUBLIC void rvvm_write_cpu_reg(rvvm_hart_t* thread, size_t reg_id, rvvm_addr_t reg);
+ 
++//! \brief Print the mmio region map
++PUBLIC void rvvm_mmio_print_map(rvvm_machine_t* machine);
++
+ RVVM_EXTERN_C_END
+ 
+ #endif
