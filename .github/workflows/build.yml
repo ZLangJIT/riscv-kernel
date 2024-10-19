@@ -444,13 +444,13 @@ jobs:
         cd linux.kernel.rvvm
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_CODE/$LIBMEDIA_GRADLE_VERSION_CODE/g" w q | ed app/build.gradle
         printf '%s\n' ",s/LIBMEDIA_GRADLE_VERSION_STRING/$LIBMEDIA_GRADLE_VERSION_STRING/g" w q | ed app/build.gradle
-        
+
         # info shows cmake output but also tons of Transforming Artifact output
         if ./gradlew build --info
-        	then
-        		echo "GRADLE_RETURN_CODE=0" | tee -a $GITHUB_ENV
-        	else
-        		echo "GRADLE_RETURN_CODE=1" | tee -a $GITHUB_ENV
+            then
+                echo "GRADLE_RETURN_CODE=0" | tee -a $GITHUB_ENV
+            else
+                echo "GRADLE_RETURN_CODE=1" | tee -a $GITHUB_ENV
         fi
 
     - name: APK build failed - print last 600 lines from cmake [linux.kernel.rvvm]
@@ -485,7 +485,7 @@ jobs:
         sha256sum linux.kernel.rvvm.debug.apk > linux.kernel.rvvm.debug.apk.sha256
         mv linux.kernel.rvvm/app/build/outputs/apk/release/app-release.apk linux.kernel.rvvm.release.apk
         sha256sum linux.kernel.rvvm.release.apk > linux.kernel.rvvm.release.apk.sha256
-        
+
     - name: Download apk [buildroot]
       if: ${{ env.REBUILD_KERNEL_FLAG == '' && env.REBUILD_BUILDROOT_FLAG == '' && env.REBUILD_RVVM_FLAG == '' && env.REBUILD_EPOXY_FLAG == '' && env.REBUILD_VIRGL_FLAG == '' && env.REBUILD_LIBMEDIA_FLAG == '' }}
       run: |
@@ -529,7 +529,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         # generate_release_notes: true
         fail_on_unmatched_files: true
-        
+
     - name: Release rvvm [rvvm]
       if: ${{ env.REBUILD_EPOXY_FLAG != '' || env.REBUILD_VIRGL_FLAG != '' || env.REBUILD_RVVM_FLAG != '' }}
       uses: softprops/action-gh-release@master
