@@ -837,10 +837,10 @@ index 0000000..42ec84f
 +#endif
 diff --git a/src/devices/shm.c b/src/devices/shm.c
 new file mode 100644
-index 0000000..e1832ef
+index 0000000..9bf1be1
 --- /dev/null
 +++ b/src/devices/shm.c
-@@ -0,0 +1,292 @@
+@@ -0,0 +1,297 @@
 +/*
 +shm.c - Memory-Mapped Shared Memory
 +Copyright (C) 2024  ZLangJIT <github.com/ZLangJIT>
@@ -1067,6 +1067,11 @@ index 0000000..e1832ef
 +
 +// https://github.com/tyler274/magenta/blob/3f71c5b1c71a9802d0316a4f51e70da9c0e0014a/system/ulib/hypervisor/virtio.c#L162
 +
++static void virtio_pci_update(rvvm_mmio_dev_t* device)
++{
++    UNUSED(device);
++}
++
 +static void virtio_pci_remove(rvvm_mmio_dev_t* device)
 +{
 +    rvvm_info("virtio_pci_remove");
@@ -1092,7 +1097,8 @@ index 0000000..e1832ef
 +}
 +
 +static rvvm_mmio_type_t virtio_pci_type = {
-+    .name = "virtio-pci",
++    .name = "virtio-balloon-pci",
++    .update = virtio_pci_update,
 +    .remove = virtio_pci_remove,
 +};
 +
@@ -1106,14 +1112,13 @@ index 0000000..e1832ef
 +    pci_dev_desc_t virtio_device = {
 +        .func[0] = {
 +            .vendor_id = 0x1AF4,  // Virtio
-+            .device_id = 0x1040 + VIRTIO_ID_PMEM,
++            .device_id = 0x1040 + VIRTIO_ID_BALLOON,
 +            .class_code = 0xff, // qemu specified virtio pci bus as PCI_CLASS_OTHERS
 +            .irq_pin = PCI_IRQ_PIN_INTA,
 +            .bar[0] = {
-+                .addr = PCI_BAR_ADDR_64,
-+                .size = 4096,
-+                .min_op_size = 1,
-+                .max_op_size = 1,
++                .size = 0x100,
++                .min_op_size = 4,
++                .max_op_size = 4,
 +                .read = virtio_pci_read,
 +                .write = virtio_pci_write,
 +                .type = &virtio_pci_type,
