@@ -1,4 +1,7 @@
 patch file
+diff --git a/dot_buildrootconfig b/dot_buildrootconfig
+new file mode 100644
+index 0000000000..e69de29bb2
 diff --git a/fs/cpio/init b/fs/cpio/init
 index f74ef7e15f..df2ba4d75d 100755
 --- a/fs/cpio/init
