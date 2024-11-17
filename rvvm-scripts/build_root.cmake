@@ -65,10 +65,19 @@ elseif (UNIX AND NOT ANDROID)
     set(BUILD_ROOT_OS "Linux")
   endif()
 elseif (UNIX AND ANDROID)
-  build_root_message("PLATFORM LINUX ANDROID")
-  set(BUILD_ROOT_OS__ANDROID TRUE)
-  set(BUILD_ROOT_OS__UNIX_LIKE TRUE)
-  set(BUILD_ROOT_OS "Android")
+  if (EXISTS /data/data/com.termux/files/usr OR EXISTS /system/app/EasterEgg/EasterEgg.apk)
+    build_root_message("PLATFORM LINUX (ANDROID HOST)")
+    set(BUILD_ROOT_OS__ANDROID TRUE)
+    set(BUILD_ROOT_OS__ANDROID_HOST TRUE)
+    set(BUILD_ROOT_OS__UNIX_LIKE TRUE)
+    set(BUILD_ROOT_OS "Android")
+  else()
+    build_root_message("PLATFORM LINUX (ANDROID TARGET)")
+    set(BUILD_ROOT_OS__ANDROID TRUE)
+    set(BUILD_ROOT_OS__ANDROID_TARGET TRUE)
+    set(BUILD_ROOT_OS__UNIX_LIKE TRUE)
+    set(BUILD_ROOT_OS "Android")
+  endif()
 elseif (WIN32)
   find_program(CYGPATH_EXE NAMES cygpath.exe)
 
@@ -233,7 +242,7 @@ macro (build_root_exec_meson new_line_seperated_extra_c_flags new_line_seperated
     build_root_message("new_line_seperated_extra_c_flags = ${new_line_seperated_extra_c_flags}")
     build_root_message("new_line_seperated_extra_cxx_flags = ${new_line_seperated_extra_cxx_flags}")
 
-    if (ANDROID)
+    if (BUILD_ROOT_OS__ANDROID_TARGET)
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/BUILD_ROOT_DOT_CMAKE__FILES__cross.build "
             [binaries]
             ar = '${BUILD_ROOT_____________deps_ar}'
@@ -324,7 +333,7 @@ macro(build_root_init cmake_packages_dir build_root_dir)
 
   set(BUILD_ROOT_____________BASH_PROGRAM sh)
 
-  if (ANDROID)
+  if (BUILD_ROOT_OS__ANDROID_TARGET)
     build_root_exec(ls -l ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin)
     set(BUILD_ROOT_____________cross_rc "")
     # replace ANDROID_PLATFORM==android-28   with  linux-android28
@@ -461,7 +470,7 @@ macro(build_root_init cmake_packages_dir build_root_dir)
   build_root_message("-DANDROID_PLATFORM=${ANDROID_PLATFORM}")
   build_root_message("-DANDROID_STL=${ANDROID_STL}")
   
-  if (NOT ANDROID)
+  if (NOT BUILD_ROOT_OS__ANDROID_TARGET)
     build_root_message("\n\nwarning: strip program unknown by default, please specify it via cmake: set(BUILD_ROOT_STRIP_PROGRAM /path/to/strip/program)\n\n")
   endif()
 endmacro()

@@ -3,7 +3,5 @@
 /Image*
 /buildroot
 /libmedia
-/disk.img
-/rvvm
 /tmp
 /*.patch.latest*
